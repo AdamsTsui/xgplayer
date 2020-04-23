@@ -1,5 +1,7 @@
 {
   "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/node": "^7.8.7",
     "@koa/cors": "^2.2.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
