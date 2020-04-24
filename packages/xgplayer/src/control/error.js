@@ -42,9 +42,9 @@ let error = function () {
     util.removeClass(player.root, 'xgplayer-is-error')
   }
   player.on('canplay', onCanplay)
-  player.on('error', onError)
+  // player.on('error', onError)
   function onDestroy () {
-    player.off('error', onError)
+    // player.off('error', onError)
     player.off('destroy', onDestroy)
     player.off('canplay', onCanplay)
   }

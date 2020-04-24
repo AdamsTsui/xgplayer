@@ -9,7 +9,7 @@ $controlsBgImage: linear-gradient(-1deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0
 // progress-bar
 $progressOuterBgColor: rgba(255, 255, 255, 0.30);
 $progressCacheBgColor: rgba(255, 255, 255, 0.50);
-$progressPlayedBgImage: linear-gradient(-90deg, #FA1F41 0%, #E31106 100%);
+$progressPlayedBgImage: linear-gradient(-90deg, #ff8800 0%, #ff8800 100%);
 $progressPlayedShadow: 0 0 2px 0 rgba(0, 0, 0, 0.26);
 
 // time
@@ -24,7 +24,7 @@ $tipsFontsize: 11px;
 // slider
 $sliderBgColor: rgba(0, 0, 0, 0.54);
 $sliderBarBgColor: rgba(255, 255, 255, 0.30);
-$sliderDragBgColor: #FA1F41;
+$sliderDragBgColor: #ff8800;
 $sliderDragAfterBgColor: #fff;
 $sliderDragAfterShadow: 0 0 5px 0 rgba(0, 0, 0, 0.26);
 
@@ -56,8 +56,8 @@ $replayTxtColor: #fff;
 // enter-logo
 $enterBgImage: '//s2.pstatp.com/cdn/expire-1-M/byted-player-images/1.0.2/bg.svg';
 $enterLogo: '//s3.pstatp.com/cdn/expire-1-M/byted-player-images/1.0.1/xg-logo-new.png';
-$enterTipsBgColor: -webkit-linear-gradient(right, #000, red, red, red, #000);
-$ieEnterTipsBgColor: linear-gradient(to right, #000, red, red, red, #000);
+$enterTipsBgColor: -webkit-linear-gradient(right, #000, #ff8800, #ff8800, #ff8800, #000);
+$ieEnterTipsBgColor: linear-gradient(to right, #000, #ff8800, #ff8800, #ff8800, #000);
 
 // live
 
@@ -67,4 +67,4 @@ $liveColor: #fff;
 
 $errorBgColor: #000;
 $errorColor: #fff;
-$errorRefreshColor: #FA1F41;
+$errorRefreshColor: #ff8800;

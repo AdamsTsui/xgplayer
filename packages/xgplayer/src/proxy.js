@@ -62,6 +62,9 @@ class Proxy {
       }
     }
     this.video = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, '')
+    this.video1 = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, '')
+    this.video2 = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, '')
+    this.video3 = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, '')
     if (options.autoplay) {
       this.video.autoplay = true
       if (options.autoplayMuted) {
@@ -170,10 +173,13 @@ class Proxy {
     }
   }
   play () {
-    return this.video.play()
+    return this.video.play() && this.video1.play() && this.video2.play() && this.video3.play()
   }
   pause () {
     this.video.pause()
+    this.video1.pause()
+    this.video2.pause()
+    this.video3.pause()
   }
   canPlayType (type) {
     return this.video.canPlayType(type)
