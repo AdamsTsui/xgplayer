@@ -154,9 +154,6 @@ class Player extends Proxy {
     }
     if (util.typeOf(url) === 'String') {
       this.video.src = url
-      this.video1.src = url
-      this.video2.src = url
-      this.video3.src = url
     } else {
       url.forEach(item => {
         this.video.appendChild(util.createDom('source', '', {
@@ -178,11 +175,7 @@ class Player extends Proxy {
     if (this.config.autoplay) {
       this.on('canplay', this.canPlayFunc)
     }
-
     root.insertBefore(this.video, root.firstChild)
-    root.insertBefore(this.video1, root.firstChild)
-    root.insertBefore(this.video2, root.firstChild)
-    root.insertBefore(this.video3, root.firstChild)
     setTimeout(() => {
       this.emit('complete')
     }, 1)
