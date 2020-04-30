@@ -15,11 +15,10 @@ class FlvJsPlayer extends Player {
         return player.currentSrc
       },
       set (url) {
-        player.flv_load(url)
-        let oldVol = player.volume
+        player.flv_load(url.toString())
         player.video.muted = true
         Player.util.addClass(player.root, 'xgplayer-is-enter')
-        player.once('playing', function(){
+        player.once('playing', function () {
           Player.util.removeClass(player.root, 'xgplayer-is-enter')
           player.video.muted = false
         })
@@ -31,9 +30,13 @@ class FlvJsPlayer extends Player {
     })
 
     player.once('complete', () => {
-      player.__flv__ = Flv.createPlayer(this.flvOpts, this.optionalConfig)
-      player.createInstance(player.__flv__)
-      if(player.config.isLive) {
+      for (let i = 0; i < this.flvOpts.channelNum; i++) {
+        let _flvOpts = Player.util.deepCopy({}, this.flvOpts)
+        _flvOpts.url = this.flvOpts.url[i]
+        player[`__flv__${i === 0 ? '' : i}`] = Flv.createPlayer(_flvOpts, this.optionalConfig)
+      }
+      player.createInstance()
+      if (player.config.isLive) {
         Player.util.addClass(player.root, 'xgplayer-is-live')
         const live = Player.util.createDom('xg-live', '正在直播', {}, 'xgplayer-live')
         player.controls.appendChild(live)
@@ -41,77 +44,89 @@ class FlvJsPlayer extends Player {
     })
   }
 
-  createInstance (flv) {
+  createInstance () {
     const player = this
-    player.video.addEventListener('contextmenu', function (e) {
-      e.preventDefault()
-    })
-    flv.attachMediaElement(player.video)
-    flv.load()
-    flv.play()
-     
-    flv.on(Flv.Events.ERROR, (e) => {
-      player.emit('error', new Player.Errors('other', player.config.url))
-    })
-    flv.on(Flv.Events.LOADED_SEI, (timestamp, data) => {
-      player.emit('loaded_sei', timestamp, data);
-    })
-    flv.on(Flv.Events.STATISTICS_INFO, (data) => {
-      player.emit("statistics_info",data);
-    })
-    flv.on(Flv.Events.MEDIA_INFO, (data)=>{
-      player.mediainfo = data;
-      player.emit("MEDIA_INFO",data);
-    })
+    for (let i = 0; i < this.flvOpts.channelNum; i++) {
+      let flv = player[`__flv__${i === 0 ? '' : i}`]
+      player[`video${i === 0 ? '' : i}`].addEventListener('contextmenu', function (e) {
+        e.preventDefault()
+      })
+      flv.attachMediaElement(player[`video${i === 0 ? '' : i}`])
+      flv.load()
+      // flv.play()
+
+      flv.on(Flv.Events.ERROR, (e) => {
+        player.emit('error', new Player.Errors('other', player.config.url))
+      })
+      flv.on(Flv.Events.LOADED_SEI, (timestamp, data) => {
+        player.emit('loaded_sei', timestamp, data);
+      })
+      flv.on(Flv.Events.STATISTICS_INFO, (data) => {
+        player.emit("statistics_info",data);
+      })
+      flv.on(Flv.Events.MEDIA_INFO, (data)=>{
+        player.mediainfo = data;
+        player.emit("MEDIA_INFO",data);
+      })
+    }
     player.once('destroy', () => {
-      flv.destroy()
-      player.__flv__ = null
+      for (let i = 0; i < this.flvOpts.channelNum; i++) {
+        let flv = player[`__flv__${i === 0 ? '' : i}`]
+        flv.destroy()
+        flv = null
+      }
     })
   }
   flv_load (newUrl) {
-    let mediaDataSource = this.flvOpts
-    mediaDataSource.segments = [
-      {
-        cors: true,
-        duration: undefined,
-        filesize: undefined,
-        timestampBase: 0,
-        url: newUrl,
-        withCredentials: false
-      }
-    ]
-    // mediaDataSource.cors = true
-    // mediaDataSource.hasAudio = true
-    // mediaDataSource.hasVideo = true
-    // mediaDataSource.isLive = true
-    mediaDataSource.url = newUrl
-    // mediaDataSource.withCredentials = false
-    this.flv_load_mds(mediaDataSource)
-  }
-  flv_load_mds (mediaDataSource) {
     let player = this
-    if (typeof player.__flv__ !== 'undefined') {
-      if (player.__flv__ != null) {
-        player.__flv__.unload()
-        player.__flv__.detachMediaElement()
-        player.__flv__.destroy()
-        player.__flv__ = null
+    let urlArr = newUrl.split(',')
+    this.flvOpts.url = this.config.url = urlArr
+
+    for (let i = 0; i < this.flvOpts.channelNum; i++) {
+      let __flv__ = player[`__flv__${i === 0 ? '' : i}`]
+      if (typeof __flv__ !== 'undefined') {
+        if (__flv__ != null) {
+          __flv__.unload()
+          __flv__.detachMediaElement()
+          __flv__.destroy()
+          __flv__ = null
+        }
       }
     }
-    player.__flv__ = Flv.createPlayer(mediaDataSource, this.optionalConfig)
 
-    player.__flv__.attachMediaElement(player.video)
-    player.__flv__.load()
+    let mediaDataSource = player.flvOpts
+    for (let i = 0; i < player.flvOpts.channelNum; i++) {
+      mediaDataSource.segments = [
+        {
+          cors: true,
+          duration: undefined,
+          filesize: undefined,
+          timestampBase: 0,
+          url: urlArr[i],
+          withCredentials: false
+        }
+      ]
+      // mediaDataSource.cors = true
+      // mediaDataSource.hasAudio = true
+      // mediaDataSource.hasVideo = true
+      // mediaDataSource.isLive = true
+      mediaDataSource.url = urlArr[i]
+      // mediaDataSource.withCredentials = false
+
+      player[`__flv__${i === 0 ? '' : i}`] = Flv.createPlayer(mediaDataSource, this.optionalConfig)
+
+      player[`__flv__${i === 0 ? '' : i}`].attachMediaElement(player[`video${i === 0 ? '' : i}`])
+      player[`__flv__${i === 0 ? '' : i}`].load()
+    }
   }
 
   switchURL (url) {
     const player = this
     let curTime = 0
-    if(!player.config.isLive) {
+    if (!player.config.isLive) {
       curTime = player.currentTime
     }
     player.flv_load(url)
-    let oldVol = player.volume
     player.video.muted = true
     Player.util.addClass(player.root, 'xgplayer-is-enter')
     player.once('playing', function(){
@@ -119,7 +134,7 @@ class FlvJsPlayer extends Player {
       player.video.muted = false
     })
     player.once('canplay', function () {
-      if(!player.config.isLive) {
+      if (!player.config.isLive) {
         player.currentTime = curTime
       }
       player.play()

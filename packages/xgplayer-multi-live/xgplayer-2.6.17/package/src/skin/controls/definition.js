@@ -13,19 +13,20 @@ let s_definition = function () {
 
   function onCanplayResourceReady () {
     let list = player.definitionList
-    let tmp = ['<ul>'], src = player.config.url, a = document.createElement('a')
+    let tmp = ['<ul>'], src = player.config.url.toString(), a = document.createElement('a')
     if (player.switchURL) {
       ['mp4', 'hls', '__flv__', 'dash'].every(item => {
         if (player[item]) {
-          if(player[item].url) {
+          if (player[item].url) {
             a.href = player[item].url
           }
-          if(item === '__flv__') {
-            if(player[item]._options) {
+          if (item === '__flv__') {
+            a.href = player.config.url.toString()
+            /* if(player[item]._options) {
               a.href = player[item]._options.url
             } else {
               a.href = player[item]._mediaDataSource.url
-            }
+            } */
           }
           src = a.href
           return false
@@ -43,9 +44,9 @@ let s_definition = function () {
     list.forEach(item => {
       a.href = item.url
       if (player.dash) {
-        tmp.push(`<li url='${item.url}' cname='${item.name}' class='${item.selected ? 'selected' : ''}'>${item.name}</li>`)
+        tmp.push(`<li url='${item.url.toString()}' cname='${item.name}' class='${item.selected ? 'selected' : ''}'>${item.name}</li>`)
       } else {
-        tmp.push(`<li url='${item.url}' cname='${item.name}' class='${a.href === src ? 'selected' : ''}'>${item.name}</li>`)
+        tmp.push(`<li url='${item.url.toString()}' cname='${item.name}' class='${a.href === src ? 'selected' : ''}'>${item.name}</li>`)
       }
     })
     let cursrc = list.filter(item => {
@@ -133,15 +134,16 @@ let s_definition = function () {
           let curRUL = document.createElement('a');
           ['mp4', 'hls', '__flv__', 'dash'].every(item => {
             if (player[item]) {
-              if(player[item].url) {
+              if (player[item].url) {
                 curRUL.href = player[item].url
               }
-              if(item === '__flv__') {
-                if(player[item]._options) {
+              if (item === '__flv__') {
+                curRUL.href = player.config.url
+                /* if(player[item]._options) {
                   curRUL.href = player[item]._options.url
                 } else {
                   curRUL.href = player[item]._mediaDataSource.url
-                }
+                } */
               }
               return false
             } else {
