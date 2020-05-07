@@ -29,11 +29,11 @@
         font-family: PingFangSC-Regular;
         font-size: 11px;
         color: $definitionLiColor;
-        padding: 6px 13px;
+        padding: 3px 13px;
         svg path {
           fill:white;
           fill-opacity:0;
-          stroke-width:1;
+          stroke-width:2;
           stroke: #ddd;
           &.curr, &:hover {
             stroke: #ff8800;

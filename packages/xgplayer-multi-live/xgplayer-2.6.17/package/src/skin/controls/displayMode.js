@@ -6,14 +6,14 @@ let s_displayMode = function () {
   if (player.config.channelNum < 2) {
     return false
   }
-  let iconPath = ['M14 9 L46 9 L46 27 L14 27 Z',
-    'M14 9 L46 9 L46 27 L14 27 Z M30 9 L30 27',
-    'M14 9 L30 9 L30 27 L14 27 Z M30 18 L46 18 L46 27 L30 27',
-    'M14 9 L46 9 L46 27 L14 27 Z M46 18 L30 18 L30 27',
-    'M14 9 L46 9 L46 27 L14 27 Z M30 9 L30 27 M14 18 L30 18',
-    'M14 9 L46 9 L46 27 L14 27 Z M30 9 L30 27 M30 18 L46 18',
-    'M14 9 L46 9 L46 27 L14 27 Z M14 18 L46 18 M24.66 18 L24.66 27 M35.32 18 L35.32 27',
-    'M14 9 L46 9 L46 27 L14 27 Z M14 18 L46 18 M30 9 L30 27']
+  let iconPath = ['M2 2 L34 2 L34 20 L2 20 Z',
+    'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20',
+    'M2 2 L18 2 L18 20 L2 20 Z M18 11 L34 11 L34 20 L18 20',
+    'M2 2 L34 2 L34 20 L2 20 Z M34 11 L18 11 L18 20',
+    'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M2 11 L18 11',
+    'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M18 11 L34 11',
+    'M2 2 L34 2 L34 20 L2 20 Z M2 11 L34 11 M12.67 11 L12.67 20 M23.34 11 L23.34 20 M34 11 L34 20',
+    'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M2 11 L34 11']
   let ul = util.createDom('xg-displaymode', '', {tabindex: 3}, 'xgplayer-displaymode'), root = player.controls
   if (sniffer.device === 'mobile') {
     player.config.displayModeActive = 'click'
@@ -22,37 +22,37 @@ let s_displayMode = function () {
   switch (player.config.channelNum) {
     case 1:
       player.currMode = 0
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="60" height="36">
+      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-0" d="${iconPath[0]}" class="curr" />
       </svg></li>`)
       break
     case 2:
       player.currMode = 1
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="60" height="36">
+      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-1" d="${iconPath[1]}" class="curr" />
       </svg></li>`)
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="60" height="36">
+      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-2" d="${iconPath[2]}" />
       </svg></li>`)
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="60" height="36">
+      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-3" d="${iconPath[3]}" />
       </svg></li>`)
       break
     case 3:
       player.currMode = 4
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="60" height="36">
+      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-4" d="${iconPath[4]}" class="curr" />
       </svg></li>`)
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="60" height="36">
+      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-5" d="${iconPath[5]}" />
       </svg></li>`)
       break
     case 4:
       player.currMode = 6
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="60" height="36">
+      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-6" d="${iconPath[6]}" class="curr" />
       </svg></li>`)
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="60" height="36">
+      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-7" d="${iconPath[7]}" />
       </svg></li>`)
       break
