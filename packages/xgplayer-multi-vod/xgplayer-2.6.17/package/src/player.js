@@ -206,19 +206,15 @@ class Player extends Proxy {
       }
       player.off('canplay', player.canPlayFunc)
     }
-    if (util.typeOf(url) === 'String') {
-      if (url.indexOf('blob:') > -1 && url === this.video.src) {
-        // 在Chromium环境下用mse url给video二次赋值会导致错误
-      } else {
-        this.video.src = url
+    if (util.typeOf(url) === 'Array') {
+      for (let i = 0; i < this.config.channelNum; i++) {
+        let videoName = `video${i === 0 ? '' : i}`
+        if (url[i].indexOf('blob:') > -1 && url[i] === this[videoName].src) {
+          // 在Chromium环境下用mse url给video二次赋值会导致错误
+        } else {
+          this[videoName].src = url[i]
+        }
       }
-    } else {
-      url.forEach(item => {
-        this.video.appendChild(util.createDom('source', '', {
-          src: `${item.src}`,
-          type: `${item.type || ''}`
-        }))
-      })
     }
     this.logParams.pt = new Date().getTime()
     this.logParams.vt = this.logParams.pt
@@ -233,7 +229,9 @@ class Player extends Proxy {
     if (this.config.autoplay) {
       this.on('canplay', this.canPlayFunc)
     }
-    root.insertBefore(this.video, root.firstChild)
+    for (let i = 0; i < this.config.channelNum; i++) {
+      root.insertBefore(this[`video${i === 0 ? '' : i}`], root.firstChild)
+    }
     setTimeout(() => {
       this.emit('complete')
     }, 1)

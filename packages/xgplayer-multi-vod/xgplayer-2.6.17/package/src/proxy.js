@@ -12,7 +12,7 @@ class Proxy {
     this._hasStart = false
     this.videoConfig = {
       controls: !!options.isShowControl,
-      autoplay: options.autoplay,
+      // autoplay: options.autoplay,
       playsinline: options.playsinline,
       'webkit-playsinline': options.playsinline,
       'x5-playsinline': options.playsinline,
@@ -22,10 +22,14 @@ class Proxy {
       airplay: options['airplay'],
       'webkit-airplay': options['airplay'],
       tabindex: 2,
+      draggable: true,
       mediaType: options.mediaType || 'video'
     }
     if (options.loop) {
       this.videoConfig.loop = 'loop'
+    }
+    if (options.url instanceof Array) {
+      options.channelNum = options.url.length
     }
     let textTrackDom = ''
     this.textTrackShowDefault = true
@@ -65,11 +69,17 @@ class Proxy {
         style.sheet.addRule(`${wrap} video::cue`, styleStr)
       }
     }
-    this.video = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, '')
-    if(!this.textTrackShowDefault && textTrackDom) {
+    for (let i = 0; i < options.channelNum; i++) {
+      let videoName = `video${(i === 0) ? '' : i}`
+      this.videoConfig['id'] = videoName
+      this[videoName] = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName)
+    }
+
+    if (!this.textTrackShowDefault && textTrackDom) {
       let trackDoms = this.video.getElementsByTagName('Track')
       trackDoms[0].track.mode = 'hidden'
     }
+
     if (options.autoplay) {
       this.video.autoplay = true
       if (options.autoplayMuted) {
@@ -186,10 +196,16 @@ class Proxy {
     }
   }
   play () {
-    return this.video.play()
+    let ret = true
+    for (let i = 0; i < this.config.channelNum; i++) {
+      ret && this[`video${i === 0 ? '' : i}`].play()
+    }
+    return ret
   }
   pause () {
-    this.video.pause()
+    for (let i = 0; i < this.config.channelNum; i++) {
+      this[`video${i === 0 ? '' : i}`].pause()
+    }
   }
   canPlayType (type) {
     return this.video.canPlayType(type)
@@ -230,17 +246,19 @@ class Proxy {
     this.video.crossOrigin = isTrue
   }
   get currentSrc () {
-    return this.video.currentSrc
+    return this.config.url
   }
   set currentSrc (src) {
-    this.video.currentSrc = src
+    this.config.url = src
   }
   get currentTime () {
     return this.video.currentTime
   }
   set currentTime (time) {
-    if(typeof isFinite === 'function' && !isFinite(time)) return
-    this.video.currentTime = time
+    if (typeof isFinite === 'function' && !isFinite(time)) return
+    for (let i = 0; i < this.config.channelNum; i++) {
+      this[`video${i === 0 ? '' : i}`].currentTime = time
+    }
     this.emit('currentTimeChange')
   }
   get defaultMuted () {
@@ -285,7 +303,14 @@ class Proxy {
     return this.video.muted
   }
   set muted (isTrue) {
-    this.video.muted = isTrue
+    for (let i = 0; i < this.config.channelNum; i++) {
+      let videoName = `video${i === 0 ? '' : i}`
+      if (i === 0) {
+        this[videoName].muted = isTrue
+      } else {
+        this[videoName].muted = true
+      }
+    }
   }
   get networkState () {
     let status = [{
@@ -347,7 +372,7 @@ class Proxy {
     return this.video.seeking
   }
   get src () {
-    return this.video.src
+    return this.config.url
   }
   set src (url) {
     let self = this
@@ -362,8 +387,13 @@ class Proxy {
       vt: new Date().getTime(),
       vd: 0
     }
-    this.video.pause()
-    this.video.src = url
+    for (let i = 0; i < this.config.channelNum; i++) {
+      this[`video${i === 0 ? '' : i}`].pause()
+    }
+    let urlArr = url.split(',')
+    for (let i = 0; i < this.config.channelNum; i++) {
+      this[`video${i === 0 ? '' : i}`].src = urlArr[i]
+    }
     this.emit('srcChange')
     this.logParams.playSrc = url
     this.logParams.pt = new Date().getTime()
@@ -388,7 +418,14 @@ class Proxy {
     return this.video.volume
   }
   set volume (vol) {
-    this.video.volume = vol
+    for (let i = 0; i < this.config.channelNum; i++) {
+      let videoName = `video${i === 0 ? '' : i}`
+      if (i === 0) {
+        this[videoName].volume = vol
+      } else {
+        this[videoName].volume = 0
+      }
+    }
   }
   get fullscreen () {
     return util.hasClass(this.root, 'xgplayer-is-fullscreen') || util.hasClass(this.root, 'xgplayer-fullscreen-active')
