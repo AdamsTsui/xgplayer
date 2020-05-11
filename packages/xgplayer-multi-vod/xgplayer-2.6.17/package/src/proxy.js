@@ -28,8 +28,8 @@ class Proxy {
     if (options.loop) {
       this.videoConfig.loop = 'loop'
     }
-    if (options.url instanceof Array) {
-      options.channelNum = options.url.length
+    if (options.url) {
+      options.channelNum = options.url.channel.length
     }
     let textTrackDom = ''
     this.textTrackShowDefault = true
@@ -246,10 +246,10 @@ class Proxy {
     this.video.crossOrigin = isTrue
   }
   get currentSrc () {
-    return this.config.url
+    return JSON.stringify(this.config.url)
   }
   set currentSrc (src) {
-    this.config.url = src
+    // this.config.url = src
   }
   get currentTime () {
     return this.video.currentTime
@@ -390,9 +390,9 @@ class Proxy {
     for (let i = 0; i < this.config.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].pause()
     }
-    let urlArr = url.split(',')
+    let urlArr = url.channel
     for (let i = 0; i < this.config.channelNum; i++) {
-      this[`video${i === 0 ? '' : i}`].src = urlArr[i]
+      this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[0].url
     }
     this.emit('srcChange')
     this.logParams.playSrc = url

@@ -206,13 +206,14 @@ class Player extends Proxy {
       }
       player.off('canplay', player.canPlayFunc)
     }
-    if (util.typeOf(url) === 'Array') {
+    if (util.typeOf(url.channel) === 'Array') {
       for (let i = 0; i < this.config.channelNum; i++) {
         let videoName = `video${i === 0 ? '' : i}`
-        if (url[i].indexOf('blob:') > -1 && url[i] === this[videoName].src) {
+        let src = this.config.url.channel[i].files[0].url
+        if (src.indexOf('blob:') > -1 && src === this[videoName].src) {
           // 在Chromium环境下用mse url给video二次赋值会导致错误
         } else {
-          this[videoName].src = url[i]
+          this[videoName].src = src
         }
       }
     }

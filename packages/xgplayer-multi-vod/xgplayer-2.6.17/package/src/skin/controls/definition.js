@@ -19,14 +19,13 @@ let s_definition = function () {
       hasInit = true
     }
     let list = player.definitionList
-    let tmp = ['<ul>'], src = player.config.url.toString(), a = document.createElement('a')
+    let tmp = ['<ul>'], src = JSON.stringify(player.config.url), tmpSrc
     if (player.switchURL) {
       ['mp4'].every(item => {
         if (player[item]) {
           if (player[item].url) {
-            a.href = player[item].url
+            src = JSON.stringify(player[item].url)
           }
-          src = a.href
           return false
         } else {
           return true
@@ -34,12 +33,11 @@ let s_definition = function () {
       })
     }
     list.forEach(item => {
-      a.href = item.url.toString()
-      tmp.push(`<li url='${item.url.toString()}' cname='${item.name}' class='${a.href === src ? 'selected' : ''}'>${item.name}</li>`)
+      tmpSrc = JSON.stringify(item)
+      tmp.push(`<li url='${tmpSrc}' cname='${item.name}' class='${tmpSrc === src ? 'selected' : ''}'>${item.name}</li>`)
     })
     let cursrc = list.filter(item => {
-      a.href = item.url
-      return a.href === src
+      return JSON.stringify(item) === src
     })
     tmp.push(`</ul><p class='name'>${(cursrc[0] || {name: ''}).name}</p>`)
     let urlInRoot = root.querySelector('.xgplayer-definition')
@@ -92,13 +90,12 @@ let s_definition = function () {
     container.addEventListener(item, function (e) {
       e.preventDefault()
       e.stopPropagation()
-      let list = player.definitionList
-      let li = e.target || e.srcElement, a = document.createElement('a')
+      let li = e.target || e.srcElement, tmpSrc
       if (li && li.tagName.toLocaleLowerCase() === 'li') {
-        player.emit('beforeDefinitionChange', a.href)
+        player.emit('beforeDefinitionChange', tmpSrc)
         let from, to
         Array.prototype.forEach.call(li.parentNode.childNodes, item => {
-          if(util.hasClass(item, 'selected')) {
+          if (util.hasClass(item, 'selected')) {
             from = item.getAttribute('cname')
             util.removeClass(item, 'selected')
           }
@@ -106,29 +103,29 @@ let s_definition = function () {
         util.addClass(li, 'selected')
         to = li.getAttribute('cname')
         li.parentNode.nextSibling.innerHTML = `${li.getAttribute('cname')}`
-        a.href = li.getAttribute('url')
+        tmpSrc = li.getAttribute('url')
         if (player.switchURL) {
-          let curRUL = document.createElement('a');
+          let curRUL
           ['mp4'].every(item => {
             if (player[item]) {
               if (player[item].url) {
-                curRUL.href = player[item].url
+                curRUL = player[item].url
               }
               return false
             } else {
               return true
             }
           })
-          if (curRUL.href !== a.href && !player.ended) {
-            player.switchURL(a.href)
+          if (curRUL !== tmpSrc && !player.ended) {
+            player.switchURL(tmpSrc)
           }
         } else {
-          if (a.href !== player.currentSrc.toString()) {
+          if (tmpSrc !== player.currentSrc.toString()) {
             player.curTime = player.currentTime
             paused = player.paused
             if (!player.ended) {
-              player.src = a.href
-              player.config.url = a.href.split(',')
+              player.src = JSON.parse(tmpSrc)
+              player.config.url = JSON.parse(tmpSrc)
               player.once('canplay', onCanplayChangeDefinition)
             }
           }
