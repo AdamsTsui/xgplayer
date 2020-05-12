@@ -124,8 +124,20 @@ let s_definition = function () {
             player.curTime = player.currentTime
             paused = player.paused
             if (!player.ended) {
-              player.src = JSON.parse(tmpSrc)
-              player.config.url = JSON.parse(tmpSrc)
+              let newUrl = JSON.parse(tmpSrc)
+              player.currFileNum = 0 // 从第一个分片开始播放，然后通过player.curTime再跳转
+              player.config.url = newUrl
+              player.channelNum = player.config.url.channel.length
+
+              let totalDuration = 0
+              let mainFiles = player.config.url.channel[0].files
+              for (let i = 0; i < mainFiles.length; i++) {
+                totalDuration += parseFloat(mainFiles[i].totaltime)
+              }
+              player.totalDuration = totalDuration
+
+              player.src = newUrl
+              player.emit('displayModeChange')
               player.once('canplay', onCanplayChangeDefinition)
             }
           }

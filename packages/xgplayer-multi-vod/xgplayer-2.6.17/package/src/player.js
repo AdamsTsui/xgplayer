@@ -207,7 +207,7 @@ class Player extends Proxy {
       player.off('canplay', player.canPlayFunc)
     }
     if (util.typeOf(url.channel) === 'Array') {
-      for (let i = 0; i < this.config.channelNum; i++) {
+      for (let i = 0; i < this.channelNum; i++) {
         let videoName = `video${i === 0 ? '' : i}`
         let src = this.config.url.channel[i].files[0].url
         if (src.indexOf('blob:') > -1 && src === this[videoName].src) {
@@ -230,7 +230,7 @@ class Player extends Proxy {
     if (this.config.autoplay) {
       this.on('canplay', this.canPlayFunc)
     }
-    for (let i = 0; i < this.config.channelNum; i++) {
+    for (let i = 0; i < 4; i++) {
       root.insertBefore(this[`video${i === 0 ? '' : i}`], root.firstChild)
     }
     setTimeout(() => {
@@ -363,7 +363,7 @@ class Player extends Proxy {
       // eslint-disable-next-line handle-callback-err
       let playPromise = this.play()
       if (playPromise !== undefined && playPromise) {
-        playPromise.catch(err => {})
+        playPromise.catch(err => { console.error(err) })
       }
     }
   }
@@ -668,8 +668,14 @@ class Player extends Proxy {
   }
 
   onEnded () {
-    util.addClass(this.root, 'xgplayer-ended')
-    util.removeClass(this.root, 'xgplayer-playing')
+    // console.log('ended.................this.currentTime:' + this.currentTime + ':::::::this.totalDuration:::' + this.totalDuration)
+    if (this.currentTime < this.totalDuration) {
+      // console.log('顺序播放下个分片')
+      this.currentTime = this.currentTime + 1
+    } else {
+      util.addClass(this.root, 'xgplayer-ended')
+      util.removeClass(this.root, 'xgplayer-playing')
+    }
   }
 
   onSeeking () {

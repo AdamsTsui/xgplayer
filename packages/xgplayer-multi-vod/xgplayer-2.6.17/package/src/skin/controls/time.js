@@ -18,6 +18,9 @@ let s_time = function () {
     //     player.controls.appendChild(live)
     //   }
     // }
+    if (player.isSrcChanging || !player.currentTime) {
+      return true
+    }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = `<span class="xgplayer-time-current">${util.format(player.currentTime || 0)}</span>` + `<span>${util.format(player.duration)}</span>`
     }

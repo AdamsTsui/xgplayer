@@ -29,8 +29,15 @@ class Proxy {
       this.videoConfig.loop = 'loop'
     }
     if (options.url) {
-      options.channelNum = options.url.channel.length
+      this.channelNum = options.url.channel.length
     }
+    let totalDuration = 0
+    let mainFiles = options.url.channel[0].files
+    for (let i = 0; i < mainFiles.length; i++) {
+      totalDuration += parseFloat(mainFiles[i].totaltime)
+    }
+    this.totalDuration = totalDuration
+    this.currFileNum = 0
     let textTrackDom = ''
     this.textTrackShowDefault = true
     if (options.textTrack && Array.isArray(options.textTrack) && (navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('Firefox') > -1)) {
@@ -69,7 +76,7 @@ class Proxy {
         style.sheet.addRule(`${wrap} video::cue`, styleStr)
       }
     }
-    for (let i = 0; i < options.channelNum; i++) {
+    for (let i = 0; i < 4; i++) {
       let videoName = `video${(i === 0) ? '' : i}`
       this.videoConfig['id'] = videoName
       this[videoName] = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName)
@@ -197,13 +204,13 @@ class Proxy {
   }
   play () {
     let ret = true
-    for (let i = 0; i < this.config.channelNum; i++) {
+    for (let i = 0; i < this.channelNum; i++) {
       ret && this[`video${i === 0 ? '' : i}`].play()
     }
     return ret
   }
   pause () {
-    for (let i = 0; i < this.config.channelNum; i++) {
+    for (let i = 0; i < this.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].pause()
     }
   }
@@ -252,14 +259,57 @@ class Proxy {
     // this.config.url = src
   }
   get currentTime () {
-    return this.video.currentTime
+    let tmpTime = 0
+    let mainFiles = this.config.url.channel[0].files
+    // console.log('this.currFileNum:' + this.currFileNum)
+    for (let i = 0; i < this.currFileNum; i++) {
+      tmpTime += parseFloat(mainFiles[i].totaltime)
+    }
+    // console.log('currTime:::' + (tmpTime + this.video.currentTime))
+    return (tmpTime + this.video.currentTime)
   }
   set currentTime (time) {
     if (typeof isFinite === 'function' && !isFinite(time)) return
-    for (let i = 0; i < this.config.channelNum; i++) {
-      this[`video${i === 0 ? '' : i}`].currentTime = time
+    let toFileNum = 0
+    let toCurrTime = 0
+    let tmpTime = 0
+    let mainFiles = this.config.url.channel[0].files
+    for (let i = 0; i < mainFiles.length; i++) {
+      tmpTime += parseFloat(mainFiles[i].totaltime)
+      if (tmpTime > time) {
+        toFileNum = i
+        toCurrTime = time - (tmpTime - parseFloat(mainFiles[i].totaltime))
+        break
+      }
     }
-    this.emit('currentTimeChange')
+    // console.log('time::' + time)
+    // console.log('currFileNum::' + this.currFileNum)
+    // console.log('toFileNum::' + toFileNum)
+    // console.log('toCurrTime::' + toCurrTime)
+    if (toFileNum === this.currFileNum) {
+      // console.log('分片内。。。')
+      for (let i = 0; i < this.channelNum; i++) {
+        this[`video${i === 0 ? '' : i}`].currentTime = toCurrTime
+      }
+      this.emit('currentTimeChange')
+    } else {
+      // console.log('跨分片。。。')
+      let self = this
+      this.currFileNum = toFileNum
+      this.isSrcChanging = true
+      this.src = this.config.url
+      this.once('canplay', function () {
+        let playPromise = self.play()
+        if (playPromise !== undefined && playPromise) {
+          // console.log('跨分片后，继续播放。。。')
+          self.currentTime = time
+          this.isSrcChanging = false
+          if (util.typeOf(playPromise) === 'function') {
+            playPromise.catch(err => { console.error(err) })
+          }
+        }
+      })
+    }
   }
   get defaultMuted () {
     return this.video.defaultMuted
@@ -268,7 +318,7 @@ class Proxy {
     this.video.defaultMuted = isTrue
   }
   get duration () {
-    return this.video.duration
+    return this.totalDuration
   }
   get ended () {
     return this.video.ended
@@ -303,7 +353,7 @@ class Proxy {
     return this.video.muted
   }
   set muted (isTrue) {
-    for (let i = 0; i < this.config.channelNum; i++) {
+    for (let i = 0; i < this.channelNum; i++) {
       let videoName = `video${i === 0 ? '' : i}`
       if (i === 0) {
         this[videoName].muted = isTrue
@@ -375,6 +425,7 @@ class Proxy {
     return this.config.url
   }
   set src (url) {
+    // console.log('this.currFileNum::::' + this.currFileNum)
     let self = this
     if (!util.hasClass(this.root, 'xgplayer-ended')) {
       this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)))
@@ -387,12 +438,12 @@ class Proxy {
       vt: new Date().getTime(),
       vd: 0
     }
-    for (let i = 0; i < this.config.channelNum; i++) {
+    for (let i = 0; i < this.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].pause()
     }
     let urlArr = url.channel
-    for (let i = 0; i < this.config.channelNum; i++) {
-      this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[0].url
+    for (let i = 0; i < this.channelNum; i++) {
+      this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[this.currFileNum].url
     }
     this.emit('srcChange')
     this.logParams.playSrc = url
@@ -418,7 +469,7 @@ class Proxy {
     return this.video.volume
   }
   set volume (vol) {
-    for (let i = 0; i < this.config.channelNum; i++) {
+    for (let i = 0; i < this.channelNum; i++) {
       let videoName = `video${i === 0 ? '' : i}`
       if (i === 0) {
         this[videoName].volume = vol

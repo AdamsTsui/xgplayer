@@ -5,7 +5,8 @@
 // xgplayer-time  2
 // xgplayer-placeholder 3
 // xgplayer-volume 4
-// xgplayer-definition 5
+// xgplayer-displaymode 5
+// xgplayer-definition 6
 // xgplayer-bullet-btn 6
 // xgplayer-textTrack 7
 // xgplayer-playback 8
@@ -68,6 +69,7 @@
         cursor: none;
     }
     video{
+        display: none;
         width: 100%;
         height: 100%;
         outline: none;

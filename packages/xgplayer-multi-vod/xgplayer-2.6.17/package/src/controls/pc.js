@@ -37,7 +37,7 @@ let pc = function () {
       }
     }
   }
-  for (let i = 0; i < player.config.channelNum; i++) {
+  for (let i = 0; i < player.channelNum; i++) {
     let videoName = `video${i === 0 ? '' : i}`
     player[videoName].addEventListener('click', function (e) { player.onElementClick(e, player[videoName]) }, false)
   }
