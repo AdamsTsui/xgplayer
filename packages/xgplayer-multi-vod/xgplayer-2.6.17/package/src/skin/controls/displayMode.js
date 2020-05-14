@@ -148,40 +148,39 @@ let s_displayMode = function () {
       'modePosSize8': [{'left': 0, 'top': 0, 'width': winWidth / 2, 'height': winHeight / 2, 'zIndex': 8}, {'left': 0, 'top': winHeight / 2, 'width': winWidth / 2, 'height': winHeight / 2, 'zIndex': 9}, {'left': winWidth / 2, 'top': 0, 'width': winWidth / 2, 'height': winHeight / 2, 'zIndex': 9}, {'left': winWidth / 2, 'top': winHeight / 2, 'width': winWidth / 2, 'height': winHeight / 2, 'zIndex': 9}]}
   }
 
+  let draggbleVideoId
+  function onDragover (e) {
+
+    e.preventDefault()
+  }
+  function onDragstart (e) {
+    draggbleVideoId = e.target.id
+  }
+  function onDrop (e) {
+    let _src = player[draggbleVideoId]
+    let _dst = e.currentTarget || e.target
+    let tmpZindex = _src.style.zIndex
+    let tmpTop = _src.style.top
+    let tmpLeft = _src.style.left
+    let tmpWidth = _src.style.width
+    let tmpHeight = _src.style.height
+
+    _src.style.transitionDuration = '1s'
+    _dst.style.transitionDuration = '1s'
+
+    _src.style.zIndex = _dst.style.zIndex
+    _src.style.top = _dst.style.top
+    _src.style.left = _dst.style.left
+    _src.style.width = _dst.style.width
+    _src.style.height = _dst.style.height
+
+    _dst.style.zIndex = tmpZindex
+    _dst.style.top = tmpTop
+    _dst.style.left = tmpLeft
+    _dst.style.width = tmpWidth
+    _dst.style.height = tmpHeight
+  }
   function initDragFunc () {
-    let draggbleVideoId
-
-    function onDragover (e) {
-      e.preventDefault()
-    }
-    function onDragstart (e) {
-      draggbleVideoId = e.target.id
-    }
-    function onDrop (e) {
-      let _src = player[draggbleVideoId]
-      let _dst = e.currentTarget || e.target
-      let tmpZindex = _src.style.zIndex
-      let tmpTop = _src.style.top
-      let tmpLeft = _src.style.left
-      let tmpWidth = _src.style.width
-      let tmpHeight = _src.style.height
-
-      _src.style.transitionDuration = '1s'
-      _dst.style.transitionDuration = '1s'
-
-      _src.style.zIndex = _dst.style.zIndex
-      _src.style.top = _dst.style.top
-      _src.style.left = _dst.style.left
-      _src.style.width = _dst.style.width
-      _src.style.height = _dst.style.height
-
-      _dst.style.zIndex = tmpZindex
-      _dst.style.top = tmpTop
-      _dst.style.left = tmpLeft
-      _dst.style.width = tmpWidth
-      _dst.style.height = tmpHeight
-    }
-
     for (let i = 0; i < player.channelNum; i++) {
       let _video = player[`video${i === 0 ? '' : i}`]
       _video.removeEventListener('dragover', onDragover)
