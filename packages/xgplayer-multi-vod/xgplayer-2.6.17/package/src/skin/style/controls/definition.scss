@@ -1,7 +1,7 @@
 .xgplayer-skin-default {
   .xgplayer-definition {
     order: 6;
-    width: 60px;
+    width: 80px;
     height: 42px;
     z-index: 18;
     position: relative;
@@ -21,7 +21,7 @@
       left: 0;
       text-align: center;
       white-space: nowrap;
-      margin-left: -10px;
+      margin-left: -5px;
       z-index: 26;
       cursor: pointer;
       li {
@@ -50,7 +50,7 @@
       color: $definitionNameColor;
       position: absolute;
       bottom: 5px;
-      width: 60px;
+      width: 70px;
       height: 20px;
       line-height: 20px;
       background: $definitionNameBgColor;
