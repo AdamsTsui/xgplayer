@@ -23,6 +23,14 @@ let s_time = function () {
     }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = `<span class="xgplayer-time-current">${util.format(player.currentTime || 0)}</span>` + `<span>${util.format(player.duration)}</span>`
+      // 三路视频同步
+      let currTime = player['video'].currentTime
+      for (let i = 1; i < player.channelNum; i++) {
+        let _video = player[`video${i}`]
+        if (Math.abs(currTime - _video.currentTime) > 1) {
+          _video.currentTime = currTime
+        }
+      }
     }
   }
   player.on('durationchange', onTimeChange)
