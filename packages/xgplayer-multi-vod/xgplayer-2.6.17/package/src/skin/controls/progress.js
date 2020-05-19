@@ -291,7 +291,12 @@ let s_progress = function () {
           break
         }
       }
-      cache.style.width = `${end / player.duration * 100}%`
+      let tmpTime = 0
+      let mainFiles = player.config.url.channel[0].files
+      for (let i = 0; i < player.currFileNum; i++) {
+        tmpTime += parseFloat(mainFiles[i].totaltime)
+      }
+      cache.style.width = `${(end + tmpTime) / player.duration * 100}%`
     }
   }
   const cacheUpdateEvents = ['bufferedChange', 'cacheupdate', 'ended', 'timeupdate']
