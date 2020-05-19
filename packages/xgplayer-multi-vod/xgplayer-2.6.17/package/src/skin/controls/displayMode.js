@@ -150,7 +150,6 @@ let s_displayMode = function () {
 
   let draggbleVideoId
   function onDragover (e) {
-
     e.preventDefault()
   }
   function onDragstart (e) {
