@@ -669,8 +669,32 @@ class Player extends Proxy {
   }
 
   onEnded () {
-    util.addClass(this.root, 'xgplayer-ended')
-    util.removeClass(this.root, 'xgplayer-playing')
+    let _this = this
+    function afterEnded () {
+      util.addClass(_this.root, 'xgplayer-ended')
+      util.removeClass(_this.root, 'xgplayer-playing')
+    }
+
+    let headTails = _this.config.headTails
+    if (headTails && headTails.tail) {
+      // 存在片头片尾
+      util.addClass(_this.root, 'xgplayer-tail-active')
+      let time = headTails.tail.time
+      let timeContainer = util.findDom(_this.root, '.xgplayer-headtail-counter-time')
+      timeContainer.innerHTML = `${time}`
+      let imgContainer = util.findDom(_this.root, '.xgplayer-headtail-tail')
+      imgContainer.src = headTails.tail.img
+      let intervalID = window.setInterval(function () {
+        timeContainer.innerHTML = `${--time}`
+        if (time === 0) {
+          afterEnded()
+          util.removeClass(_this.root, 'xgplayer-tail-active')
+          window.clearInterval(intervalID)
+        }
+      }, 1000)
+    } else {
+      afterEnded()
+    }
   }
 
   onSeeking () {

@@ -67,3 +67,11 @@
     }
   }
 }
+
+.xgplayer-skin-default {
+  &.xgplayer-head-active, &.xgplayer-tail-active {
+    .xgplayer-start {
+      display: none;
+    }
+  }
+}

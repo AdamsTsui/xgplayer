@@ -362,7 +362,7 @@ class Player extends Proxy {
       this.currentTime = 0
       // eslint-disable-next-line handle-callback-err
       let playPromise = this.play()
-      if (playPromise !== undefined && playPromise) {
+      if (playPromise !== undefined && playPromise && util.typeOf(playPromise.catch) === 'function') {
         playPromise.catch(err => { console.error(err) })
       }
     }
@@ -668,13 +668,36 @@ class Player extends Proxy {
   }
 
   onEnded () {
+    let _this = this
+    function afterEnded () {
+      util.addClass(_this.root, 'xgplayer-ended')
+      util.removeClass(_this.root, 'xgplayer-playing')
+    }
     // console.log('ended.................this.currentTime:' + this.currentTime + ':::::::this.totalDuration:::' + this.totalDuration)
-    if (this.currentTime < this.totalDuration) {
+    if (_this.currentTime < _this.totalDuration) {
       // console.log('顺序播放下个分片')
-      this.currentTime = this.currentTime + 1
+      _this.currentTime = _this.currentTime + 1
     } else {
-      util.addClass(this.root, 'xgplayer-ended')
-      util.removeClass(this.root, 'xgplayer-playing')
+      let headTails = _this.config.headTails
+      if (headTails && headTails.tail) {
+        // 存在片头片尾
+        util.addClass(_this.root, 'xgplayer-tail-active')
+        let time = headTails.tail.time
+        let timeContainer = util.findDom(_this.root, '.xgplayer-headtail-counter-time')
+        timeContainer.innerHTML = `${time}`
+        let imgContainer = util.findDom(_this.root, '.xgplayer-headtail-tail')
+        imgContainer.src = headTails.tail.img
+        let intervalID = window.setInterval(function () {
+          timeContainer.innerHTML = `${--time}`
+          if (time === 0) {
+            afterEnded()
+            util.removeClass(_this.root, 'xgplayer-tail-active')
+            window.clearInterval(intervalID)
+          }
+        }, 1000)
+      } else {
+        afterEnded()
+      }
     }
   }
 
