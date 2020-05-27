@@ -5833,7 +5833,7 @@ var pc = function pc() {
       }
     }
   };
-  player.video.addEventListener('dblclick', function (e) {
+  player.root.addEventListener('dblclick', function (e) {
     player.onElementDblclick(e, player.video);
   }, false);
 

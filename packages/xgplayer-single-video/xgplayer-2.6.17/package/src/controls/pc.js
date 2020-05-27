@@ -57,7 +57,7 @@ let pc = function () {
       }
     }
   }
-  player.video.addEventListener('dblclick', function (e) { player.onElementDblclick(e, player.video) }, false)
+  player.root.addEventListener('dblclick', function (e) { player.onElementDblclick(e, player.video) }, false)
 
   function onMouseEnter () {
     clearTimeout(player.leavePlayerTimer)
