@@ -23,7 +23,7 @@ let pc = function () {
           } else if (!player.ended) {
             if (player.paused) {
               let playPromise = player.play()
-              if (playPromise !== undefined && playPromise) {
+              if (playPromise !== undefined && playPromise && util.typeOf(playPromise.catch) === 'function') {
                 playPromise.catch(err => {})
               }
             } else {
