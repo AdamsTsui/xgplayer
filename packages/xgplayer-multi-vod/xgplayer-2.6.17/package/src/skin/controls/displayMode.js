@@ -14,11 +14,6 @@ let s_displayMode = function () {
         _video.style.display = 'none'
       }
     }
-    // 一路视频不显示模块切换
-    if (player.channelNum < 2) {
-      util.removeClass(player.root, 'xgplayer-is-displaymode')
-      return false
-    }
     let iconPath = ['M2 2 L34 2 L34 20 L2 20 Z',
       'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20',
       'M2 2 L18 2 L18 20 L2 20 Z M18 11 L34 11 L34 20 L18 20',
@@ -77,7 +72,11 @@ let s_displayMode = function () {
     tmp.push(`<p class='name'>布局</p>`)
     ul.innerHTML = tmp.join('')
     root.appendChild(ul)
-    util.addClass(player.root, 'xgplayer-is-displaymode')
+    if (player.channelNum > 1) {
+      util.addClass(player.root, 'xgplayer-is-displaymode')
+    } else {
+      util.removeClass(player.root, 'xgplayer-is-displaymode')
+    }
 
     initDragFunc()
 
