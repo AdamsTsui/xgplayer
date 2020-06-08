@@ -125,11 +125,12 @@ let s_displayMode = function () {
     let posSize = scanlePosSizes()[`modePosSize${player.currMode + 1}`]
     for (let i = 0; i < player.channelNum; i++) {
       let _video = player[`video${(i === 0 ? '' : i)}`]
-      _video.style.top = `${posSize[i]['top']}px`
-      _video.style.left = `${posSize[i]['left']}px`
-      _video.style.width = `${posSize[i]['width']}px`
-      _video.style.height = `${posSize[i]['height']}px`
-      _video.style.zIndex = `${posSize[i]['zIndex']}`
+      _video.style.top = posSize[i]['top']
+      _video.style.bottom = posSize[i]['bottom']
+      _video.style.left = posSize[i]['left']
+      _video.style.width = posSize[i]['width']
+      _video.style.height = posSize[i]['height']
+      _video.style.zIndex = posSize[i]['zIndex']
     }
   }
 
@@ -137,14 +138,27 @@ let s_displayMode = function () {
     let winWidth = player.root.clientWidth
     let winHeight = player.root.clientHeight
     return {
-      'modePosSize1': [{'left': 0, 'top': 0, 'width': winWidth, 'height': winHeight, 'zIndex': 8}],
-      'modePosSize2': [{'left': 0, 'top': 0, 'width': winWidth / 2, 'height': winHeight, 'zIndex': 8}, {'left': winWidth / 2, 'top': 0, 'width': winWidth / 2, 'height': winHeight, 'zIndex': 9}],
-      'modePosSize3': [{'left': 0, 'top': 0, 'width': winWidth * 2 / 3, 'height': winHeight, 'zIndex': 8}, {'left': winWidth * 2 / 3, 'top': winHeight / 2, 'width': winWidth / 3, 'height': winHeight / 2, 'zIndex': 9}],
-      'modePosSize4': [{'left': 0, 'top': 0, 'width': winWidth, 'height': winHeight, 'zIndex': 8}, {'left': winWidth * 2 / 3, 'top': winHeight / 2, 'width': winWidth / 3, 'height': winHeight / 2, 'zIndex': 9}],
-      'modePosSize5': [{'left': winWidth / 3, 'top': 0, 'width': winWidth * 2 / 3, 'height': winHeight, 'zIndex': 8}, {'left': 0, 'top': 0, 'width': winWidth / 3, 'height': winHeight / 2, 'zIndex': 9}, {'left': 0, 'top': winHeight / 2, 'width': winWidth / 3, 'height': winHeight / 2, 'zIndex': 9}],
-      'modePosSize6': [{'left': 0, 'top': 0, 'width': winWidth * 2 / 3, 'height': winHeight, 'zIndex': 8}, {'left': winWidth * 2 / 3, 'top': 0, 'width': winWidth / 3, 'height': winHeight / 2, 'zIndex': 9}, {'left': winWidth * 2 / 3, 'top': winHeight / 2, 'width': winWidth / 3, 'height': winHeight / 2, 'zIndex': 9}],
-      'modePosSize7': [{'left': 0, 'top': 0, 'width': winWidth, 'height': winHeight * 2 / 3, 'zIndex': 8}, {'left': 0, 'top': winHeight * 2 / 3, 'width': winWidth / 3, 'height': winHeight / 3, 'zIndex': 9}, {'left': winWidth / 3, 'top': winHeight * 2 / 3, 'width': winWidth / 3, 'height': winHeight / 3, 'zIndex': 9}, {'left': winWidth * 2 / 3, 'top': winHeight * 2 / 3, 'width': winWidth / 3, 'height': winHeight / 3, 'zIndex': 9}],
-      'modePosSize8': [{'left': 0, 'top': 0, 'width': winWidth / 2, 'height': winHeight / 2, 'zIndex': 8}, {'left': 0, 'top': winHeight / 2, 'width': winWidth / 2, 'height': winHeight / 2, 'zIndex': 9}, {'left': winWidth / 2, 'top': 0, 'width': winWidth / 2, 'height': winHeight / 2, 'zIndex': 9}, {'left': winWidth / 2, 'top': winHeight / 2, 'width': winWidth / 2, 'height': winHeight / 2, 'zIndex': 9}]}
+      'modePosSize1': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8}],
+      'modePosSize2': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2  + 'px', 'height': winHeight + 'px', 'zIndex': 8},
+        {'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9}],
+      'modePosSize3': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8},
+        {'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}],
+      'modePosSize4': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8},
+        {'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}],
+      'modePosSize5': [{'left': winWidth / 3 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8},
+        {'left': '0px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9},
+        {'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9}],
+      'modePosSize6': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8},
+        {'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9},
+        {'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9}],
+      'modePosSize7': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight * 2 / 3 + 'px', 'zIndex': 8},
+        {'left': '0px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9},
+        {'left': winWidth / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9},
+        {'left': winWidth * 2 / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9}],
+      'modePosSize8': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 8},
+        {'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9},
+        {'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9},
+        {'left': winWidth / 2 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}]}
   }
 
   let draggbleVideoId
@@ -162,6 +176,7 @@ let s_displayMode = function () {
     let tmpLeft = _src.style.left
     let tmpWidth = _src.style.width
     let tmpHeight = _src.style.height
+    let tmpBottom = _src.style.bottom
 
     _src.style.transitionDuration = '1s'
     _dst.style.transitionDuration = '1s'
@@ -171,12 +186,14 @@ let s_displayMode = function () {
     _src.style.left = _dst.style.left
     _src.style.width = _dst.style.width
     _src.style.height = _dst.style.height
+    _src.style.bottom = _dst.style.bottom
 
     _dst.style.zIndex = tmpZindex
     _dst.style.top = tmpTop
     _dst.style.left = tmpLeft
     _dst.style.width = tmpWidth
     _dst.style.height = tmpHeight
+    _dst.style.bottom = tmpBottom
   }
   function initDragFunc () {
     for (let i = 0; i < player.channelNum; i++) {
