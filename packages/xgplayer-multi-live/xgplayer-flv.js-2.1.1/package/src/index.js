@@ -94,8 +94,8 @@ class FlvJsPlayer extends Player {
       }
     }
 
-    let mediaDataSource = player.flvOpts
     for (let i = 0; i < player.flvOpts.channelNum; i++) {
+      let mediaDataSource = Player.util.deepCopy({}, this.flvOpts)
       mediaDataSource.segments = [
         {
           cors: true,
