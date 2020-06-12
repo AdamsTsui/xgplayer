@@ -43,6 +43,10 @@ let start = function () {
         timeContainer.innerHTML = `${time}`
         let imgContainer = util.findDom(root, '.xgplayer-headtail-head')
         imgContainer.src = headTails.head.img
+        let poster = util.findDom(root, '.xgplayer-poster')
+        if(poster) {
+          poster.style.display = 'none'
+        }
         let intervalID = window.setInterval(function () {
           timeContainer.innerHTML = `${--time}`
           if (time === 0) {

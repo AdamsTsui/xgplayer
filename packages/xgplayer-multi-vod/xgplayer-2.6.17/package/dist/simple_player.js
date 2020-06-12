@@ -5498,6 +5498,10 @@ var start = function start() {
         timeContainer.innerHTML = '' + time;
         var imgContainer = util.findDom(root, '.xgplayer-headtail-head');
         imgContainer.src = headTails.head.img;
+        var poster = util.findDom(root, '.xgplayer-poster');
+        if (poster) {
+          poster.style.display = 'none';
+        }
         var intervalID = window.setInterval(function () {
           timeContainer.innerHTML = '' + --time;
           if (time === 0) {
