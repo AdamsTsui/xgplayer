@@ -350,9 +350,20 @@ var Player = function (_Proxy) {
       }
       this.logParams.playSrc = url;
       this.canPlayFunc = function () {
+        var status = true;
+        for (var i = 0; i < player.config.channelNum; i++) {
+          status = status && player.canPlayStatus[i];
+        }
+        if (!status) {
+          return;
+        }
+        for (var _i = 0; _i < player.config.channelNum; _i++) {
+          player.canPlayStatus[_i] = false;
+        }
         var playPromise = player.video.play();
         if (playPromise !== undefined && playPromise) {
           playPromise.then(function () {
+            player.play();
             player.emit('autoplay started');
           }).catch(function () {
             player.emit('autoplay was prevented');
@@ -384,8 +395,8 @@ var Player = function (_Proxy) {
       if (this.config.autoplay) {
         this.on('canplay', this.canPlayFunc);
       }
-      for (var _i = 0; _i < this.config.channelNum; _i++) {
-        root.insertBefore(this['video' + (_i === 0 ? '' : _i)], root.firstChild);
+      for (var _i2 = 0; _i2 < this.config.channelNum; _i2++) {
+        root.insertBefore(this['video' + (_i2 === 0 ? '' : _i2)], root.firstChild);
       }
       setTimeout(function () {
         _this2.emit('complete');
@@ -2531,12 +2542,19 @@ var Proxy = function () {
       draggable: true,
       mediaType: options.mediaType || 'video'
     };
+
     if (options.loop) {
       this.videoConfig.loop = 'loop';
     }
     if (options.url instanceof Array) {
       options.channelNum = options.url.length;
     }
+
+    this.canPlayStatus = [];
+    for (var i = 0; i < options.channelNum; i++) {
+      this.canPlayStatus.push(false);
+    }
+
     var textTrackDom = '';
     this.textTrackShowDefault = true;
     if (options.textTrack && Array.isArray(options.textTrack) && (navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('Firefox') > -1)) {
@@ -2577,8 +2595,8 @@ var Proxy = function () {
         style.sheet.addRule(wrap + ' video::cue', styleStr);
       }
     }
-    for (var i = 0; i < options.channelNum; i++) {
-      var videoName = 'video' + (i === 0 ? '' : i);
+    for (var _i = 0; _i < options.channelNum; _i++) {
+      var videoName = 'video' + (_i === 0 ? '' : _i);
       this.videoConfig['id'] = videoName;
       this[videoName] = _util2.default.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName);
     }
@@ -2640,6 +2658,10 @@ var Proxy = function () {
           }
           self.logParams.played[self.logParams.played.length - 1].end = self.video.currentTime;
         }
+
+        if (name === 'canplay') {
+          self.canPlayStatus[0] = true;
+        }
         if (name === 'error') {
           // process the error
           self._onError(name);
@@ -2653,8 +2675,8 @@ var Proxy = function () {
             _util2.default.setInterval(self, 'bufferedChange', function () {
               if (self.video && self.video.buffered) {
                 var curBuffer = [];
-                for (var _i = 0, len = self.video.buffered.length; _i < len; _i++) {
-                  curBuffer.push([self.video.buffered.start(_i), self.video.buffered.end(_i)]);
+                for (var _i2 = 0, len = self.video.buffered.length; _i2 < len; _i2++) {
+                  curBuffer.push([self.video.buffered.start(_i2), self.video.buffered.end(_i2)]);
                 }
                 if (curBuffer.toString() !== lastBuffer) {
                   lastBuffer = curBuffer.toString();
@@ -2669,6 +2691,42 @@ var Proxy = function () {
           }
         }
       }, false);
+
+      if (options.channelNum > 1) {
+        self.video1.addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (name === 'canplay') {
+            self.canPlayStatus[1] = true;
+            self.emit(name, self);
+          }
+        }, false);
+      }
+
+      if (options.channelNum > 2) {
+        self.video2.addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (name === 'canplay') {
+            self.canPlayStatus[2] = true;
+            self.emit(name, self);
+          }
+        }, false);
+      }
+
+      if (options.channelNum > 3) {
+        self.video3.addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (name === 'canplay') {
+            self.canPlayStatus[3] = true;
+            self.emit(name, self);
+          }
+        }, false);
+      }
     });
   }
   /**
@@ -2685,6 +2743,24 @@ var Proxy = function () {
           msg: this.error,
           handle: 'Constructor'
         }, this.video.error.code, this.video.error));
+      } else if (this.video1 && this.video1.error) {
+        this.emit(name, new _error2.default('other', this.currentTime, this.duration, this.networkState, this.readyState, this.currentSrc, this.src, this.ended, {
+          line: 162,
+          msg: this.error,
+          handle: 'Constructor'
+        }, this.video1.error.code, this.video1.error));
+      } else if (this.video2 && this.video2.error) {
+        this.emit(name, new _error2.default('other', this.currentTime, this.duration, this.networkState, this.readyState, this.currentSrc, this.src, this.ended, {
+          line: 162,
+          msg: this.error,
+          handle: 'Constructor'
+        }, this.video2.error.code, this.video2.error));
+      } else if (this.video3 && this.video3.error) {
+        this.emit(name, new _error2.default('other', this.currentTime, this.duration, this.networkState, this.readyState, this.currentSrc, this.src, this.ended, {
+          line: 162,
+          msg: this.error,
+          handle: 'Constructor'
+        }, this.video3.error.code, this.video3.error));
       }
     }
   }, {

@@ -195,9 +195,20 @@ class Player extends Proxy {
     }
     this.logParams.playSrc = url
     this.canPlayFunc = function () {
+      let status = true
+      for(let i = 0; i < player.config.channelNum; i++) {
+        status = status && player.canPlayStatus[i]
+      }
+      if(!status) {
+        return
+      }
+      for(let i = 0; i < player.config.channelNum; i++) {
+        player.canPlayStatus[i] = false
+      }
       let playPromise = player.video.play()
       if (playPromise !== undefined && playPromise) {
         playPromise.then(function () {
+          player.play()
           player.emit('autoplay started')
         }).catch(function () {
           player.emit('autoplay was prevented')

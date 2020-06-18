@@ -25,12 +25,19 @@ class Proxy {
       draggable: true,
       mediaType: options.mediaType || 'video'
     }
+
     if (options.loop) {
       this.videoConfig.loop = 'loop'
     }
     if (options.url instanceof Array) {
       options.channelNum = options.url.length
     }
+
+    this.canPlayStatus = []
+    for(let i = 0; i < options.channelNum; i++) {
+      this.canPlayStatus.push(false)
+    }
+
     let textTrackDom = ''
     this.textTrackShowDefault = true
     if (options.textTrack && Array.isArray(options.textTrack) && (navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('Firefox') > -1)) {
@@ -136,6 +143,10 @@ class Proxy {
           }
           self.logParams.played[self.logParams.played.length - 1].end = self.video.currentTime
         }
+
+        if(name === 'canplay') {
+          self.canPlayStatus[0] = true
+        }
         if (name === 'error') {
           // process the error
           self._onError(name)
@@ -165,6 +176,43 @@ class Proxy {
           }
         }
       }, false)
+
+      if(options.channelNum > 1) {
+        self.video1.addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if(name === 'canplay') {
+            self.canPlayStatus[1] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
+
+      if(options.channelNum > 2) {
+        self.video2.addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if(name === 'canplay') {
+            self.canPlayStatus[2] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
+
+      if(options.channelNum > 3) {
+        self.video3.addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if(name === 'canplay') {
+            self.canPlayStatus[3] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
+
     })
   }
   /**
@@ -178,6 +226,27 @@ class Proxy {
           msg: this.error,
           handle: 'Constructor'
         }, this.video.error.code, this.video.error))
+    } else if (this.video1 && this.video1.error) {
+      this.emit(name, new Errors('other', this.currentTime, this.duration, this.networkState, this.readyState, this.currentSrc, this.src,
+        this.ended, {
+          line: 162,
+          msg: this.error,
+          handle: 'Constructor'
+        }, this.video1.error.code, this.video1.error))
+    } else if (this.video2 && this.video2.error) {
+      this.emit(name, new Errors('other', this.currentTime, this.duration, this.networkState, this.readyState, this.currentSrc, this.src,
+          this.ended, {
+            line: 162,
+            msg: this.error,
+            handle: 'Constructor'
+          }, this.video2.error.code, this.video2.error))
+    } else if (this.video3 && this.video3.error) {
+      this.emit(name, new Errors('other', this.currentTime, this.duration, this.networkState, this.readyState, this.currentSrc, this.src,
+          this.ended, {
+            line: 162,
+            msg: this.error,
+            handle: 'Constructor'
+          }, this.video3.error.code, this.video3.error))
     }
   }
 
