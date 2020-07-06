@@ -442,7 +442,7 @@ class Proxy {
     return this.video.src
   }
   set src (url) {
-    let self = this
+    /*let self = this
     if (!util.hasClass(this.root, 'xgplayer-ended')) {
       this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)))
     }
@@ -468,7 +468,7 @@ class Proxy {
       self.logParams.vd = self.video.duration
       self.off('loadeddata', ldFunc)
     }
-    this.once('loadeddata', ldFunc)
+    this.once('loadeddata', ldFunc)*/
   }
   set poster (posterUrl) {
     let poster = util.findDom(this.root, '.xgplayer-poster')

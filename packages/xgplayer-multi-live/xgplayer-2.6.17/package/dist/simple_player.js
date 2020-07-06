@@ -3007,9 +3007,9 @@ var Proxy = function () {
       return this.video.src;
     },
     set: function set(url) {
-      var self = this;
-      if (!_util2.default.hasClass(this.root, 'xgplayer-ended')) {
-        this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)));
+      /*let self = this
+      if (!util.hasClass(this.root, 'xgplayer-ended')) {
+        this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)))
       }
       this.logParams = {
         bc: 0,
@@ -3018,22 +3018,22 @@ var Proxy = function () {
         pt: new Date().getTime(),
         vt: new Date().getTime(),
         vd: 0
-      };
-      this.video.pause();
-      this.video.src = url;
-      this.emit('srcChange');
-      this.logParams.playSrc = url;
-      this.logParams.pt = new Date().getTime();
-      this.logParams.vt = this.logParams.pt;
-      function ldFunc() {
-        self.logParams.vt = new Date().getTime();
-        if (self.logParams.pt > self.logParams.vt) {
-          self.logParams.pt = self.logParams.vt;
-        }
-        self.logParams.vd = self.video.duration;
-        self.off('loadeddata', ldFunc);
       }
-      this.once('loadeddata', ldFunc);
+      this.video.pause()
+      this.video.src = url
+      this.emit('srcChange')
+      this.logParams.playSrc = url
+      this.logParams.pt = new Date().getTime()
+      this.logParams.vt = this.logParams.pt
+      function ldFunc () {
+        self.logParams.vt = new Date().getTime()
+        if (self.logParams.pt > self.logParams.vt) {
+          self.logParams.pt = self.logParams.vt
+        }
+        self.logParams.vd = self.video.duration
+        self.off('loadeddata', ldFunc)
+      }
+      this.once('loadeddata', ldFunc)*/
     }
   }, {
     key: 'poster',
@@ -10541,6 +10541,7 @@ var s_error = function s_error() {
   var player = this;
   var root = player.root;
   var util = _player2.default.util;
+  var winInteval = undefined;
 
   var error = util.createDom('xg-error', '<span class="xgplayer-error-text">请<span class="xgplayer-error-refresh">刷新</span>试试</span>', {}, 'xgplayer-error');
   player.once('ready', function () {
@@ -10561,22 +10562,37 @@ var s_error = function s_error() {
       text.innerHTML = player.config.errorTips || 'please try to <span class="xgplayer-error-refresh">refresh</span>';
     }
     // }
-    util.addClass(player.root, 'xgplayer-is-error');
+    // util.addClass(player.root, 'xgplayer-is-error')
+    util.addClass(player.root, 'xgplayer-is-enter');
     refresh = error.querySelector('.xgplayer-error-refresh');
     if (refresh) {
       ['touchend', 'click'].forEach(function (item) {
         refresh.addEventListener(item, function (e) {
           e.preventDefault();
           e.stopPropagation();
-          player.autoplay = true;
-          player.once('playing', function () {
-            util.removeClass(player.root, 'xgplayer-is-error');
-          });
-          player.src = player.config.url;
+          replayVideo();
         });
       });
     }
+
+    if (!winInteval) {
+      winInteval = window.setInterval(replayVideo, 6000);
+    }
   }
+
+  function replayVideo() {
+    player.autoplay = true;
+    player.once('playing', function () {
+      if (winInteval) {
+        window.clearInterval(winInteval);
+        winInteval = undefined;
+      }
+      // util.removeClass(player.root, 'xgplayer-is-error')
+      util.removeClass(player.root, 'xgplayer-is-enter');
+    });
+    player.src = player.config.url;
+  }
+
   player.on('error', onError);
   function onDestroy() {
     player.off('error', onError);

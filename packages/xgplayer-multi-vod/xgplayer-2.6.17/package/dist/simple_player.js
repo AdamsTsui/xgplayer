@@ -364,11 +364,15 @@ var Player = function (_Proxy) {
       if (_util2.default.typeOf(url.channel) === 'Array') {
         for (var i = 0; i < this.channelNum; i++) {
           var videoName = 'video' + (i === 0 ? '' : i);
-          var src = this.config.url.channel[i].files[0].url;
-          if (src.indexOf('blob:') > -1 && src === this[videoName].src) {
+          var channel = this.config.url.channel[i];
+          if (channel.type === 'mp4') {
+            // if (src.indexOf('blob:') > -1 && src === this[videoName].src) {
             // 在Chromium环境下用mse url给video二次赋值会导致错误
-          } else {
-            this[videoName].src = src;
+            // } else {
+            this[videoName].src = channel.files[0].url;
+            // }
+          } else if (channel.type === 'jpg') {
+            this[videoName].poster = channel.files[0].imageUrl;
           }
         }
       }
@@ -5917,9 +5921,12 @@ var pc = function pc() {
 
   var _loop = function _loop(i) {
     var videoName = 'video' + (i === 0 ? '' : i);
-    player[videoName].addEventListener('click', function (e) {
-      player.onElementClick(e, player[videoName]);
-    }, false);
+    var channel = player.config.url.channel[i];
+    if (channel.type === 'mp4') {
+      player[videoName].addEventListener('click', function (e) {
+        player.onElementClick(e, player[videoName]);
+      }, false);
+    }
   };
 
   for (var i = 0; i < player.channelNum; i++) {
@@ -8831,8 +8838,21 @@ var s_time = function s_time() {
       var currTime = player['video'].currentTime;
       for (var i = 1; i < player.channelNum; i++) {
         var _video = player['video' + i];
-        if (Math.abs(currTime - _video.currentTime) > 1) {
-          _video.currentTime = currTime;
+        var channel = player.config.url.channel[i];
+        if (channel.type === 'mp4') {
+          if (Math.abs(currTime - _video.currentTime) > 1) {
+            _video.currentTime = currTime;
+          }
+        } else if (channel.type === 'jpg') {
+          var currentAllTime = player.currentTime;
+          var files = channel.files;
+          for (var j = files.length - 1; j >= 0; j--) {
+            var file = files[j];
+            if (currentAllTime > file.starttime) {
+              _video.poster = file.imageUrl;
+              break;
+            }
+          }
         }
       }
     }

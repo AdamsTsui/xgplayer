@@ -27,8 +27,21 @@ let s_time = function () {
       let currTime = player['video'].currentTime
       for (let i = 1; i < player.channelNum; i++) {
         let _video = player[`video${i}`]
-        if (Math.abs(currTime - _video.currentTime) > 1) {
-          _video.currentTime = currTime
+        let channel = player.config.url.channel[i]
+        if (channel.type === 'mp4') {
+          if (Math.abs(currTime - _video.currentTime) > 1) {
+            _video.currentTime = currTime
+          }
+        } else if (channel.type === 'jpg') {
+          const currentAllTime = player.currentTime
+          let files = channel.files
+          for (let j = (files.length - 1); j >= 0; j--) {
+            let file = files[j]
+            if (currentAllTime > file.starttime) {
+              _video.poster = file.imageUrl
+              break
+            }
+          }
         }
       }
     }
