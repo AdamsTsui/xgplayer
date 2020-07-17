@@ -2540,7 +2540,9 @@ var Proxy = function () {
       'webkit-airplay': options['airplay'],
       tabindex: 2,
       draggable: true,
-      mediaType: options.mediaType || 'video'
+      mediaType: options.mediaType || 'video',
+      useCORS: true,
+      crossOrigin: "Anonymous"
     };
 
     if (options.loop) {
