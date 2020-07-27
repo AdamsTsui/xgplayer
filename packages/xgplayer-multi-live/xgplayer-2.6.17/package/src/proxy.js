@@ -25,7 +25,7 @@ class Proxy {
       draggable: true,
       mediaType: options.mediaType || 'video',
       useCORS: true,
-      crossOrigin: "Anonymous"
+      crossOrigin: 'Anonymous'
     }
 
     if (options.loop) {
@@ -36,14 +36,14 @@ class Proxy {
     }
 
     this.canPlayStatus = []
-    for(let i = 0; i < options.channelNum; i++) {
+    for (let i = 0; i < options.channelNum; i++) {
       this.canPlayStatus.push(false)
     }
 
     let textTrackDom = ''
     this.textTrackShowDefault = true
     if (options.textTrack && Array.isArray(options.textTrack) && (navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('Firefox') > -1)) {
-      if(options.textTrack.length > 0 && !options.textTrack.some(track => { return track.default })) {
+      if (options.textTrack.length > 0 && !options.textTrack.some(track => { return track.default })) {
         options.textTrack[0].default = true
         this.textTrackShowDefault = false
       }
@@ -146,7 +146,7 @@ class Proxy {
           self.logParams.played[self.logParams.played.length - 1].end = self.video.currentTime
         }
 
-        if(name === 'canplay') {
+        if (name === 'canplay') {
           self.canPlayStatus[0] = true
         }
         if (name === 'error') {
@@ -160,7 +160,7 @@ class Proxy {
           if (['ended', 'error', 'timeupdate'].indexOf(name) < 0) {
             clearInterval(self._interval['bufferedChange'])
             util.setInterval(self, 'bufferedChange', function () {
-              if(self.video && self.video.buffered) {
+              if (self.video && self.video.buffered) {
                 let curBuffer = []
                 for (let i = 0, len = self.video.buffered.length; i < len; i++) {
                   curBuffer.push([self.video.buffered.start(i), self.video.buffered.end(i)])
@@ -179,42 +179,41 @@ class Proxy {
         }
       }, false)
 
-      if(options.channelNum > 1) {
+      if (options.channelNum > 1) {
         self.video1.addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if(name === 'canplay') {
+          } else if (name === 'canplay') {
             self.canPlayStatus[1] = true
             self.emit(name, self)
           }
         }, false)
       }
 
-      if(options.channelNum > 2) {
+      if (options.channelNum > 2) {
         self.video2.addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if(name === 'canplay') {
+          } else if (name === 'canplay') {
             self.canPlayStatus[2] = true
             self.emit(name, self)
           }
         }, false)
       }
 
-      if(options.channelNum > 3) {
+      if (options.channelNum > 3) {
         self.video3.addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if(name === 'canplay') {
+          } else if (name === 'canplay') {
             self.canPlayStatus[3] = true
             self.emit(name, self)
           }
         }, false)
       }
-
     })
   }
   /**
@@ -237,18 +236,18 @@ class Proxy {
         }, this.video1.error.code, this.video1.error))
     } else if (this.video2 && this.video2.error) {
       this.emit(name, new Errors('other', this.currentTime, this.duration, this.networkState, this.readyState, this.currentSrc, this.src,
-          this.ended, {
-            line: 162,
-            msg: this.error,
-            handle: 'Constructor'
-          }, this.video2.error.code, this.video2.error))
+        this.ended, {
+          line: 162,
+          msg: this.error,
+          handle: 'Constructor'
+        }, this.video2.error.code, this.video2.error))
     } else if (this.video3 && this.video3.error) {
       this.emit(name, new Errors('other', this.currentTime, this.duration, this.networkState, this.readyState, this.currentSrc, this.src,
-          this.ended, {
-            line: 162,
-            msg: this.error,
-            handle: 'Constructor'
-          }, this.video3.error.code, this.video3.error))
+        this.ended, {
+          line: 162,
+          msg: this.error,
+          handle: 'Constructor'
+        }, this.video3.error.code, this.video3.error))
     }
   }
 
@@ -326,8 +325,11 @@ class Proxy {
     return this.video.currentTime
   }
   set currentTime (time) {
-    if(typeof isFinite === 'function' && !isFinite(time)) return
-    this.video.currentTime = time
+    if (typeof isFinite === 'function' && !isFinite(time)) return
+    // this.video.currentTime = time
+    for (let i = 0; i < this.config.channelNum; i++) {
+      this[`video${i === 0 ? '' : i}`].currentTime = time
+    }
     this.emit('currentTimeChange')
   }
   get defaultMuted () {
@@ -444,7 +446,7 @@ class Proxy {
     return this.video.src
   }
   set src (url) {
-    /*let self = this
+    /* let self = this
     if (!util.hasClass(this.root, 'xgplayer-ended')) {
       this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)))
     }
@@ -470,7 +472,7 @@ class Proxy {
       self.logParams.vd = self.video.duration
       self.off('loadeddata', ldFunc)
     }
-    this.once('loadeddata', ldFunc)*/
+    this.once('loadeddata', ldFunc) */
   }
   set poster (posterUrl) {
     let poster = util.findDom(this.root, '.xgplayer-poster')

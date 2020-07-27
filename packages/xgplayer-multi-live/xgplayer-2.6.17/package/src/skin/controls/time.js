@@ -18,6 +18,14 @@ let s_time = function () {
     //     player.controls.appendChild(live)
     //   }
     // }
+
+    // console.log(player.video.currentTime + ':::::::::::::::' + player.video1.currentTime + ':::::::::' + player.video2.currentTime)
+    for (let i = 1; i < this.config.channelNum; i++) {
+      if (Math.abs(player.currentTime - this[`video${i === 0 ? '' : i}`].currentTime) > 0.5) {
+        // console.log('video' + i + '与主流时间开始同步')
+        this[`video${i === 0 ? '' : i}`].currentTime = player.currentTime
+      }
+    }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = `<span class="xgplayer-time-current">${util.format(player.currentTime || 0)}</span>` + `<span>${util.format(player.duration)}</span>`
     }
