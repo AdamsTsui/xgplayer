@@ -8771,10 +8771,10 @@ var s_time = function s_time() {
     //   }
     // }
 
-    // console.log(player.video.currentTime + ':::::::::::::::' + player.video1.currentTime + ':::::::::' + player.video2.currentTime)
+    console.log(player.video.currentTime + ':::::::::::::::' + player.video1.currentTime + ':::::::::' + player.video2.currentTime);
     for (var i = 1; i < this.config.channelNum; i++) {
       if (Math.abs(player.currentTime - this['video' + (i === 0 ? '' : i)].currentTime) > 0.5) {
-        // console.log('video' + i + '与主流时间开始同步')
+        console.log('video' + i + '与主流时间开始同步');
         this['video' + (i === 0 ? '' : i)].currentTime = player.currentTime;
       }
     }

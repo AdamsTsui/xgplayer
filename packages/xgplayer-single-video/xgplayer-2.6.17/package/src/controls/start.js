@@ -11,6 +11,7 @@ let start = function () {
 
   function onPlaying () {
     util.removeClass(root, 'xgplayer-is-enter')
+    player.showCaption()
   }
 
   function onStartBtnClick () {
@@ -31,6 +32,7 @@ let start = function () {
         }
       }
     }
+
     if (util.hasClass(root, 'xgplayer-nostart')) {
       // console.info('第一次开始播放。。。')
       let headTails = player.config.headTails
@@ -44,7 +46,7 @@ let start = function () {
         let imgContainer = util.findDom(root, '.xgplayer-headtail-head')
         imgContainer.src = headTails.head.img
         let poster = util.findDom(root, '.xgplayer-poster')
-        if(poster) {
+        if (poster) {
           poster.style.display = 'none'
         }
         let intervalID = window.setInterval(function () {
@@ -58,6 +60,7 @@ let start = function () {
       } else {
         firstPlay()
       }
+      player.showCaption()
     } else {
       if (player.paused) {
         // console.info('暂停播放后，再继续播放。。。')
@@ -72,6 +75,7 @@ let start = function () {
             }
           }
         }, 10)
+        player.showCaption()
       }
     }
   }

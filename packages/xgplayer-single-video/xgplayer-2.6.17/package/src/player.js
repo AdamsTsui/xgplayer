@@ -187,6 +187,39 @@ class Player extends Proxy {
     player.once('destroy', onDestroy)
   }
 
+  showCaption () {
+    let root = this.root
+    let caption = this.config.caption
+    if (caption && caption.img) {
+      util.addClass(root, 'xgplayer-caption-active')
+      let captionCon = util.findDom(root, '.xgplayer-caption')
+      let captionImg = util.findDom(root, '.xgplayer-caption-img')
+      captionImg.src = caption.img
+      if (caption.width && caption.height) {
+        captionCon.style.width = caption.width + 'px'
+        captionCon.style.height = caption.height + 'px'
+      }
+      if (caption.pos) {
+        switch (caption.pos) {
+          case 1:
+            util.addClass(captionCon, 'left-top')
+            break
+          case 2:
+            util.addClass(captionCon, 'right-top')
+            break
+          case 3:
+            util.addClass(captionCon, 'left-bottom')
+            break
+          case 4:
+            util.addClass(captionCon, 'right-bottom')
+            break
+          default:
+            util.addClass(captionCon, 'left-top')
+        }
+      }
+    }
+  }
+
   start (url = this.config.url) {
     let root = this.root
     let player = this
@@ -199,6 +232,7 @@ class Player extends Proxy {
       if (playPromise !== undefined && playPromise) {
         playPromise.then(function () {
           player.emit('autoplay started')
+          player.showCaption()
         }).catch(function () {
           player.emit('autoplay was prevented')
           Player.util.addClass(player.root, 'xgplayer-is-autoplay')
