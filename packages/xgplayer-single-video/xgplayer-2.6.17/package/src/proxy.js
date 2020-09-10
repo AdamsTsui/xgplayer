@@ -22,9 +22,7 @@ class Proxy {
       airplay: options['airplay'],
       'webkit-airplay': options['airplay'],
       tabindex: 2,
-      mediaType: options.mediaType || 'video',
-      useCORS: true,
-      crossOrigin: "Anonymous"
+      mediaType: options.mediaType || 'video'
     }
     if (options.loop) {
       this.videoConfig.loop = 'loop'

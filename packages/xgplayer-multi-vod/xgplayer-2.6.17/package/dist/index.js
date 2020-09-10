@@ -2565,9 +2565,7 @@ var Proxy = function () {
       'webkit-airplay': options['airplay'],
       tabindex: 2,
       draggable: true,
-      mediaType: options.mediaType || 'video',
-      useCORS: true,
-      crossOrigin: "Anonymous"
+      mediaType: options.mediaType || 'video'
     };
     if (options.loop) {
       this.videoConfig.loop = 'loop';
@@ -8357,7 +8355,9 @@ var s_displayMode = function s_displayMode() {
       }
     });
   }
-
+  window.onscroll = function () {
+    modeChange();
+  };
   function modeChange() {
     var posSize = scanlePosSizes()['modePosSize' + (player.currMode + 1)];
     for (var i = 0; i < player.channelNum; i++) {
@@ -8375,14 +8375,14 @@ var s_displayMode = function s_displayMode() {
     var winWidth = player.root.clientWidth;
     var winHeight = player.root.clientHeight;
     return {
-      'modePosSize1': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
-      'modePosSize2': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9 }],
-      'modePosSize3': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }],
-      'modePosSize4': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }],
-      'modePosSize5': [{ 'left': winWidth / 3 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }],
-      'modePosSize6': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }],
-      'modePosSize7': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight * 2 / 3 + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }],
-      'modePosSize8': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }, { 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }, { 'left': winWidth / 2 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }] };
+      'modePosSize1': [{ 'left': '0px', 'top': '0px', 'bottom': 'null', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
+      'modePosSize2': [{ 'left': '0px', 'top': '0px', 'bottom': 'null', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'null', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9 }],
+      'modePosSize3': [{ 'left': '0px', 'top': '0px', 'bottom': 'null', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'null', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }],
+      'modePosSize4': [{ 'left': '0px', 'top': '0px', 'bottom': 'null', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'null', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }],
+      'modePosSize5': [{ 'left': winWidth / 3 + 'px', 'top': '0px', 'bottom': 'null', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': 'null', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'null', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }],
+      'modePosSize6': [{ 'left': '0px', 'top': '0px', 'bottom': 'null', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': 'null', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'null', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }],
+      'modePosSize7': [{ 'left': '0px', 'top': '0px', 'bottom': 'null', 'width': winWidth + 'px', 'height': winHeight * 2 / 3 + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'null', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'null', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'null', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }],
+      'modePosSize8': [{ 'left': '0px', 'top': '0px', 'bottom': 'null', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'null', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }, { 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'null', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }, { 'left': winWidth / 2 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'null', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }] };
   }
 
   var draggbleVideoId = void 0;
