@@ -24,6 +24,12 @@ class Proxy {
       tabindex: 2,
       mediaType: options.mediaType || 'video'
     }
+    if (options.useCORS) {
+      this.videoConfig = util.deepCopy({
+        useCORS: true,
+        crossOrigin: 'Anonymous'
+      }, this.videoConfig)
+    }
     if (options.loop) {
       this.videoConfig.loop = 'loop'
     }

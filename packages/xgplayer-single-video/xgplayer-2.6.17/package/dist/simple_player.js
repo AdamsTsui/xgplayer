@@ -2591,6 +2591,12 @@ var Proxy = function () {
       tabindex: 2,
       mediaType: options.mediaType || 'video'
     };
+    if (options.useCORS) {
+      this.videoConfig = _util2.default.deepCopy({
+        useCORS: true,
+        crossOrigin: 'Anonymous'
+      }, this.videoConfig);
+    }
     if (options.loop) {
       this.videoConfig.loop = 'loop';
     }

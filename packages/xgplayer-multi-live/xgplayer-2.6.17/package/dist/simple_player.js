@@ -2542,7 +2542,12 @@ var Proxy = function () {
       draggable: true,
       mediaType: options.mediaType || 'video'
     };
-
+    if (options.useCORS) {
+      this.videoConfig = _util2.default.deepCopy({
+        useCORS: true,
+        crossOrigin: 'Anonymous'
+      }, this.videoConfig);
+    }
     if (options.loop) {
       this.videoConfig.loop = 'loop';
     }
