@@ -127,10 +127,10 @@ let s_definition = function () {
               let newUrl = JSON.parse(tmpSrc)
               player.currFileNum = 0 // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl
-              player.channelNum = player.config.url.channel.length
+              player.channelNum = player.config.url.channels.length
 
               let totalDuration = 0
-              let mainFiles = player.config.url.channel[0].files
+              let mainFiles = player.config.url.channels[0].files
               for (let i = 0; i < mainFiles.length; i++) {
                 totalDuration += parseFloat(mainFiles[i].totaltime)
               }

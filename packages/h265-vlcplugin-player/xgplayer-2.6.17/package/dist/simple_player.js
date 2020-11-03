@@ -361,10 +361,10 @@ var Player = function (_Proxy) {
         }
         player.off('canplay', player.canPlayFunc);
       };
-      if (_util2.default.typeOf(url.channel) === 'Array') {
+      if (_util2.default.typeOf(url.channels) === 'Array') {
         for (var i = 0; i < this.channelNum; i++) {
           var videoName = 'video' + (i === 0 ? '' : i);
-          var channel = this.config.url.channel[i];
+          var channel = this.config.url.channels[i];
           if (channel.type === 'mp4') {
             // if (src.indexOf('blob:') > -1 && src === this[videoName].src) {
             // 在Chromium环境下用mse url给video二次赋值会导致错误
@@ -2578,10 +2578,10 @@ var Proxy = function () {
       this.videoConfig.loop = 'loop';
     }
     if (options.url) {
-      this.channelNum = options.url.channel.length;
+      this.channelNum = options.url.channels.length;
     }
     var totalDuration = 0;
-    var mainFiles = options.url.channel[0].files;
+    var mainFiles = options.url.channels[0].files;
     for (var i = 0; i < mainFiles.length; i++) {
       totalDuration += parseFloat(mainFiles[i].totaltime);
     }
@@ -2831,7 +2831,7 @@ var Proxy = function () {
     key: 'currentTime',
     get: function get() {
       var tmpTime = 0;
-      var mainFiles = this.config.url.channel[0].files;
+      var mainFiles = this.config.url.channels[0].files;
       // console.log('this.currFileNum:' + this.currFileNum)
       for (var i = 0; i < this.currFileNum; i++) {
         tmpTime += parseFloat(mainFiles[i].totaltime);
@@ -2844,7 +2844,7 @@ var Proxy = function () {
       var toFileNum = 0;
       var toCurrTime = 0;
       var tmpTime = 0;
-      var mainFiles = this.config.url.channel[0].files;
+      var mainFiles = this.config.url.channels[0].files;
       for (var i = 0; i < mainFiles.length; i++) {
         tmpTime += parseFloat(mainFiles[i].totaltime);
         if (tmpTime > time) {
@@ -3044,7 +3044,7 @@ var Proxy = function () {
       for (var i = 0; i < this.channelNum; i++) {
         this['video' + (i === 0 ? '' : i)].pause();
       }
-      var urlArr = url.channel;
+      var urlArr = url.channels;
       for (var _i4 = 0; _i4 < this.channelNum; _i4++) {
         this['video' + (_i4 === 0 ? '' : _i4)].src = urlArr[_i4].files[this.currFileNum].url;
       }
@@ -5947,7 +5947,7 @@ var pc = function pc() {
 
   var _loop = function _loop(i) {
     var videoName = 'video' + (i === 0 ? '' : i);
-    var channel = player.config.url.channel[i];
+    var channel = player.config.url.channels[i];
     if (channel.type === 'mp4') {
       player[videoName].addEventListener('click', function (e) {
         player.onElementClick(e, player[videoName]);
@@ -8195,10 +8195,10 @@ var s_definition = function s_definition() {
               var newUrl = JSON.parse(tmpSrc);
               player.currFileNum = 0; // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl;
-              player.channelNum = player.config.url.channel.length;
+              player.channelNum = player.config.url.channels.length;
 
               var totalDuration = 0;
-              var mainFiles = player.config.url.channel[0].files;
+              var mainFiles = player.config.url.channels[0].files;
               for (var i = 0; i < mainFiles.length; i++) {
                 totalDuration += parseFloat(mainFiles[i].totaltime);
               }
@@ -8799,7 +8799,7 @@ var s_progress = function s_progress() {
         }
       }
       var tmpTime = 0;
-      var mainFiles = player.config.url.channel[0].files;
+      var mainFiles = player.config.url.channels[0].files;
       for (var _i = 0; _i < player.currFileNum; _i++) {
         tmpTime += parseFloat(mainFiles[_i].totaltime);
       }
@@ -8866,7 +8866,7 @@ var s_time = function s_time() {
       var currTime = player['video'].currentTime;
       for (var i = 1; i < player.channelNum; i++) {
         var _video = player['video' + i];
-        var channel = player.config.url.channel[i];
+        var channel = player.config.url.channels[i];
         if (channel.type === 'mp4') {
           if (Math.abs(currTime - _video.currentTime) > 1) {
             _video.currentTime = currTime;
@@ -10930,4 +10930,4 @@ _player2.default.install('s_imageIndex', s_imageIndex);
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=simple_player.js.map

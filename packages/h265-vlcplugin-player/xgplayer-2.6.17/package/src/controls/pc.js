@@ -39,7 +39,7 @@ let pc = function () {
   }
   for (let i = 0; i < player.channelNum; i++) {
     let videoName = `video${i === 0 ? '' : i}`
-    let channel = player.config.url.channel[i]
+    let channel = player.config.url.channels[i]
     if (channel.type === 'mp4')  {
       player[videoName].addEventListener('click', function (e) { player.onElementClick(e, player[videoName]) }, false)
     }

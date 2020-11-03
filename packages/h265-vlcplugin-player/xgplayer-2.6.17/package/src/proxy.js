@@ -36,10 +36,10 @@ class Proxy {
       this.videoConfig.loop = 'loop'
     }
     if (options.url) {
-      this.channelNum = options.url.channel.length
+      this.channelNum = options.url.channels.length
     }
     let totalDuration = 0
-    let mainFiles = options.url.channel[0].files
+    let mainFiles = options.url.channels[0].files
     for (let i = 0; i < mainFiles.length; i++) {
       totalDuration += parseFloat(mainFiles[i].totaltime)
     }
@@ -267,7 +267,7 @@ class Proxy {
   }
   get currentTime () {
     let tmpTime = 0
-    let mainFiles = this.config.url.channel[0].files
+    let mainFiles = this.config.url.channels[0].files
     // console.log('this.currFileNum:' + this.currFileNum)
     for (let i = 0; i < this.currFileNum; i++) {
       tmpTime += parseFloat(mainFiles[i].totaltime)
@@ -280,7 +280,7 @@ class Proxy {
     let toFileNum = 0
     let toCurrTime = 0
     let tmpTime = 0
-    let mainFiles = this.config.url.channel[0].files
+    let mainFiles = this.config.url.channels[0].files
     for (let i = 0; i < mainFiles.length; i++) {
       tmpTime += parseFloat(mainFiles[i].totaltime)
       if (tmpTime > time) {
@@ -448,7 +448,7 @@ class Proxy {
     for (let i = 0; i < this.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].pause()
     }
-    let urlArr = url.channel
+    let urlArr = url.channels
     for (let i = 0; i < this.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[this.currFileNum].url
     }

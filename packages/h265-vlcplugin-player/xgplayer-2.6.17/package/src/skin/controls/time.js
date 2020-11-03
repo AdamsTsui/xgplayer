@@ -27,7 +27,7 @@ let s_time = function () {
       let currTime = player['video'].currentTime
       for (let i = 1; i < player.channelNum; i++) {
         let _video = player[`video${i}`]
-        let channel = player.config.url.channel[i]
+        let channel = player.config.url.channels[i]
         if (channel.type === 'mp4') {
           if (Math.abs(currTime - _video.currentTime) > 1) {
             _video.currentTime = currTime

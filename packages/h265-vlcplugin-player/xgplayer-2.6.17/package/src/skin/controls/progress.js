@@ -292,7 +292,7 @@ let s_progress = function () {
         }
       }
       let tmpTime = 0
-      let mainFiles = player.config.url.channel[0].files
+      let mainFiles = player.config.url.channels[0].files
       for (let i = 0; i < player.currFileNum; i++) {
         tmpTime += parseFloat(mainFiles[i].totaltime)
       }
