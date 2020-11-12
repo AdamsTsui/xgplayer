@@ -133,7 +133,7 @@ class Player extends Proxy {
         player.video.focus()
       }
     }
-    this.root.addEventListener('mousemove', this.mousemoveFunc)
+    // this.root.addEventListener('mousemove', this.mousemoveFunc)
     this.playFunc = function () {
       player.emit('focus')
       if (!player.config.closePlayVideoFocus) {
@@ -180,66 +180,38 @@ class Player extends Proxy {
       player.on('exitFullscreen', this.updateRotateDeg)
     }
 
+    function onMediaPlayerMediaChanged () {
+      console.log('mediaChanging::' + this.mediaChanging)
+      if (this.mediaChanging) {
+        this.mediaChanging = false
+      } else {
+        // console.log('this.currFileNum::::' + this.currFileNum)
+        this.currFileNum++
+      }
+      console.log('onMediaPlayerMediaChanged function.....')
+    }
     function onDestroy () {
       player.root.removeEventListener('mousemove', player.mousemoveFunc)
       player.off('destroy', onDestroy)
+      player.off('MediaPlayerMediaChanged', onMediaPlayerMediaChanged)
     }
     player.once('destroy', onDestroy)
+    player.on('MediaPlayerMediaChanged', onMediaPlayerMediaChanged)
   }
 
   start (url = this.config.url) {
-    let root = this.root
-    let player = this
-    if (!url || url === '') {
-      this.emit('urlNull')
-    }
-    this.logParams.playSrc = url
-    this.canPlayFunc = function () {
-      let playPromise = player.video.play()
-      if (playPromise !== undefined && playPromise) {
-        playPromise.then(function () {
-          player.emit('autoplay started')
-        }).catch(function () {
-          player.emit('autoplay was prevented')
-          Player.util.addClass(player.root, 'xgplayer-is-autoplay')
-        })
-      }
-      player.off('canplay', player.canPlayFunc)
-    }
-    if (util.typeOf(url.channels) === 'Array') {
+    if (url && util.typeOf(url.channels) === 'Array') {
+      let root = this.root
       for (let i = 0; i < this.channelNum; i++) {
-        let videoName = `video${i === 0 ? '' : i}`
-        let channel = this.config.url.channels[i]
-        if (channel.type === 'mp4') {
-          // if (src.indexOf('blob:') > -1 && src === this[videoName].src) {
-            // 在Chromium环境下用mse url给video二次赋值会导致错误
-          // } else {
-            this[videoName].src = channel.files[0].url
-          // }
-        } else if (channel.type === 'jpg') {
-          this[videoName].poster = channel.files[0].imageUrl
+        root.insertBefore(this[`video${i === 0 ? '' : i}`], root.firstChild)
+        let _vlc = document.getElementById(`video${i === 0 ? '' : i}`)
+        let _files = url.channels[i].files
+        for (let j = 0; j < _files.length; j++) {
+          _vlc.playlist.add(_files[j].url)
         }
+        // console.log('_vlc.playlist.itemCount:' + _vlc.playlist.itemCount)
       }
     }
-    this.logParams.pt = new Date().getTime()
-    this.logParams.vt = this.logParams.pt
-    this.loadeddataFunc = function () {
-      player.logParams.vt = new Date().getTime()
-      if (player.logParams.pt > player.logParams.vt) {
-        player.logParams.pt = player.logParams.vt
-      }
-      player.logParams.vd = player.video.duration
-    }
-    this.once('loadeddata', this.loadeddataFunc)
-    if (this.config.autoplay) {
-      this.on('canplay', this.canPlayFunc)
-    }
-    for (let i = 0; i < 4; i++) {
-      root.insertBefore(this[`video${i === 0 ? '' : i}`], root.firstChild)
-    }
-    setTimeout(() => {
-      this.emit('complete')
-    }, 1)
   }
 
   reload () {
@@ -673,36 +645,9 @@ class Player extends Proxy {
 
   onEnded () {
     let _this = this
-    function afterEnded () {
-      util.addClass(_this.root, 'xgplayer-ended')
-      util.removeClass(_this.root, 'xgplayer-playing')
-    }
-    // console.log('ended.................this.currentTime:' + this.currentTime + ':::::::this.totalDuration:::' + this.totalDuration)
-    if (_this.currentTime < _this.totalDuration) {
-      // console.log('顺序播放下个分片')
-      _this.currentTime = _this.currentTime + 1
-    } else {
-      let headTails = _this.config.headTails
-      if (headTails && headTails.tail) {
-        // 存在片头片尾
-        util.addClass(_this.root, 'xgplayer-tail-active')
-        let time = headTails.tail.time
-        let timeContainer = util.findDom(_this.root, '.xgplayer-headtail-counter-time')
-        timeContainer.innerHTML = `${time}`
-        let imgContainer = util.findDom(_this.root, '.xgplayer-headtail-tail')
-        imgContainer.src = headTails.tail.img
-        let intervalID = window.setInterval(function () {
-          timeContainer.innerHTML = `${--time}`
-          if (time === 0) {
-            afterEnded()
-            util.removeClass(_this.root, 'xgplayer-tail-active')
-            window.clearInterval(intervalID)
-          }
-        }, 1000)
-      } else {
-        afterEnded()
-      }
-    }
+    // util.addClass(_this.root, 'xgplayer-ended')
+    _this.currFileNum = -1
+    util.removeClass(_this.root, 'xgplayer-playing')
   }
 
   onSeeking () {

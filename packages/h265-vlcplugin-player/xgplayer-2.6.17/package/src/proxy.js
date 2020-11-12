@@ -11,19 +11,10 @@ class Proxy {
     }
     this._hasStart = false
     this.videoConfig = {
-      controls: !!options.isShowControl,
-      // autoplay: options.autoplay,
-      playsinline: options.playsinline,
-      'webkit-playsinline': options.playsinline,
-      'x5-playsinline': options.playsinline,
-      'x5-video-player-type': options['x5-video-player-type'] || options['x5VideoPlayerType'],
-      'x5-video-player-fullscreen': options['x5-video-player-fullscreen'] || options['x5VideoPlayerFullscreen'],
-      'x5-video-orientation': options['x5-video-orientation'] || options['x5VideoOrientation'],
-      airplay: options['airplay'],
-      'webkit-airplay': options['airplay'],
-      tabindex: 2,
       draggable: true,
-      mediaType: options.mediaType || 'video'
+      classid: 'clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921',
+      codebase: 'http://download.videolan.org/pub/videolan/vlc/last/win32/axvlc.cab',
+      mediaType: options.mediaType || 'object'
     }
     if (options.useCORS) {
       this.videoConfig = util.deepCopy({
@@ -44,11 +35,12 @@ class Proxy {
       totalDuration += parseFloat(mainFiles[i].totaltime)
     }
     this.totalDuration = totalDuration
-    this.currFileNum = 0
+    this.currFileNum = -1
+    this.mediaChanging = false
     let textTrackDom = ''
     this.textTrackShowDefault = true
     if (options.textTrack && Array.isArray(options.textTrack) && (navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('Firefox') > -1)) {
-      if(options.textTrack.length > 0 && !options.textTrack.some(track => { return track.default })) {
+      if (options.textTrack.length > 0 && !options.textTrack.some(track => { return track.default })) {
         options.textTrack[0].default = true
         this.textTrackShowDefault = false
       }
@@ -83,10 +75,13 @@ class Proxy {
         style.sheet.addRule(`${wrap} video::cue`, styleStr)
       }
     }
-    for (let i = 0; i < 4; i++) {
+    let innerHTML = '<param name="autostart" value="true"/>' +
+                    '<param name="controls" value="false"/>' +
+                    '<param name="allowfullscreen" value="false"/>'
+    for (let i = 0; i < this.channelNum; i++) {
       let videoName = `video${(i === 0) ? '' : i}`
       this.videoConfig['id'] = videoName
-      this[videoName] = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName)
+      this[videoName] = util.createDom(this.videoConfig.mediaType, innerHTML, this.videoConfig, videoName)
     }
 
     if (!this.textTrackShowDefault && textTrackDom) {
@@ -210,15 +205,33 @@ class Proxy {
     }
   }
   play () {
-    let ret = true
+    let _this = this
     for (let i = 0; i < this.channelNum; i++) {
-      ret && this[`video${i === 0 ? '' : i}`].play()
+      let objectId = `video${i === 0 ? '' : i}`
+      let vlcObj = document.getElementById(objectId)
+      if (vlcObj) {
+        console.log('开始播放。。。。。。。')
+        if (_this.currFileNum > -1) {
+          console.log('开始播放。。。。。。。1')
+          vlcObj.playlist.playItem(this.currFileNum)
+        } else {
+          console.log('开始播放。。。。。。。2')
+          vlcObj.playlist.play()
+        }
+      }
+      setTimeout(function () {
+        _this.emit('playStarted')
+      }, 1000)
     }
-    return ret
   }
   pause () {
     for (let i = 0; i < this.channelNum; i++) {
-      this[`video${i === 0 ? '' : i}`].pause()
+      let objectId = `video${i === 0 ? '' : i}`
+      let vlcObj = document.getElementById(objectId)
+      if (vlcObj) {
+        // console.log('暂停了。。。。。。。')
+        vlcObj.playlist.pause()
+      }
     }
   }
   canPlayType (type) {
@@ -273,7 +286,12 @@ class Proxy {
       tmpTime += parseFloat(mainFiles[i].totaltime)
     }
     // console.log('currTime:::' + (tmpTime + this.video.currentTime))
-    return (tmpTime + this.video.currentTime)
+    let vlcObj = document.getElementById('video')
+    if (vlcObj) {
+      return (tmpTime + vlcObj.input.time / 1000)
+    } else {
+      return 0
+    }
   }
   set currentTime (time) {
     if (typeof isFinite === 'function' && !isFinite(time)) return
@@ -296,26 +314,26 @@ class Proxy {
     if (toFileNum === this.currFileNum) {
       // console.log('分片内。。。')
       for (let i = 0; i < this.channelNum; i++) {
-        this[`video${i === 0 ? '' : i}`].currentTime = toCurrTime
+        let fileName = `video${i === 0 ? '' : i}`
+        let vlcObj = document.getElementById(fileName)
+        if (vlcObj) {
+          vlcObj.input.time = toCurrTime * 1000
+        }
       }
       this.emit('currentTimeChange')
     } else {
       // console.log('跨分片。。。')
-      let self = this
       this.currFileNum = toFileNum
-      this.isSrcChanging = true
-      this.src = this.config.url
-      this.once('canplay', function () {
-        let playPromise = self.play()
-        if (playPromise !== undefined && playPromise) {
-          // console.log('跨分片后，继续播放。。。')
-          self.currentTime = time
-          this.isSrcChanging = false
-          if (util.typeOf(playPromise) === 'function') {
-            playPromise.catch(err => { console.error(err) })
-          }
+      this.mediaChanging = true
+      // console.log('toFileNum:::::' + toFileNum)
+      for (let i = 0; i < this.channelNum; i++) {
+        let fileName = `video${i === 0 ? '' : i}`
+        let vlcObj = document.getElementById(fileName)
+        if (vlcObj) {
+          vlcObj.playlist.playItem(toFileNum)
+          vlcObj.input.time = toCurrTime * 1000
         }
-      })
+      }
     }
   }
   get defaultMuted () {
@@ -386,7 +404,12 @@ class Proxy {
     return this.lang ? this.lang[status[this.video.networkState].en] : status[this.video.networkState].en
   }
   get paused () {
-    return this.video.paused
+    let ret = false
+    let vlcObj = document.getElementById('video')
+    if (vlcObj) {
+      ret = (vlcObj.input.state === 4 || vlcObj.input.state === 6)
+    }
+    return ret
   }
   get playbackRate () {
     return this.video.playbackRate

@@ -72,7 +72,7 @@ let pc = function () {
   root.addEventListener('mouseenter', onMouseEnter)
 
   function onMouseLeave () {
-    if(!player.config.closePlayerBlur) {
+    if (!player.config.closePlayerBlur) {
       player.leavePlayerTimer = setTimeout(function () {
         player.emit('blur', player)
       }, player.config.leavePlayerTime || 0)

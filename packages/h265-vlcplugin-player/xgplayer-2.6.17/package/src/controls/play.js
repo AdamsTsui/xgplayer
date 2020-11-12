@@ -4,9 +4,9 @@ let play = function () {
   let player = this
 
   function onPlayBtnClick () {
-    if (!player.config.allowPlayAfterEnded && player.ended) {
-      return
-    }
+    // if (!player.config.allowPlayAfterEnded && player.ended) {
+    //   return
+    // }
     if (player.paused) {
       let playPromise = player.play()
       if (playPromise !== undefined && playPromise) {

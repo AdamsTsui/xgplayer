@@ -21,7 +21,7 @@ let s_play = function () {
   tipsText.pause = player.lang.PAUSE_TIPS
   let tips = util.createDom('xg-tips', `<span class="xgplayer-tip-play">${tipsText.play}</span>
                                         <span class="xgplayer-tip-pause">${tipsText.pause}</span>`, {}, 'xgplayer-tips')
-  btn.appendChild(tips)
+  // btn.appendChild(tips)
   player.once('ready', () => {
     player.controls.appendChild(btn)
   });

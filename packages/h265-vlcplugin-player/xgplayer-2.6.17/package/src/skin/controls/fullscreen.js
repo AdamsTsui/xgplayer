@@ -21,7 +21,7 @@ let s_fullscreen = function () {
   tipsText.exitfull = player.lang.EXITFULLSCREEN_TIPS
   let tips = util.createDom('xg-tips', `<span class="xgplayer-tip-requestfull">${tipsText.requestfull}</span>
                                         <span class="xgplayer-tip-exitfull">${tipsText.exitfull}</span>`, {}, 'xgplayer-tips')
-  btn.appendChild(tips)
+  // btn.appendChild(tips)
   player.once('ready', () => {
     player.controls.appendChild(btn)
   });

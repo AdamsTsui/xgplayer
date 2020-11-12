@@ -121,19 +121,19 @@ let s_progress = function () {
     thumbnail.style.height = `${tnailHeight}px`
   };
   ['touchstart', 'mousedown'].forEach(item => {
-    if(player.config.disableProgress) return;
+    if (player.config.disableProgress) return
     container.addEventListener(item, function (e) {
       // e.preventDefault()
       e.stopPropagation()
       util.event(e)
-      if (e._target === point || (!player.config.allowSeekAfterEnded && player.ended)) {
-        return true
-      }
+      // if (e._target === point || (!player.config.allowSeekAfterEnded && player.ended)) {
+      //   return true
+      // }
       container.focus()
       let {left} = progress.getBoundingClientRect()
 
       const isRotate = isRotateFullscreen(player)
-      if(isRotate) {
+      if (isRotate) {
         left = progress.getBoundingClientRect().top
         containerWidth = container.getBoundingClientRect().height
       } else {
@@ -152,15 +152,7 @@ let s_progress = function () {
         }
         let now = w / containerWidth * player.duration
         progress.style.width = `${w * 100 / containerWidth}%`
-
-        if (player.videoConfig.mediaType === 'video' && !player.dash && !player.config.closeMoveSeek) {
-          player.currentTime = Number(now).toFixed(1)
-        } else {
-          let time = util.findDom(player.controls, '.xgplayer-time')
-          if (time) {
-            time.innerHTML = `<span class="xgplayer-time-current">${util.format(now || 0)}</span><span>${util.format(player.duration)}</span>`
-          }
-        }
+        player.currentTime = Number(now).toFixed(1)
         player.emit('focus')
       }
       let up = function (e) {
@@ -255,9 +247,9 @@ let s_progress = function () {
     if (!containerWidth && container) {
       containerWidth = container.getBoundingClientRect().width
     }
-    if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
+    if (!player.isProgressMoving) {
       const precent = player.currentTime / player.duration
-      const prevPrecent = Number.parseFloat(progress.style.width || '0') / Number.parseFloat(container.style.width || '100')
+      const prevPrecent = parseFloat(progress.style.width || '0') / parseFloat(container.style.width || '100')
       if (Math.abs(precent - prevPrecent) <= 1) {
         progress.style.width = `${player.currentTime * 100 / player.duration}%`
       }
@@ -304,6 +296,10 @@ let s_progress = function () {
     player.on(item, onCacheUpdate)
   })
 
+  function onEnded () {
+    progress.style.width = `0%`
+  }
+  player.on('ended', onEnded)
   function destroyFunc () {
     player.removeAllProgressDot()
     player.off('canplay', onCanplay)
@@ -313,6 +309,7 @@ let s_progress = function () {
     cacheUpdateEvents.forEach(item => {
       player.off(item, onCacheUpdate)
     })
+    player.off('ended', onEnded)
     player.off('destroy', destroyFunc)
   }
   player.once('destroy', destroyFunc)
