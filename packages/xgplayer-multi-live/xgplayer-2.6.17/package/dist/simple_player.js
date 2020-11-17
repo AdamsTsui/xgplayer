@@ -2548,6 +2548,7 @@ var Proxy = function () {
         crossOrigin: 'Anonymous'
       }, this.videoConfig);
     }
+    options.autoplay = false;
     if (options.loop) {
       this.videoConfig.loop = 'loop';
     }
