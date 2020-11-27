@@ -350,10 +350,13 @@ var Player = function (_Proxy) {
       }
       this.logParams.playSrc = url;
       this.canPlayFunc = function () {
-        var playPromise = player.video.play();
+        var index = player.soundChannelId - 1;
+        var videoName = 'video' + (index === 0 ? '' : index);
+        var playPromise = player[videoName].play();
         if (playPromise !== undefined && playPromise) {
           playPromise.then(function () {
             player.emit('autoplay started');
+            player.play();
           }).catch(function () {
             player.emit('autoplay was prevented');
             Player.util.addClass(player.root, 'xgplayer-is-autoplay');
@@ -2573,17 +2576,31 @@ var Proxy = function () {
         crossOrigin: 'Anonymous'
       }, this.videoConfig);
     }
-    options.autoplay = false;
+    // options.autoplay = false
     if (options.loop) {
       this.videoConfig.loop = 'loop';
     }
     if (options.url) {
       this.channelNum = options.url.channel.length;
     }
+    this.soundChannelId = options.soundChannelId;
+    if (!this.soundChannelId || this.channelNum === 1) {
+      this.soundChannelId = 1;
+    }
+    // 图片那一路的id
+    this.imageChannelId = -1;
+    for (var i = 0; i < this.channelNum; i++) {
+      var channel = options.url.channel[i];
+      if (channel.type === 'jpg') {
+        this.imageChannelId = i;
+        break;
+      }
+    }
+
     var totalDuration = 0;
     var mainFiles = options.url.channel[0].files;
-    for (var i = 0; i < mainFiles.length; i++) {
-      totalDuration += parseFloat(mainFiles[i].totaltime);
+    for (var _i = 0; _i < mainFiles.length; _i++) {
+      totalDuration += parseFloat(mainFiles[_i].totaltime);
     }
     this.totalDuration = totalDuration;
     this.currFileNum = 0;
@@ -2627,8 +2644,8 @@ var Proxy = function () {
         style.sheet.addRule(wrap + ' video::cue', styleStr);
       }
     }
-    for (var _i = 0; _i < 4; _i++) {
-      var videoName = 'video' + (_i === 0 ? '' : _i);
+    for (var _i2 = 0; _i2 < 4; _i2++) {
+      var videoName = 'video' + (_i2 === 0 ? '' : _i2);
       this.videoConfig['id'] = videoName;
       this[videoName] = _util2.default.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName);
     }
@@ -2639,9 +2656,11 @@ var Proxy = function () {
     }
 
     if (options.autoplay) {
-      this.video.autoplay = true;
+      var _index = this.soundChannelId - 1;
+      var _videoName = 'video' + (_index === 0 ? '' : _index);
+      this[_videoName].autoplay = true;
       if (options.autoplayMuted) {
-        this.video.muted = true;
+        this[_videoName].muted = true;
       }
     }
     this.ev = ['play', 'playing', 'pause', 'ended', 'error', 'seeking', 'seeked', 'timeupdate', 'waiting', 'canplay', 'canplaythrough', 'durationchange', 'volumechange', 'loadeddata'].map(function (item) {
@@ -2703,8 +2722,8 @@ var Proxy = function () {
             _util2.default.setInterval(self, 'bufferedChange', function () {
               if (self.video && self.video.buffered) {
                 var curBuffer = [];
-                for (var _i2 = 0, len = self.video.buffered.length; _i2 < len; _i2++) {
-                  curBuffer.push([self.video.buffered.start(_i2), self.video.buffered.end(_i2)]);
+                for (var _i3 = 0, len = self.video.buffered.length; _i3 < len; _i3++) {
+                  curBuffer.push([self.video.buffered.start(_i3), self.video.buffered.end(_i3)]);
                 }
                 if (curBuffer.toString() !== lastBuffer) {
                   lastBuffer = curBuffer.toString();
@@ -2749,7 +2768,9 @@ var Proxy = function () {
     value: function play() {
       var ret = true;
       for (var i = 0; i < this.channelNum; i++) {
-        ret && this['video' + (i === 0 ? '' : i)].play();
+        if (this.imageChannelId < 0 || this.imageChannelId > 0 && this.imageChannelId !== i) {
+          ret && this['video' + (i === 0 ? '' : i)].play();
+        }
       }
       return ret;
     }
@@ -2859,8 +2880,8 @@ var Proxy = function () {
       // console.log('toCurrTime::' + toCurrTime)
       if (toFileNum === this.currFileNum) {
         // console.log('分片内。。。')
-        for (var _i3 = 0; _i3 < this.channelNum; _i3++) {
-          this['video' + (_i3 === 0 ? '' : _i3)].currentTime = toCurrTime;
+        for (var _i4 = 0; _i4 < this.channelNum; _i4++) {
+          this['video' + (_i4 === 0 ? '' : _i4)].currentTime = toCurrTime;
         }
         this.emit('currentTimeChange');
       } else {
@@ -2935,12 +2956,15 @@ var Proxy = function () {
   }, {
     key: 'muted',
     get: function get() {
-      return this.video.muted;
+      var index = this.soundChannelId - 1;
+      var videoName = 'video' + (index === 0 ? '' : index);
+      return this[videoName].muted;
     },
     set: function set(isTrue) {
+      var index = this.soundChannelId - 1;
       for (var i = 0; i < this.channelNum; i++) {
         var videoName = 'video' + (i === 0 ? '' : i);
-        if (i === 0) {
+        if (i === index) {
           this[videoName].muted = isTrue;
         } else {
           this[videoName].muted = true;
@@ -3045,8 +3069,8 @@ var Proxy = function () {
         this['video' + (i === 0 ? '' : i)].pause();
       }
       var urlArr = url.channel;
-      for (var _i4 = 0; _i4 < this.channelNum; _i4++) {
-        this['video' + (_i4 === 0 ? '' : _i4)].src = urlArr[_i4].files[this.currFileNum].url;
+      for (var _i5 = 0; _i5 < this.channelNum; _i5++) {
+        this['video' + (_i5 === 0 ? '' : _i5)].src = urlArr[_i5].files[this.currFileNum].url;
       }
       this.emit('srcChange');
       this.logParams.playSrc = url;
@@ -3073,12 +3097,15 @@ var Proxy = function () {
   }, {
     key: 'volume',
     get: function get() {
-      return this.video.volume;
+      var index = this.soundChannelId - 1;
+      var videoName = 'video' + (index === 0 ? '' : index);
+      return this[videoName].volume;
     },
     set: function set(vol) {
+      var index = this.soundChannelId - 1;
       for (var i = 0; i < this.channelNum; i++) {
         var videoName = 'video' + (i === 0 ? '' : i);
-        if (i === 0) {
+        if (i === index) {
           this[videoName].volume = vol;
         } else {
           this[videoName].volume = 0;
@@ -10942,7 +10969,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'multi-vod-v1.0.0';
+var VERSION = 'multi-vod-v1.0.1';
 
 var s_version = function s_version() {
   var player = this,

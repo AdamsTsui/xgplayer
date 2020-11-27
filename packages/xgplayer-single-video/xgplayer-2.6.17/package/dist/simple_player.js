@@ -387,6 +387,7 @@ var Player = function (_Proxy) {
         var playPromise = player.video.play();
         if (playPromise !== undefined && playPromise) {
           playPromise.then(function () {
+            player.play();
             player.emit('autoplay started');
             player.showCaption();
           }).catch(function () {
@@ -2597,7 +2598,7 @@ var Proxy = function () {
         crossOrigin: 'Anonymous'
       }, this.videoConfig);
     }
-    options.autoplay = false;
+    // options.autoplay = false
     if (options.loop) {
       this.videoConfig.loop = 'loop';
     }

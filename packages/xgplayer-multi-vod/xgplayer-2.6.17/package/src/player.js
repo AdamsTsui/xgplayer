@@ -195,10 +195,13 @@ class Player extends Proxy {
     }
     this.logParams.playSrc = url
     this.canPlayFunc = function () {
-      let playPromise = player.video.play()
+      let index = player.soundChannelId - 1
+      let videoName = `video${(index === 0) ? '' : index}`
+      let playPromise = player[videoName].play()
       if (playPromise !== undefined && playPromise) {
         playPromise.then(function () {
           player.emit('autoplay started')
+          player.play()
         }).catch(function () {
           player.emit('autoplay was prevented')
           Player.util.addClass(player.root, 'xgplayer-is-autoplay')

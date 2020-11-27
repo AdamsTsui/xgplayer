@@ -31,7 +31,11 @@ class Proxy {
         crossOrigin: 'Anonymous'
       }, this.videoConfig)
     }
-    options.autoplay = false
+    // options.autoplay = false
+    this.soundChannelId = options.soundChannelId
+    if (!this.soundChannelId) {
+      this.soundChannelId = 1
+    }
     if (options.loop) {
       this.videoConfig.loop = 'loop'
     }
@@ -94,9 +98,11 @@ class Proxy {
     }
 
     if (options.autoplay) {
-      this.video.autoplay = true
+      let index = this.soundChannelId - 1
+      let videoName = `video${(index === 0) ? '' : index}`
+      this[videoName].autoplay = true
       if (options.autoplayMuted) {
-        this.video.muted = true
+        this[videoName].muted = true
       }
     }
     this.ev = ['play', 'playing', 'pause', 'ended', 'error', 'seeking', 'seeked',
@@ -375,12 +381,15 @@ class Proxy {
     this.video.loop = isTrue
   }
   get muted () {
-    return this.video.muted
+    let index = this.soundChannelId - 1
+    let videoName = `video${(index === 0) ? '' : index}`
+    return this[videoName].muted
   }
   set muted (isTrue) {
+    let index = this.soundChannelId - 1
     for (let i = 0; i < this.config.channelNum; i++) {
       let videoName = `video${i === 0 ? '' : i}`
-      if (i === 0) {
+      if (i === index) {
         this[videoName].muted = isTrue
       } else {
         this[videoName].muted = true
@@ -485,12 +494,15 @@ class Proxy {
     }
   }
   get volume () {
-    return this.video.volume
+    let index = this.soundChannelId - 1
+    let videoName = `video${(index === 0) ? '' : index}`
+    return this[videoName].volume
   }
   set volume (vol) {
+    let index = this.soundChannelId - 1
     for (let i = 0; i < this.config.channelNum; i++) {
       let videoName = `video${i === 0 ? '' : i}`
-      if (i === 0) {
+      if (i === index) {
         this[videoName].volume = vol
       } else {
         this[videoName].volume = 0

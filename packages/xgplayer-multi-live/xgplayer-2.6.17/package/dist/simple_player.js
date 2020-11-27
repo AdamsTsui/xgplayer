@@ -360,11 +360,13 @@ var Player = function (_Proxy) {
         for (var _i = 0; _i < player.config.channelNum; _i++) {
           player.canPlayStatus[_i] = false;
         }
-        var playPromise = player.video.play();
+        var index = player.soundChannelId - 1;
+        var videoName = 'video' + (index === 0 ? '' : index);
+        var playPromise = player[videoName].play();
         if (playPromise !== undefined && playPromise) {
           playPromise.then(function () {
-            player.play();
             player.emit('autoplay started');
+            player.play();
           }).catch(function () {
             player.emit('autoplay was prevented');
             Player.util.addClass(player.root, 'xgplayer-is-autoplay');
@@ -2548,7 +2550,11 @@ var Proxy = function () {
         crossOrigin: 'Anonymous'
       }, this.videoConfig);
     }
-    options.autoplay = false;
+    // options.autoplay = false
+    this.soundChannelId = options.soundChannelId;
+    if (!this.soundChannelId) {
+      this.soundChannelId = 1;
+    }
     if (options.loop) {
       this.videoConfig.loop = 'loop';
     }
@@ -2613,9 +2619,11 @@ var Proxy = function () {
     }
 
     if (options.autoplay) {
-      this.video.autoplay = true;
+      var _index = this.soundChannelId - 1;
+      var _videoName = 'video' + (_index === 0 ? '' : _index);
+      this[_videoName].autoplay = true;
       if (options.autoplayMuted) {
-        this.video.muted = true;
+        this[_videoName].muted = true;
       }
     }
     this.ev = ['play', 'playing', 'pause', 'ended', 'error', 'seeking', 'seeked', 'timeupdate', 'waiting', 'canplay', 'canplaythrough', 'durationchange', 'volumechange', 'loadeddata'].map(function (item) {
@@ -2923,12 +2931,15 @@ var Proxy = function () {
   }, {
     key: 'muted',
     get: function get() {
-      return this.video.muted;
+      var index = this.soundChannelId - 1;
+      var videoName = 'video' + (index === 0 ? '' : index);
+      return this[videoName].muted;
     },
     set: function set(isTrue) {
+      var index = this.soundChannelId - 1;
       for (var i = 0; i < this.config.channelNum; i++) {
         var videoName = 'video' + (i === 0 ? '' : i);
-        if (i === 0) {
+        if (i === index) {
           this[videoName].muted = isTrue;
         } else {
           this[videoName].muted = true;
@@ -3055,12 +3066,15 @@ var Proxy = function () {
   }, {
     key: 'volume',
     get: function get() {
-      return this.video.volume;
+      var index = this.soundChannelId - 1;
+      var videoName = 'video' + (index === 0 ? '' : index);
+      return this[videoName].volume;
     },
     set: function set(vol) {
+      var index = this.soundChannelId - 1;
       for (var i = 0; i < this.config.channelNum; i++) {
         var videoName = 'video' + (i === 0 ? '' : i);
-        if (i === 0) {
+        if (i === index) {
           this[videoName].volume = vol;
         } else {
           this[videoName].volume = 0;
@@ -10703,7 +10717,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'multi-live-v1.0.0';
+var VERSION = 'multi-live-v1.0.1';
 
 var s_version = function s_version() {
   var player = this,

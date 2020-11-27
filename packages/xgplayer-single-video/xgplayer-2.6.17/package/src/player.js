@@ -231,6 +231,7 @@ class Player extends Proxy {
       let playPromise = player.video.play()
       if (playPromise !== undefined && playPromise) {
         playPromise.then(function () {
+          player.play()
           player.emit('autoplay started')
           player.showCaption()
         }).catch(function () {
