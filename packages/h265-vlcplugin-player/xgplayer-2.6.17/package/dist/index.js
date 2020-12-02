@@ -8325,7 +8325,7 @@ var s_progress = function s_progress() {
         window.removeEventListener('touchmove', move, { passive: false });
         window.removeEventListener('mouseup', up);
         window.removeEventListener('touchend', up);
-        container.blur();
+        // container.blur()
         if (!player.isProgressMoving || player.videoConfig.mediaType === 'audio' || player.dash || player.config.closeMoveSeek) {
           var w = (isRotate ? e.clientY : e.clientX) - left;
           if (w > containerWidth) {

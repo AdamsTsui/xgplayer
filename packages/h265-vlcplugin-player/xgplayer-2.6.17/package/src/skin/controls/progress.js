@@ -163,7 +163,7 @@ let s_progress = function () {
         window.removeEventListener('touchmove', move, { passive: false })
         window.removeEventListener('mouseup', up)
         window.removeEventListener('touchend', up)
-        container.blur()
+        // container.blur()
         if (!player.isProgressMoving || player.videoConfig.mediaType === 'audio' || player.dash || player.config.closeMoveSeek) {
           let w = (isRotate ? e.clientY : e.clientX) - left
           if(w > containerWidth) {
