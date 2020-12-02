@@ -181,13 +181,6 @@ class Player extends Proxy {
     }
 
     function onMediaPlayerMediaChanged () {
-      console.log('mediaChanging::' + this.mediaChanging)
-      if (this.mediaChanging) {
-        this.mediaChanging = false
-      } else {
-        // console.log('this.currFileNum::::' + this.currFileNum)
-        this.currFileNum++
-      }
       console.log('onMediaPlayerMediaChanged function.....')
     }
     function onDestroy () {
@@ -208,8 +201,10 @@ class Player extends Proxy {
         let _files = url.channels[i].files
         for (let j = 0; j < _files.length; j++) {
           _vlc.playlist.add(_files[j].url)
+          if (i > 0) {
+            _vlc.audio.mute = true
+          }
         }
-        // console.log('_vlc.playlist.itemCount:' + _vlc.playlist.itemCount)
       }
     }
   }
@@ -644,10 +639,9 @@ class Player extends Proxy {
   }
 
   onEnded () {
-    let _this = this
-    // util.addClass(_this.root, 'xgplayer-ended')
-    _this.currFileNum = -1
-    util.removeClass(_this.root, 'xgplayer-playing')
+    this.currentTime = 0
+    this.pause()
+    util.removeClass(this.root, 'xgplayer-playing')
   }
 
   onSeeking () {

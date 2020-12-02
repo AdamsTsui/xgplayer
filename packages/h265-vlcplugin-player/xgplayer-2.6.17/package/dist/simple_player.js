@@ -155,9 +155,9 @@ var Player = function (_Proxy) {
   function Player(options) {
     _classCallCheck(this, Player);
 
-    var _this2 = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, options));
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, options));
 
-    _this2.config = _util2.default.deepCopy({
+    _this.config = _util2.default.deepCopy({
       width: 600,
       height: 337.5,
       ignores: [],
@@ -168,77 +168,77 @@ var Player = function (_Proxy) {
       controls: true,
       controlsList: ['nodownload']
     }, options);
-    _this2.version = _package.version;
-    _this2.userTimer = null;
-    _this2.waitTimer = null;
-    _this2.database = new _database2.default();
-    _this2.history = [];
-    _this2.isProgressMoving = false;
-    _this2.root = _util2.default.findDom(document, '#' + _this2.config.id);
-    _this2.controls = _util2.default.createDom('xg-controls', '', {
+    _this.version = _package.version;
+    _this.userTimer = null;
+    _this.waitTimer = null;
+    _this.database = new _database2.default();
+    _this.history = [];
+    _this.isProgressMoving = false;
+    _this.root = _util2.default.findDom(document, '#' + _this.config.id);
+    _this.controls = _util2.default.createDom('xg-controls', '', {
       unselectable: 'on',
       onselectstart: 'return false'
     }, 'xgplayer-controls');
-    if (_this2.config.isShowControl) {
-      _this2.controls.style.display = 'none';
+    if (_this.config.isShowControl) {
+      _this.controls.style.display = 'none';
     }
-    if (!_this2.root) {
-      var el = _this2.config.el;
+    if (!_this.root) {
+      var el = _this.config.el;
       if (el && el.nodeType === 1) {
-        _this2.root = el;
+        _this.root = el;
       } else {
         var _ret;
 
-        _this2.emit('error', new _error2.default({
+        _this.emit('error', new _error2.default({
           type: 'use',
           errd: {
             line: 45,
             handle: 'Constructor',
             msg: 'container id can\'t be empty'
           },
-          vid: _this2.config.vid
+          vid: _this.config.vid
         }));
         console.error('container id can\'t be empty');
-        return _ret = false, _possibleConstructorReturn(_this2, _ret);
+        return _ret = false, _possibleConstructorReturn(_this, _ret);
       }
     }
     // this.rootBackup = util.copyDom(this.root)
-    _util2.default.addClass(_this2.root, 'xgplayer xgplayer-' + _sniffer2.default.device + ' xgplayer-nostart ' + (_this2.config.controls ? '' : 'no-controls'));
-    _this2.root.appendChild(_this2.controls);
-    if (_this2.config.fluid) {
-      _this2.root.style['max-width'] = '100%';
-      _this2.root.style['width'] = '100%';
-      _this2.root.style['height'] = '0';
-      _this2.root.style['padding-top'] = _this2.config.height * 100 / _this2.config.width + '%';
+    _util2.default.addClass(_this.root, 'xgplayer xgplayer-' + _sniffer2.default.device + ' xgplayer-nostart ' + (_this.config.controls ? '' : 'no-controls'));
+    _this.root.appendChild(_this.controls);
+    if (_this.config.fluid) {
+      _this.root.style['max-width'] = '100%';
+      _this.root.style['width'] = '100%';
+      _this.root.style['height'] = '0';
+      _this.root.style['padding-top'] = _this.config.height * 100 / _this.config.width + '%';
 
-      _this2.video.style['position'] = 'absolute';
-      _this2.video.style['top'] = '0';
-      _this2.video.style['left'] = '0';
+      _this.video.style['position'] = 'absolute';
+      _this.video.style['top'] = '0';
+      _this.video.style['left'] = '0';
     } else {
       // this.root.style.width = `${this.config.width}px`
       // this.root.style.height = `${this.config.height}px`
-      if (_this2.config.width) {
-        if (typeof _this2.config.width !== 'number') {
-          _this2.root.style.width = _this2.config.width;
+      if (_this.config.width) {
+        if (typeof _this.config.width !== 'number') {
+          _this.root.style.width = _this.config.width;
         } else {
-          _this2.root.style.width = _this2.config.width + 'px';
+          _this.root.style.width = _this.config.width + 'px';
         }
       }
-      if (_this2.config.height) {
-        if (typeof _this2.config.height !== 'number') {
-          _this2.root.style.height = _this2.config.height;
+      if (_this.config.height) {
+        if (typeof _this.config.height !== 'number') {
+          _this.root.style.height = _this.config.height;
         } else {
-          _this2.root.style.height = _this2.config.height + 'px';
+          _this.root.style.height = _this.config.height + 'px';
         }
       }
     }
-    if (_this2.config.execBeforePluginsCall) {
-      _this2.config.execBeforePluginsCall.forEach(function (item) {
-        item.call(_this2, _this2);
+    if (_this.config.execBeforePluginsCall) {
+      _this.config.execBeforePluginsCall.forEach(function (item) {
+        item.call(_this, _this);
       });
     }
-    if (_this2.config.controlStyle && _util2.default.typeOf(_this2.config.controlStyle) === 'String') {
-      var self = _this2;
+    if (_this.config.controlStyle && _util2.default.typeOf(_this.config.controlStyle) === 'String') {
+      var self = _this;
       fetch(self.config.controlStyle, {
         method: 'GET',
         headers: {
@@ -259,36 +259,36 @@ var Player = function (_Proxy) {
         console.log('Fetch错误:' + err);
       });
     } else {
-      _this2.pluginsCall();
+      _this.pluginsCall();
     }
-    _this2.ev.forEach(function (item) {
+    _this.ev.forEach(function (item) {
       var evName = Object.keys(item)[0];
-      var evFunc = _this2[item[evName]];
+      var evFunc = _this[item[evName]];
       if (evFunc) {
-        _this2.on(evName, evFunc);
+        _this.on(evName, evFunc);
       }
     });
 
     ['focus', 'blur'].forEach(function (item) {
-      _this2.on(item, _this2['on' + item.charAt(0).toUpperCase() + item.slice(1)]);
+      _this.on(item, _this['on' + item.charAt(0).toUpperCase() + item.slice(1)]);
     });
-    var player = _this2;
-    _this2.mousemoveFunc = function () {
+    var player = _this;
+    _this.mousemoveFunc = function () {
       player.emit('focus');
       if (!player.config.closeFocusVideoFocus) {
         player.video.focus();
       }
     };
     // this.root.addEventListener('mousemove', this.mousemoveFunc)
-    _this2.playFunc = function () {
+    _this.playFunc = function () {
       player.emit('focus');
       if (!player.config.closePlayVideoFocus) {
         player.video.focus();
       }
     };
-    player.once('play', _this2.playFunc);
+    player.once('play', _this.playFunc);
 
-    _this2.getVideoSize = function () {
+    _this.getVideoSize = function () {
       if (this.video.videoWidth && this.video.videoHeight) {
         var containerSize = player.root.getBoundingClientRect();
         if (player.config.fitVideoSize === 'auto') {
@@ -304,38 +304,31 @@ var Player = function (_Proxy) {
         }
       }
     };
-    player.once('loadeddata', _this2.getVideoSize);
+    player.once('loadeddata', _this.getVideoSize);
 
     setTimeout(function () {
-      _this2.emit('ready');
-      _this2.isReady = true;
+      _this.emit('ready');
+      _this.isReady = true;
     }, 0);
 
-    if (!_this2.config.keyShortcut || _this2.config.keyShortcut === 'on') {
+    if (!_this.config.keyShortcut || _this.config.keyShortcut === 'on') {
       ['video', 'controls'].forEach(function (item) {
         player[item].addEventListener('keydown', function (e) {
           player.onKeydown(e, player);
         });
       });
     }
-    if (_this2.config.videoInit) {
-      if (_util2.default.hasClass(_this2.root, 'xgplayer-nostart')) {
-        _this2.start();
+    if (_this.config.videoInit) {
+      if (_util2.default.hasClass(_this.root, 'xgplayer-nostart')) {
+        _this.start();
       }
     }
     if (player.config.rotate) {
-      player.on('requestFullscreen', _this2.updateRotateDeg);
-      player.on('exitFullscreen', _this2.updateRotateDeg);
+      player.on('requestFullscreen', _this.updateRotateDeg);
+      player.on('exitFullscreen', _this.updateRotateDeg);
     }
 
     function onMediaPlayerMediaChanged() {
-      console.log('mediaChanging::' + this.mediaChanging);
-      if (this.mediaChanging) {
-        this.mediaChanging = false;
-      } else {
-        // console.log('this.currFileNum::::' + this.currFileNum)
-        this.currFileNum++;
-      }
       console.log('onMediaPlayerMediaChanged function.....');
     }
     function onDestroy() {
@@ -345,7 +338,7 @@ var Player = function (_Proxy) {
     }
     player.once('destroy', onDestroy);
     player.on('MediaPlayerMediaChanged', onMediaPlayerMediaChanged);
-    return _this2;
+    return _this;
   }
 
   _createClass(Player, [{
@@ -361,8 +354,10 @@ var Player = function (_Proxy) {
           var _files = url.channels[i].files;
           for (var j = 0; j < _files.length; j++) {
             _vlc.playlist.add(_files[j].url);
+            if (i > 0) {
+              _vlc.audio.mute = true;
+            }
           }
-          // console.log('_vlc.playlist.itemCount:' + _vlc.playlist.itemCount)
         }
       }
     }
@@ -382,7 +377,7 @@ var Player = function (_Proxy) {
   }, {
     key: 'destroy',
     value: function destroy() {
-      var _this3 = this;
+      var _this2 = this;
 
       var isDelDom = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
@@ -400,9 +395,9 @@ var Player = function (_Proxy) {
       }
       this.ev.forEach(function (item) {
         var evName = Object.keys(item)[0];
-        var evFunc = _this3[item[evName]];
+        var evFunc = _this2[item[evName]];
         if (evFunc) {
-          _this3.off(evName, evFunc);
+          _this2.off(evName, evFunc);
         }
       });
       if (this.loadeddataFunc) {
@@ -421,12 +416,12 @@ var Player = function (_Proxy) {
         this.off('loadeddata', this.getVideoSize);
       };
       ['focus', 'blur'].forEach(function (item) {
-        _this3.off(item, _this3['on' + item.charAt(0).toUpperCase() + item.slice(1)]);
+        _this2.off(item, _this2['on' + item.charAt(0).toUpperCase() + item.slice(1)]);
       });
       if (!this.config.keyShortcut || this.config.keyShortcut === 'on') {
         ['video', 'controls'].forEach(function (item) {
-          if (_this3[item]) {
-            _this3[item].removeEventListener('keydown', function (e) {
+          if (_this2[item]) {
+            _this2[item].removeEventListener('keydown', function (e) {
               player.onKeydown(e, player);
             });
           }
@@ -594,7 +589,7 @@ var Player = function (_Proxy) {
   }, {
     key: 'pluginsCall',
     value: function pluginsCall() {
-      var _this4 = this;
+      var _this3 = this;
 
       var self = this;
       if (Player.plugins) {
@@ -613,7 +608,7 @@ var Player = function (_Proxy) {
                 }, 0);
               }
             } else {
-              descriptor.call(_this4, _this4);
+              descriptor.call(_this3, _this3);
             }
           }
         });
@@ -843,10 +838,9 @@ var Player = function (_Proxy) {
   }, {
     key: 'onEnded',
     value: function onEnded() {
-      var _this = this;
-      // util.addClass(_this.root, 'xgplayer-ended')
-      _this.currFileNum = -1;
-      _util2.default.removeClass(_this.root, 'xgplayer-playing');
+      this.currentTime = 0;
+      this.pause();
+      _util2.default.removeClass(this.root, 'xgplayer-playing');
     }
   }, {
     key: 'onSeeking',
@@ -2520,7 +2514,6 @@ var Proxy = function () {
       totalDuration += parseFloat(mainFiles[i].totaltime);
     }
     this.totalDuration = totalDuration;
-    this.currFileNum = -1;
     this.mediaChanging = false;
     var textTrackDom = '';
     this.textTrackShowDefault = true;
@@ -2688,14 +2681,7 @@ var Proxy = function () {
         var objectId = 'video' + (i === 0 ? '' : i);
         var vlcObj = document.getElementById(objectId);
         if (vlcObj) {
-          console.log('开始播放。。。。。。。');
-          if (_this.currFileNum > -1) {
-            console.log('开始播放。。。。。。。1');
-            vlcObj.playlist.playItem(this.currFileNum);
-          } else {
-            console.log('开始播放。。。。。。。2');
-            vlcObj.playlist.play();
-          }
+          vlcObj.playlist.play();
         }
         setTimeout(function () {
           _this.emit('playStarted');
@@ -2709,7 +2695,6 @@ var Proxy = function () {
         var objectId = 'video' + (i === 0 ? '' : i);
         var vlcObj = document.getElementById(objectId);
         if (vlcObj) {
-          // console.log('暂停了。。。。。。。')
           vlcObj.playlist.pause();
         }
       }
@@ -2786,13 +2771,11 @@ var Proxy = function () {
     get: function get() {
       var tmpTime = 0;
       var mainFiles = this.config.url.channels[0].files;
-      // console.log('this.currFileNum:' + this.currFileNum)
-      for (var i = 0; i < this.currFileNum; i++) {
-        tmpTime += parseFloat(mainFiles[i].totaltime);
-      }
-      // console.log('currTime:::' + (tmpTime + this.video.currentTime))
       var vlcObj = document.getElementById('video');
       if (vlcObj) {
+        for (var i = 0; i < vlcObj.playlist.currentItem; i++) {
+          tmpTime += parseFloat(mainFiles[i].totaltime);
+        }
         return tmpTime + vlcObj.input.time / 1000;
       } else {
         return 0;
@@ -2812,11 +2795,8 @@ var Proxy = function () {
           break;
         }
       }
-      // console.log('time::' + time)
-      // console.log('currFileNum::' + this.currFileNum)
-      // console.log('toFileNum::' + toFileNum)
-      // console.log('toCurrTime::' + toCurrTime)
-      if (toFileNum === this.currFileNum) {
+      var currentItem = document.getElementById('video').playlist.currentItem;
+      if (toFileNum === currentItem) {
         // console.log('分片内。。。')
         for (var _i3 = 0; _i3 < this.channelNum; _i3++) {
           var fileName = 'video' + (_i3 === 0 ? '' : _i3);
@@ -2827,8 +2807,6 @@ var Proxy = function () {
         }
         this.emit('currentTimeChange');
       } else {
-        // console.log('跨分片。。。')
-        this.currFileNum = toFileNum;
         this.mediaChanging = true;
         // console.log('toFileNum:::::' + toFileNum)
         for (var _i4 = 0; _i4 < this.channelNum; _i4++) {
@@ -2990,7 +2968,6 @@ var Proxy = function () {
       return this.config.url;
     },
     set: function set(url) {
-      // console.log('this.currFileNum::::' + this.currFileNum)
       var self = this;
       if (!_util2.default.hasClass(this.root, 'xgplayer-ended')) {
         this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)));
@@ -3003,12 +2980,13 @@ var Proxy = function () {
         vt: new Date().getTime(),
         vd: 0
       };
+      var currentItem = document.getElementById('video').playlist.currentItem;
       for (var i = 0; i < this.channelNum; i++) {
         this['video' + (i === 0 ? '' : i)].pause();
       }
       var urlArr = url.channels;
       for (var _i5 = 0; _i5 < this.channelNum; _i5++) {
-        this['video' + (_i5 === 0 ? '' : _i5)].src = urlArr[_i5].files[this.currFileNum].url;
+        this['video' + (_i5 === 0 ? '' : _i5)].src = urlArr[_i5].files[currentItem].url;
       }
       this.emit('srcChange');
       this.logParams.playSrc = url;

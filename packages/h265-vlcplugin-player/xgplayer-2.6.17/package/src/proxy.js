@@ -35,7 +35,6 @@ class Proxy {
       totalDuration += parseFloat(mainFiles[i].totaltime)
     }
     this.totalDuration = totalDuration
-    this.currFileNum = -1
     this.mediaChanging = false
     let textTrackDom = ''
     this.textTrackShowDefault = true
@@ -210,14 +209,7 @@ class Proxy {
       let objectId = `video${i === 0 ? '' : i}`
       let vlcObj = document.getElementById(objectId)
       if (vlcObj) {
-        console.log('开始播放。。。。。。。')
-        if (_this.currFileNum > -1) {
-          console.log('开始播放。。。。。。。1')
-          vlcObj.playlist.playItem(this.currFileNum)
-        } else {
-          console.log('开始播放。。。。。。。2')
-          vlcObj.playlist.play()
-        }
+        vlcObj.playlist.play()
       }
       setTimeout(function () {
         _this.emit('playStarted')
@@ -229,7 +221,6 @@ class Proxy {
       let objectId = `video${i === 0 ? '' : i}`
       let vlcObj = document.getElementById(objectId)
       if (vlcObj) {
-        // console.log('暂停了。。。。。。。')
         vlcObj.playlist.pause()
       }
     }
@@ -281,13 +272,11 @@ class Proxy {
   get currentTime () {
     let tmpTime = 0
     let mainFiles = this.config.url.channels[0].files
-    // console.log('this.currFileNum:' + this.currFileNum)
-    for (let i = 0; i < this.currFileNum; i++) {
-      tmpTime += parseFloat(mainFiles[i].totaltime)
-    }
-    // console.log('currTime:::' + (tmpTime + this.video.currentTime))
     let vlcObj = document.getElementById('video')
     if (vlcObj) {
+      for (let i = 0; i < vlcObj.playlist.currentItem; i++) {
+        tmpTime += parseFloat(mainFiles[i].totaltime)
+      }
       return (tmpTime + vlcObj.input.time / 1000)
     } else {
       return 0
@@ -307,11 +296,8 @@ class Proxy {
         break
       }
     }
-    // console.log('time::' + time)
-    // console.log('currFileNum::' + this.currFileNum)
-    // console.log('toFileNum::' + toFileNum)
-    // console.log('toCurrTime::' + toCurrTime)
-    if (toFileNum === this.currFileNum) {
+    let currentItem = document.getElementById('video').playlist.currentItem
+    if (toFileNum === currentItem) {
       // console.log('分片内。。。')
       for (let i = 0; i < this.channelNum; i++) {
         let fileName = `video${i === 0 ? '' : i}`
@@ -322,8 +308,6 @@ class Proxy {
       }
       this.emit('currentTimeChange')
     } else {
-      // console.log('跨分片。。。')
-      this.currFileNum = toFileNum
       this.mediaChanging = true
       // console.log('toFileNum:::::' + toFileNum)
       for (let i = 0; i < this.channelNum; i++) {
@@ -455,7 +439,6 @@ class Proxy {
     return this.config.url
   }
   set src (url) {
-    // console.log('this.currFileNum::::' + this.currFileNum)
     let self = this
     if (!util.hasClass(this.root, 'xgplayer-ended')) {
       this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)))
@@ -468,12 +451,13 @@ class Proxy {
       vt: new Date().getTime(),
       vd: 0
     }
+    let currentItem = document.getElementById('video').playlist.currentItem
     for (let i = 0; i < this.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].pause()
     }
     let urlArr = url.channels
     for (let i = 0; i < this.channelNum; i++) {
-      this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[this.currFileNum].url
+      this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[currentItem].url
     }
     this.emit('srcChange')
     this.logParams.playSrc = url
