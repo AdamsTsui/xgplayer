@@ -521,6 +521,9 @@ class Proxy {
   get pip () {
     return util.hasClass(this.root, 'xgplayer-pip-active')
   }
+  showFuliu (type) {
+    this.emit('showFuliu', type)
+  }
 }
 
 export default Proxy

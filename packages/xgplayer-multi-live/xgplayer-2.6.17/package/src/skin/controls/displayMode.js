@@ -4,7 +4,7 @@ let s_displayMode = function () {
   let player = this, util = Player.util, sniffer = Player.sniffer
   // 一路视频不显示模块切换
   if (player.config.channelNum < 2) {
-    return false
+    // return false
   }
   let iconPath = ['M2 2 L34 2 L34 20 L2 20 Z',
     'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20',
@@ -14,95 +14,102 @@ let s_displayMode = function () {
     'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M18 11 L34 11',
     'M2 2 L34 2 L34 20 L2 20 Z M2 11 L34 11 M12.67 11 L12.67 20 M23.34 11 L23.34 20 M34 11 L34 20',
     'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M2 11 L34 11']
-  let ul = util.createDom('xg-displaymode', '', {tabindex: 3}, 'xgplayer-displaymode'), root = player.controls
-  if (sniffer.device === 'mobile') {
-    player.config.displayModeActive = 'click'
-  }
-  let tmp = ['<ul>']
-  switch (player.config.channelNum) {
-    case 1:
-      player.currMode = 0
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
+  function initUI () {
+    let ul = util.createDom('xg-displaymode', '', {tabindex: 3}, 'xgplayer-displaymode'), root = player.controls
+    if (sniffer.device === 'mobile') {
+      player.config.displayModeActive = 'click'
+    }
+    let tmp = ['<ul>']
+    switch (player.config.channelNum) {
+      case 1:
+        player.currMode = 0
+        tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-0" d="${iconPath[0]}" class="curr" />
       </svg></li>`)
-      break
-    case 2:
-      player.currMode = 1
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
+        break
+      case 2:
+        player.currMode = 1
+        tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-1" d="${iconPath[1]}" class="curr" />
       </svg></li>`)
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
+        tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-2" d="${iconPath[2]}" />
       </svg></li>`)
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
+        tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-3" d="${iconPath[3]}" />
       </svg></li>`)
-      break
-    case 3:
-      player.currMode = 4
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
+        break
+      case 3:
+        player.currMode = 4
+        tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-4" d="${iconPath[4]}" class="curr" />
       </svg></li>`)
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
+        tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-5" d="${iconPath[5]}" />
       </svg></li>`)
-      break
-    case 4:
-      player.currMode = 6
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
+        break
+      case 4:
+        player.currMode = 6
+        tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-6" d="${iconPath[6]}" class="curr" />
       </svg></li>`)
-      tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
+        tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-7" d="${iconPath[7]}" />
       </svg></li>`)
-      break
-  }
-  tmp.push(`</ul>`)
-  tmp.push(`<p class='name'>布局</p>`)
-  ul.innerHTML = tmp.join('')
-  root.appendChild(ul)
-  util.addClass(player.root, 'xgplayer-is-displaymode')
-
-  initDragFunc()
-
-  modeChange()
-
-  let urlInRoot = root.querySelector('.xgplayer-displaymode')
-  if (urlInRoot) {
-    let cur = urlInRoot.querySelector('.name')
-    if (!player.config.displayModeActive || player.config.displayModeActive === 'hover') {
-      cur.addEventListener('mouseenter', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        util.addClass(player.root, 'xgplayer-displaymode-active')
-        urlInRoot.focus()
-      })
+        break
     }
-  }
+    tmp.push(`</ul>`)
+    tmp.push(`<p class='name'>布局</p>`)
+    ul.innerHTML = tmp.join('')
+    let exitsEle = util.findDom(root, '.xgplayer-displaymode')
+    if (exitsEle) {
+      root.removeChild(exitsEle)
+    }
+    root.appendChild(ul)
+    util.addClass(player.root, 'xgplayer-is-displaymode')
 
-  ul.addEventListener('mouseleave', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    util.removeClass(player.root, 'xgplayer-displaymode-active')
-  })
+    initDragFunc()
 
-  ul.addEventListener('click', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    let path = e.target || e.srcElement
-    if (path && path.tagName.toLocaleLowerCase() === 'path') {
-      let mode = path.getAttribute('name').substring(5)
-      if (mode === player.currMode) {
-        return false
+    modeChange()
+
+    let urlInRoot = root.querySelector('.xgplayer-displaymode')
+    if (urlInRoot) {
+      let cur = urlInRoot.querySelector('.name')
+      if (!player.config.displayModeActive || player.config.displayModeActive === 'hover') {
+        cur.addEventListener('mouseenter', (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          util.addClass(player.root, 'xgplayer-displaymode-active')
+          urlInRoot.focus()
+        })
       }
-      player.currMode = parseInt(path.getAttribute('name').substring(5))
-      Array.prototype.forEach.call(path.parentNode.parentNode.parentNode.childNodes, item => {
-        util.removeClass(item.querySelector('path'), 'curr')
-      })
-      util.addClass(path, 'curr')
-      modeChange()
     }
-  })
+
+    ul.addEventListener('mouseleave', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      util.removeClass(player.root, 'xgplayer-displaymode-active')
+    })
+
+    ul.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      let path = e.target || e.srcElement
+      if (path && path.tagName.toLocaleLowerCase() === 'path') {
+        let mode = path.getAttribute('name').substring(5)
+        if (mode === player.currMode) {
+          return false
+        }
+        player.currMode = parseInt(path.getAttribute('name').substring(5))
+        Array.prototype.forEach.call(path.parentNode.parentNode.parentNode.childNodes, item => {
+          util.removeClass(item.querySelector('path'), 'curr')
+        })
+        util.addClass(path, 'curr')
+        modeChange()
+      }
+    })
+  }
+  initUI()
   window.onscroll = function () {
     modeChange()
   }
@@ -192,31 +199,32 @@ let s_displayMode = function () {
     }
   }
 
-  ['touchend', 'click'].forEach(item => {
-    ul.addEventListener(item, function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }, false)
-  })
-
-  ul.addEventListener('mouseleave', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    util.removeClass(player.root, 'xgplayer-definition-active')
-  })
-
+  function showFuliu (type) {
+    console.log('showFuliu......')
+    if (type === 0) {
+      player['video1'].style.display = 'none'
+      player.config.channelNum = 1
+      initUI()
+    } else {
+      player['video1'].style.display = 'block'
+      player.config.channelNum = 2
+      initUI()
+    }
+  }
   function destroyFunc () {
     player.off('canplay', canplayModeFunc)
     player.off('destroy', destroyFunc)
     player.off('requestFullscreen', modeChange)
     player.off('exitFullscreen', modeChange)
     window.removeEventListener('resize', modeChange, false)
+    player.off('showFuliu', showFuliu)
   }
 
   player.on('canplay', canplayModeFunc)
   player.on('requestFullscreen', modeChange)
   player.on('exitFullscreen', modeChange)
   window.addEventListener('resize', modeChange, false)
+  player.on('showFuliu', showFuliu)
   player.once('destroy', destroyFunc)
 }
 

@@ -42,6 +42,12 @@ class FlvJsPlayer extends Player {
         player.controls.appendChild(live)
       }
     })
+    player.on('showFuliu', function (type) {
+      console.log('showFuliu flv:::' + type)
+      if (type === 1) {
+        this.switchURL(this.config.url.join(','))
+      }
+    })
   }
 
   createInstance () {
@@ -81,6 +87,8 @@ class FlvJsPlayer extends Player {
     let player = this
     let urlArr = newUrl.split(',')
     this.flvOpts.url = this.config.url = urlArr
+
+    console.log('this.flvOpts.url::::' + this.config.url)
 
     for (let i = 0; i < this.flvOpts.channelNum; i++) {
       let __flv__ = player[`__flv__${i === 0 ? '' : i}`]
@@ -129,7 +137,7 @@ class FlvJsPlayer extends Player {
     player.flv_load(url)
     player.video.muted = true
     Player.util.addClass(player.root, 'xgplayer-is-enter')
-    player.once('playing', function(){
+    player.once('playing', function() {
       Player.util.removeClass(player.root, 'xgplayer-is-enter')
       player.video.muted = false
     })
