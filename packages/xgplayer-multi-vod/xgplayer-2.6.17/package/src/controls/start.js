@@ -33,31 +33,7 @@ let start = function () {
     }
     if (util.hasClass(root, 'xgplayer-nostart')) {
       // console.info('第一次开始播放。。。')
-      let headTails = player.config.headTails
-      if (headTails && headTails.head) {
-        // 存在片头片尾
-        // console.log(JSON.stringify(headTails))
-        util.addClass(root, 'xgplayer-head-active')
-        let time = headTails.head.time
-        let timeContainer = util.findDom(root, '.xgplayer-headtail-counter-time')
-        timeContainer.innerHTML = `${time}`
-        let imgContainer = util.findDom(root, '.xgplayer-headtail-head')
-        imgContainer.src = headTails.head.img
-        let poster = util.findDom(root, '.xgplayer-poster')
-        if(poster) {
-          poster.style.display = 'none'
-        }
-        let intervalID = window.setInterval(function () {
-          timeContainer.innerHTML = `${--time}`
-          if (time === 0) {
-            firstPlay()
-            util.removeClass(root, 'xgplayer-head-active')
-            window.clearInterval(intervalID)
-          }
-        }, 1000)
-      } else {
-        firstPlay()
-      }
+      firstPlay()
     } else {
       if (player.paused) {
         // console.info('暂停播放后，再继续播放。。。')

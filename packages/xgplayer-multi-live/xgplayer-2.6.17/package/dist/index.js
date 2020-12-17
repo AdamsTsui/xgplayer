@@ -8389,7 +8389,6 @@ var s_displayMode = function s_displayMode() {
   }
 
   function showFuliu(type) {
-    console.log('showFuliu......');
     if (type === 0) {
       player['video1'].style.display = 'none';
       player.config.channelNum = 1;

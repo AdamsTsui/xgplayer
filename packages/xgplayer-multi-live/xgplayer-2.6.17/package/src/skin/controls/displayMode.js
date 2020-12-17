@@ -2,10 +2,6 @@ import Player from '../../player'
 
 let s_displayMode = function () {
   let player = this, util = Player.util, sniffer = Player.sniffer
-  // 一路视频不显示模块切换
-  if (player.config.channelNum < 2) {
-    // return false
-  }
   let iconPath = ['M2 2 L34 2 L34 20 L2 20 Z',
     'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20',
     'M2 2 L18 2 L18 20 L2 20 Z M18 11 L34 11 L34 20 L18 20',
@@ -200,7 +196,6 @@ let s_displayMode = function () {
   }
 
   function showFuliu (type) {
-    console.log('showFuliu......')
     if (type === 0) {
       player['video1'].style.display = 'none'
       player.config.channelNum = 1

@@ -88,8 +88,6 @@ class FlvJsPlayer extends Player {
     let urlArr = newUrl.split(',')
     this.flvOpts.url = this.config.url = urlArr
 
-    console.log('this.flvOpts.url::::' + this.config.url)
-
     for (let i = 0; i < this.flvOpts.channelNum; i++) {
       let __flv__ = player[`__flv__${i === 0 ? '' : i}`]
       if (typeof __flv__ !== 'undefined') {
@@ -141,7 +139,7 @@ class FlvJsPlayer extends Player {
       Player.util.removeClass(player.root, 'xgplayer-is-enter')
       player.video.muted = false
     })
-    player.once('canplay', function () {
+    player.on('canplay', function () {
       if (!player.config.isLive) {
         player.currentTime = curTime
       }

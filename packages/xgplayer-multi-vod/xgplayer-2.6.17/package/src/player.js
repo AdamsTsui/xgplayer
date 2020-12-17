@@ -213,14 +213,9 @@ class Player extends Proxy {
       for (let i = 0; i < this.channelNum; i++) {
         let videoName = `video${i === 0 ? '' : i}`
         let channel = this.config.url.channel[i]
-        if (channel.type === 'mp4') {
-          // if (src.indexOf('blob:') > -1 && src === this[videoName].src) {
-            // 在Chromium环境下用mse url给video二次赋值会导致错误
-          // } else {
-            this[videoName].src = channel.files[0].url
-          // }
-        } else if (channel.type === 'jpg') {
-          this[videoName].poster = channel.files[0].imageUrl
+        this[videoName].src = channel.files[0].url
+        if (player.is323Meeting && i === 0) {
+          break
         }
       }
     }

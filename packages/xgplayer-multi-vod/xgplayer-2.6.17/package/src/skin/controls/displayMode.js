@@ -5,6 +5,9 @@ let s_displayMode = function () {
 
   function canplayModeFunc () {
     // console.info('播放器初始化完毕，可以初始化布局')
+    if (player.is323Meeting && !player.isFuliuPlaying) {
+      player.channelNum = 1
+    }
     player.volume = player.volume
     for (let i = 0; i < 4; i++) {
       let _video = player[`video${(i === 0 ? '' : i)}`]
@@ -71,6 +74,10 @@ let s_displayMode = function () {
     tmp.push(`</ul>`)
     tmp.push(`<p class='name'>布局</p>`)
     ul.innerHTML = tmp.join('')
+    let exitsEle = util.findDom(root, '.xgplayer-displaymode')
+    if (exitsEle) {
+      root.removeChild(exitsEle)
+    }
     root.appendChild(ul)
     if (player.channelNum > 1) {
       util.addClass(player.root, 'xgplayer-is-displaymode')
@@ -217,6 +224,7 @@ let s_displayMode = function () {
     player.off('displayModeChange', canplayModeFunc)
     player.off('requestFullscreen', modeChange)
     player.off('exitFullscreen', modeChange)
+    player.off('ShowOrHideFuliu', canplayModeFunc)
     player.off('blur', onBlur)
     window.removeEventListener('resize', modeChange, false)
     player.off('destroy', destroyFunc)
@@ -227,6 +235,7 @@ let s_displayMode = function () {
   player.on('displayModeChange', canplayModeFunc)
   player.on('requestFullscreen', modeChange)
   player.on('exitFullscreen', modeChange)
+  player.on('ShowOrHideFuliu', canplayModeFunc)
   window.addEventListener('resize', modeChange, false)
   player.once('destroy', destroyFunc)
 }
