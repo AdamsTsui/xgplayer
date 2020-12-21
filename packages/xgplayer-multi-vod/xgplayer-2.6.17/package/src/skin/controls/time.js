@@ -8,17 +8,17 @@ let s_time = function () {
   player.once('ready', () => {
     player.controls.appendChild(container)
   })
-  let onTimeChange = function (videoObj) {
+  let onTimeChange = function () {
     if (player.isSrcChanging || !player.currentTime) {
       return true
     }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = `<span class="xgplayer-time-current">${util.format(player.currentTime || 0)}</span>` + `<span>${util.format(player.duration)}</span>`
-      // console.log(new Date().getTime() + ' _video:::' + videoObj + ':::::player.currentTime:::' + player.currentTime + ' isAvailable:::' + player.isFuliuAvailable(player.currentTime))
+      console.log(new Date().getTime() + ':::::player.currentTime:::' + player.currentTime + ' isAvailable:::' + player.isFuliuAvailable(player.currentTime))
       if (player.is323Meeting) {
         if (player.isFuliuAvailable(player.currentTime)) {
           if (!player.isFuliuPlaying) {
-            console.log('开始辅流............')
+            // console.log('开始辅流............')
             player.channelNum = 2
             player.isFuliuPlaying = true
             player.emit('ShowOrHideFuliu')
@@ -26,7 +26,7 @@ let s_time = function () {
           }
         } else {
           if (player.isFuliuPlaying) {
-            console.log('暂停辅流............')
+            // console.log('暂停辅流............')
             player.channelNum = 1
             player.isFuliuPlaying = false
             player.emit('ShowOrHideFuliu')

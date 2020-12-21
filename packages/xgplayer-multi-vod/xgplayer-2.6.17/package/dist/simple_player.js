@@ -8896,17 +8896,17 @@ var s_time = function s_time() {
   player.once('ready', function () {
     player.controls.appendChild(container);
   });
-  var onTimeChange = function onTimeChange(videoObj) {
+  var onTimeChange = function onTimeChange() {
     if (player.isSrcChanging || !player.currentTime) {
       return true;
     }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = '<span class="xgplayer-time-current">' + util.format(player.currentTime || 0) + '</span>' + ('<span>' + util.format(player.duration) + '</span>');
-      // console.log(new Date().getTime() + ' _video:::' + videoObj + ':::::player.currentTime:::' + player.currentTime + ' isAvailable:::' + player.isFuliuAvailable(player.currentTime))
+      console.log(new Date().getTime() + ':::::player.currentTime:::' + player.currentTime + ' isAvailable:::' + player.isFuliuAvailable(player.currentTime));
       if (player.is323Meeting) {
         if (player.isFuliuAvailable(player.currentTime)) {
           if (!player.isFuliuPlaying) {
-            console.log('开始辅流............');
+            // console.log('开始辅流............')
             player.channelNum = 2;
             player.isFuliuPlaying = true;
             player.emit('ShowOrHideFuliu');
@@ -8914,7 +8914,7 @@ var s_time = function s_time() {
           }
         } else {
           if (player.isFuliuPlaying) {
-            console.log('暂停辅流............');
+            // console.log('暂停辅流............')
             player.channelNum = 1;
             player.isFuliuPlaying = false;
             player.emit('ShowOrHideFuliu');
