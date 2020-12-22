@@ -1,6 +1,6 @@
 import Player from '../../player'
 
-const VERSION = 'rex-ch50-vod-v1.0.0'
+const VERSION = 'rex-ch50-vod-v1.0.1'
 
 let s_version = function () {
   let player = this, util = Player.util, root = player.root

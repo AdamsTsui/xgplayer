@@ -14,7 +14,6 @@ let s_time = function () {
     }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = `<span class="xgplayer-time-current">${util.format(player.currentTime || 0)}</span>` + `<span>${util.format(player.duration)}</span>`
-      console.log(new Date().getTime() + ':::::player.currentTime:::' + player.currentTime + ' isAvailable:::' + player.isFuliuAvailable(player.currentTime))
       if (player.is323Meeting) {
         if (player.isFuliuAvailable(player.currentTime)) {
           if (!player.isFuliuPlaying) {

@@ -1331,6 +1331,59 @@ util.isWeiXin = function () {
   return ua.indexOf('micromessenger') > -1;
 };
 
+util.transMp4ToSegment = function (stream) {
+  var STEP = 30 * 60;
+  var MAX = 35 * 60;
+  if (!stream || !util.typeOf(stream) === 'object') return;
+  var channels = stream.channel;
+  if (channels && channels.length > 0) {
+    for (var i = 0; i < channels.length; i++) {
+      var tmpFiles = [];
+      var channel = channels[i];
+      var files = channel.files;
+      for (var j = 0; j < files.length; j++) {
+        var file = files[j];
+        if (!file['endtime']) {
+          var totalTime = parseFloat(file['totaltime']);
+
+          if (totalTime > MAX) {
+            var start = 1;
+            var end = STEP + 1;
+            while (totalTime > STEP) {
+              tmpFiles.push({
+                'starttime': '0',
+                'totaltime': '' + STEP,
+                'url': file['url'] + '?start=' + start + '&end=' + end
+              });
+
+              start = end;
+              end += STEP;
+              totalTime -= STEP;
+            }
+
+            end = end - STEP + totalTime;
+            tmpFiles.push({
+              'starttime': '0',
+              'totaltime': '' + totalTime,
+              'url': file['url'] + '?start=' + start + '&end=' + end
+            });
+          } else {
+            tmpFiles.push({
+              'starttime': '0',
+              'totaltime': '' + totalTime,
+              'url': file['url']
+            });
+          }
+        }
+      }
+      if (tmpFiles.length > 0) {
+        channel['files'] = tmpFiles;
+      }
+    }
+  }
+
+  // console.log('stream::::::' + JSON.stringify(stream))
+};
 exports.default = util;
 module.exports = exports['default'];
 
@@ -2581,6 +2634,8 @@ var Proxy = function () {
     }
     if (options.url) {
       this.channelNum = options.url.channel.length;
+      _util2.default.transMp4ToSegment(options.url);
+      // console.log('options.url:::' + JSON.stringify(options.url))
     }
 
     this.soundChannelId = options.soundChannelId;
@@ -8902,7 +8957,6 @@ var s_time = function s_time() {
     }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = '<span class="xgplayer-time-current">' + util.format(player.currentTime || 0) + '</span>' + ('<span>' + util.format(player.duration) + '</span>');
-      console.log(new Date().getTime() + ':::::player.currentTime:::' + player.currentTime + ' isAvailable:::' + player.isFuliuAvailable(player.currentTime));
       if (player.is323Meeting) {
         if (player.isFuliuAvailable(player.currentTime)) {
           if (!player.isFuliuPlaying) {
@@ -10978,7 +11032,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'rex-ch50-vod-v1.0.0';
+var VERSION = 'rex-ch50-vod-v1.0.1';
 
 var s_version = function s_version() {
   var player = this,
