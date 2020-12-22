@@ -8974,6 +8974,29 @@ var s_time = function s_time() {
             player.emit('ShowOrHideFuliu');
           }
         }
+      } else {
+        // 三路视频同步
+        var currTime = player['video'].currentTime;
+        for (var i = 1; i < player.channelNum; i++) {
+          var _video = player['video' + i];
+          var channel = player.config.url.channel[i];
+          if (channel.type === 'mp4') {
+            if (Math.abs(currTime - _video.currentTime) > 1) {
+              // console.log('同步。。。。。。。。')
+              _video.currentTime = currTime;
+            }
+          } else if (channel.type === 'jpg') {
+            var currentAllTime = player.currentTime;
+            var files = channel.files;
+            for (var j = files.length - 1; j >= 0; j--) {
+              var file = files[j];
+              if (currentAllTime > file.starttime) {
+                _video.poster = file.imageUrl;
+                break;
+              }
+            }
+          }
+        }
       }
     }
   };
@@ -11032,7 +11055,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'rex-ch50-vod-v1.0.1';
+var VERSION = 'rex-ch50-vod-v1.0.2';
 
 var s_version = function s_version() {
   var player = this,

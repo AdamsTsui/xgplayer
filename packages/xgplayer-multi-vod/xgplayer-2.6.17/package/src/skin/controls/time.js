@@ -31,6 +31,29 @@ let s_time = function () {
             player.emit('ShowOrHideFuliu')
           }
         }
+      } else {
+        // 三路视频同步
+        let currTime = player['video'].currentTime
+        for (let i = 1; i < player.channelNum; i++) {
+          let _video = player[`video${i}`]
+          let channel = player.config.url.channel[i]
+          if (channel.type === 'mp4') {
+            if (Math.abs(currTime - _video.currentTime) > 1) {
+              // console.log('同步。。。。。。。。')
+              _video.currentTime = currTime
+            }
+          } else if (channel.type === 'jpg') {
+            const currentAllTime = player.currentTime
+            let files = channel.files
+            for (let j = (files.length - 1); j >= 0; j--) {
+              let file = files[j]
+              if (currentAllTime > file.starttime) {
+                _video.poster = file.imageUrl
+                break
+              }
+            }
+          }
+        }
       }
     }
   }
