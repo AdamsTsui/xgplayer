@@ -128,6 +128,7 @@ let s_definition = function () {
               player.currFileNum = 0 // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl
               player.channelNum = player.config.url.channel.length
+              util.transMp4ToSegment(player.config.url)
 
               let totalDuration = 0
               let mainFiles = player.config.url.channel[0].files

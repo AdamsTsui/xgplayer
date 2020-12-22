@@ -37,6 +37,8 @@ class Proxy {
     }
     if (options.url) {
       this.channelNum = options.url.channel.length
+      util.transMp4ToSegment(options.url)
+      // console.log('options.url:::' + JSON.stringify(options.url))
     }
     this.soundChannelId = options.soundChannelId
     if (!this.soundChannelId || this.channelNum === 1) {

@@ -1336,6 +1336,60 @@ util.isWeiXin = function () {
   return ua.indexOf('micromessenger') > -1;
 };
 
+util.transMp4ToSegment = function (stream) {
+  var STEP = 30 * 60;
+  var MAX = 35 * 60;
+  if (!stream || !util.typeOf(stream) === 'object') return;
+  var channels = stream.channel;
+  if (channels && channels.length > 0) {
+    for (var i = 0; i < channels.length; i++) {
+      var tmpFiles = [];
+      var channel = channels[i];
+      var files = channel.files;
+      if (!(channel['type'] === 'mp4')) continue;
+      for (var j = 0; j < files.length; j++) {
+        var file = files[j];
+        if (!file['endtime']) {
+          var totalTime = parseFloat(file['totaltime']);
+
+          if (totalTime > MAX) {
+            var start = 1;
+            var end = STEP + 1;
+            while (totalTime > STEP) {
+              tmpFiles.push({
+                'starttime': '0',
+                'totaltime': '' + STEP,
+                'url': file['url'] + '?start=' + start + '&end=' + end
+              });
+
+              start = end;
+              end += STEP;
+              totalTime -= STEP;
+            }
+
+            end = end - STEP + totalTime;
+            tmpFiles.push({
+              'starttime': '0',
+              'totaltime': '' + totalTime,
+              'url': file['url'] + '?start=' + start + '&end=' + end
+            });
+          } else {
+            tmpFiles.push({
+              'starttime': '0',
+              'totaltime': '' + totalTime,
+              'url': file['url']
+            });
+          }
+        }
+      }
+      if (tmpFiles.length > 0) {
+        channel['files'] = tmpFiles;
+      }
+    }
+  }
+
+  // console.log('stream::::::' + JSON.stringify(stream))
+};
 exports.default = util;
 module.exports = exports['default'];
 
@@ -2582,6 +2636,8 @@ var Proxy = function () {
     }
     if (options.url) {
       this.channelNum = options.url.channel.length;
+      _util2.default.transMp4ToSegment(options.url);
+      // console.log('options.url:::' + JSON.stringify(options.url))
     }
     this.soundChannelId = options.soundChannelId;
     if (!this.soundChannelId || this.channelNum === 1) {
@@ -8225,6 +8281,7 @@ var s_definition = function s_definition() {
               player.currFileNum = 0; // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl;
               player.channelNum = player.config.url.channel.length;
+              util.transMp4ToSegment(player.config.url);
 
               var totalDuration = 0;
               var mainFiles = player.config.url.channel[0].files;
@@ -10969,7 +11026,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'multi-vod-v1.0.1';
+var VERSION = 'multi-vod-v1.0.2';
 
 var s_version = function s_version() {
   var player = this,

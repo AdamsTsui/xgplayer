@@ -228,8 +228,62 @@ util.Hex2RGBA = function (hex, alpha) {
 }
 
 util.isWeiXin = function () {
-    let ua = window.navigator.userAgent.toLowerCase()
-    return ua.indexOf('micromessenger') > -1
+  let ua = window.navigator.userAgent.toLowerCase()
+  return ua.indexOf('micromessenger') > -1
 }
 
+util.transMp4ToSegment = function (stream) {
+  const STEP = 30 * 60
+  const MAX = 35 * 60
+  if (!stream || !util.typeOf(stream) === 'object') return
+  let channels = stream.channel
+  if (channels && channels.length > 0) {
+    for (let i = 0; i < channels.length; i++) {
+      let tmpFiles = []
+      let channel = channels[i]
+      let files = channel.files
+      if (!(channel['type'] === 'mp4')) continue
+      for (let j = 0; j < files.length; j++) {
+        let file = files[j]
+        if (!file['endtime']) {
+          let totalTime = parseFloat(file['totaltime'])
+
+          if (totalTime > MAX) {
+            let start = 1
+            let end = STEP + 1
+            while (totalTime > STEP) {
+              tmpFiles.push({
+                'starttime': '0',
+                'totaltime': '' + STEP,
+                'url': file['url'] + '?start=' + start + '&end=' + end
+              })
+
+              start = end
+              end += STEP
+              totalTime -= STEP
+            }
+
+            end = end - STEP + totalTime
+            tmpFiles.push({
+              'starttime': '0',
+              'totaltime': '' + totalTime,
+              'url': file['url'] + '?start=' + start + '&end=' + end
+            })
+          } else {
+            tmpFiles.push({
+              'starttime': '0',
+              'totaltime': '' + totalTime,
+              'url': file['url']
+            })
+          }
+        }
+      }
+      if (tmpFiles.length > 0) {
+        channel['files'] = tmpFiles
+      }
+    }
+  }
+
+  // console.log('stream::::::' + JSON.stringify(stream))
+}
 export default util
