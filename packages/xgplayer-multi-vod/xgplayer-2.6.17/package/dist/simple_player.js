@@ -1339,7 +1339,7 @@ util.isWeiXin = function () {
 util.transMp4ToSegment = function (stream) {
   var STEP = 30 * 60;
   var MAX = 35 * 60;
-  if (!stream || !util.typeOf(stream) === 'object') return;
+  if (!stream || !(util.typeOf(stream) === 'object')) return;
   var channels = stream.channel;
   if (channels && channels.length > 0) {
     for (var i = 0; i < channels.length; i++) {
@@ -2096,13 +2096,7 @@ var _extends = Object.assign || function (e) {
       };n.src = t + "/v1/gif?" + r;
     });
   } catch (e) {}
-};var postSdkLog = function e(r, n) {
-  if (window.XDomainRequest) {
-    return sendByImg(r, n);
-  }var t = new XMLHttpRequest();t.open("POST", r + "?rdn=" + Math.random(), true);t.onload = function () {};t.onerror = function () {
-    t.abort();
-  };t.send(JSON.stringify(n));
-};var encodePayload$1 = function e(r) {
+};var postSdkLog = function e(r, n) {};var encodePayload$1 = function e(r) {
   var n = "";for (var t in r) {
     if (r.hasOwnProperty(t)) {
       n += "&" + t + "=" + encodeURIComponent(JSON.stringify(r[t]));
@@ -2138,11 +2132,7 @@ var _extends = Object.assign || function (e) {
         s(n, t, ERROR_CODE.BEACON_STATUS_FALSE);
       }return;
     }sendByImg$1(n, u, i, s);return;
-  }var c = new XMLHttpRequest();c.open("POST", n + "?rdn=" + Math.random(), true);c.onload = function () {
-    i(n, u, c.responseText);
-  };c.onerror = function () {
-    c.abort();s(n, u, ERROR_CODE.XHR_ON_ERROR);
-  };c.send(JSON.stringify(u));
+  }
 };function _classCallCheck$7(e, r) {
   if (!(e instanceof r)) {
     throw new TypeError("Cannot call a class as a function");
