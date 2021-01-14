@@ -121,7 +121,7 @@ let s_progress = function () {
     thumbnail.style.height = `${tnailHeight}px`
   };
   ['touchstart', 'mousedown'].forEach(item => {
-    if(player.config.disableProgress) return;
+    if (player.config.disableProgress) return
     container.addEventListener(item, function (e) {
       // e.preventDefault()
       e.stopPropagation()
@@ -141,6 +141,15 @@ let s_progress = function () {
         left = progress.getBoundingClientRect().left
       }
 
+      util.event(e)
+      let w = (isRotate ? e.clientY : e.clientX) - left
+      if (w > containerWidth) {
+        w = containerWidth
+      }
+      let old = player.currentTime
+      let now = w / containerWidth * player.duration
+      if (now > old) return
+
       let move = function (e) {
         // e.preventDefault()
         e.stopPropagation()
@@ -151,6 +160,7 @@ let s_progress = function () {
           w = containerWidth
         }
         let now = w / containerWidth * player.duration
+        if (now > old) return
         progress.style.width = `${w * 100 / containerWidth}%`
 
         if (player.videoConfig.mediaType === 'video' && !player.dash && !player.config.closeMoveSeek) {

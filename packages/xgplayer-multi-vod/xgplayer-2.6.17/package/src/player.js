@@ -802,11 +802,13 @@ class Player extends Proxy {
         }
       }
     } else if (e && e.keyCode === 39) { // 按 right
+      /*
       if (player.currentTime + 10 <= player.duration) {
         player.currentTime += 10
       } else {
         player.currentTime = player.duration - 1
       }
+      */
     } else if (e && e.keyCode === 37) { // 按 left
       if (player.currentTime - 10 >= 0) {
         player.currentTime -= 10
