@@ -8572,28 +8572,39 @@ var s_time = function s_time() {
   var player = this;
   var root = player.root;
   var util = _player2.default.util;
+  var supposedCurrentTime = 0;
   var container = util.createDom('xg-time', '<span class="xgplayer-time-current">' + (player.currentTime || util.format(0)) + '</span>\n                                           <span>' + (player.duration || util.format(0)) + '</span>', {}, 'xgplayer-time');
   player.once('ready', function () {
     player.controls.appendChild(container);
   });
+
   var onTimeChange = function onTimeChange() {
-    // let liveText = player.lang.LIVE
-    // if(player.duration === Infinity) {
-    //   util.addClass(player.root, 'xgplayer-is-live')
-    //   if(!util.findDom(player.root, '.xgplayer-live')) {
-    //     const live = util.createDom('xg-live', liveText, {}, 'xgplayer-live')
-    //     player.controls.appendChild(live)
-    //   }
-    // }
-    if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
+    if (!player['video'].seeking && (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash)) {
+      supposedCurrentTime = player.currentTime;
       container.innerHTML = '<span class="xgplayer-time-current">' + util.format(player.currentTime || 0) + '</span>' + ('<span>' + util.format(player.duration) + '</span>');
     }
   };
+
+  var onSeeking = function onSeeking() {
+    var delta = player.currentTime - supposedCurrentTime;
+    if (delta > 0.01) {
+      player.currentTime = supposedCurrentTime;
+    }
+  };
+
+  var onEnded = function onEnded() {
+    supposedCurrentTime = 0;
+  };
+
+  player.on('ended', onEnded);
   player.on('durationchange', onTimeChange);
+  player.on('seeking', onSeeking);
   player.on('timeupdate', onTimeChange);
 
   function onDestroy() {
+    player.off('ended', onEnded);
     player.off('durationchange', onTimeChange);
+    player.off('seeking', onSeeking);
     player.off('timeupdate', onTimeChange);
     player.off('destroy', onDestroy);
   }
