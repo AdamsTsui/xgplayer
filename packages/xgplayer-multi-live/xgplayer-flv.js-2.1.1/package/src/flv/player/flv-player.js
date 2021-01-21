@@ -239,6 +239,7 @@ class FlvPlayer {
             this._emitter.emit(PlayerEvents.ERROR, ErrorTypes.MEDIA_ERROR, detail, {code: -1, msg: info});
         });
         this._transmuxer.on(TransmuxingEvents.MEDIA_INFO, (mediaInfo) => {
+            // console.log('MEDIA_INFO:::' + JSON.stringify(mediaInfo))
             this._mediaInfo = mediaInfo;
             this._emitter.emit(PlayerEvents.MEDIA_INFO, Object.assign({}, mediaInfo));
         });
@@ -594,6 +595,7 @@ class FlvPlayer {
     }
 
     _onvCanPlay(e) {
+        // console.log('可以播放了。。。。。。。')
         this._receivedCanPlay = true;
         this._mediaElement.removeEventListener('canplay', this.e.onvCanPlay);
     }

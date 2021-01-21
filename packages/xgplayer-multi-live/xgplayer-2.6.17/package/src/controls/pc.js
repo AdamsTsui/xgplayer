@@ -38,8 +38,8 @@ let pc = function () {
     }
   }
   for (let i = 0; i < player.config.channelNum; i++) {
-    let videoName = `video${i === 0 ? '' : i}`
-    player[videoName].addEventListener('click', function (e) { player.onElementClick(e, player[videoName]) }, false)
+    // let videoName = `video${i === 0 ? '' : i}`
+    // player[videoName].addEventListener('click', function (e) { player.onElementClick(e, player[videoName]) }, false)
   }
 
   player.onElementDblclick = function (e, element) {
@@ -60,7 +60,7 @@ let pc = function () {
       }
     }
   }
-  player.root.addEventListener('dblclick', function (e) { player.onElementDblclick(e, player.video) }, false)
+  // player.root.addEventListener('dblclick', function (e) { player.onElementDblclick(e, player.video) }, false)
 
   function onMouseEnter () {
     clearTimeout(player.leavePlayerTimer)

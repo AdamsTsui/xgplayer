@@ -14,7 +14,7 @@ let s_displayMode = function () {
     'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M18 11 L34 11',
     'M2 2 L34 2 L34 20 L2 20 Z M2 11 L34 11 M12.67 11 L12.67 20 M23.34 11 L23.34 20 M34 11 L34 20',
     'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M2 11 L34 11']
-  let ul = util.createDom('xg-displaymode', '', {tabindex: 3}, 'xgplayer-displaymode'), root = player.controls
+  let container = util.createDom('xg-displaymode', '', {tabindex: 3}, 'xgplayer-displaymode'), root = player.controls
   if (sniffer.device === 'mobile') {
     player.config.displayModeActive = 'click'
   }
@@ -27,7 +27,7 @@ let s_displayMode = function () {
       </svg></li>`)
       break
     case 2:
-      player.currMode = 1
+      player.currMode = 3
       tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-1" d="${iconPath[1]}" class="curr" />
       </svg></li>`)
@@ -59,34 +59,27 @@ let s_displayMode = function () {
   }
   tmp.push(`</ul>`)
   tmp.push(`<p class='name'>布局</p>`)
-  ul.innerHTML = tmp.join('')
-  root.appendChild(ul)
+  container.innerHTML = tmp.join('')
+  root.appendChild(container)
   util.addClass(player.root, 'xgplayer-is-displaymode')
 
-  initDragFunc()
-
-  modeChange()
-
-  let urlInRoot = root.querySelector('.xgplayer-displaymode')
-  if (urlInRoot) {
-    let cur = urlInRoot.querySelector('.name')
-    if (!player.config.displayModeActive || player.config.displayModeActive === 'hover') {
-      cur.addEventListener('mouseenter', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        util.addClass(player.root, 'xgplayer-displaymode-active')
-        urlInRoot.focus()
-      })
-    }
+  let label = container.querySelector('.name')
+  if (label) {
+    label.addEventListener('mouseenter', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      util.addClass(player.root, 'xgplayer-displaymode-active')
+      container.focus()
+    })
   }
 
-  ul.addEventListener('mouseleave', (e) => {
+  container.addEventListener('mouseleave', (e) => {
     e.preventDefault()
     e.stopPropagation()
     util.removeClass(player.root, 'xgplayer-displaymode-active')
   })
 
-  ul.addEventListener('click', (e) => {
+  container.addEventListener('click', (e) => {
     e.preventDefault()
     e.stopPropagation()
     let path = e.target || e.srcElement
@@ -129,26 +122,26 @@ let s_displayMode = function () {
     let winHeight = player.root.clientHeight
     return {
       'modePosSize1': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8}],
-      'modePosSize2': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2  + 'px', 'height': winHeight + 'px', 'zIndex': 8},
-                       {'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9}],
-      'modePosSize3': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8},
-                       {'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}],
-      'modePosSize4': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8},
-                       {'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}],
+      'modePosSize2': [{'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9},
+        {'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 8}],
+      'modePosSize3': [{'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9},
+        {'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8}],
+      'modePosSize4': [{'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': '0px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9},
+        {'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8}],
       'modePosSize5': [{'left': winWidth / 3 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8},
-                       {'left': '0px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9},
-                       {'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9}],
+        {'left': '0px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9},
+        {'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9}],
       'modePosSize6': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8},
-                       {'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9},
-                       {'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9}],
+        {'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9},
+        {'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9}],
       'modePosSize7': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight * 2 / 3 + 'px', 'zIndex': 8},
-                       {'left': '0px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9},
-                       {'left': winWidth / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9},
-                       {'left': winWidth * 2 / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9}],
+        {'left': '0px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9},
+        {'left': winWidth / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9},
+        {'left': winWidth * 2 / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9}],
       'modePosSize8': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 8},
-                       {'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9},
-                       {'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9},
-                       {'left': winWidth / 2 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}]}
+        {'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9},
+        {'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9},
+        {'left': winWidth / 2 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}]}
   }
 
   function initDragFunc () {
@@ -191,19 +184,28 @@ let s_displayMode = function () {
       })
     }
   }
+  function initVideoDblclick () {
+    for (let i = 0; i < player.config.channelNum; i++) {
+      let videoName = `video${i === 0 ? '' : i}`
+      player[videoName].addEventListener('dblclick', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        util.event(e)
+        let _video = e._target
+        if (!util.hasClass(_video, 'fullscreen')) {
+          util.addClass(_video, 'fullscreen')
+        } else {
+          util.removeClass(_video, 'fullscreen')
+        }
+      }, false)
+    }
+  }
 
-  ['touchend', 'click'].forEach(item => {
-    ul.addEventListener(item, function (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }, false)
-  })
+  initDragFunc()
 
-  ul.addEventListener('mouseleave', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    util.removeClass(player.root, 'xgplayer-definition-active')
-  })
+  modeChange()
+
+  initVideoDblclick()
 
   function destroyFunc () {
     player.off('canplay', canplayModeFunc)

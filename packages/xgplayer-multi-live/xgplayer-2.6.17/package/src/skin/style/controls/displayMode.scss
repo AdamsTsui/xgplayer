@@ -74,4 +74,13 @@
   .xgplayer-displaymode {
     display: block;
   }
+  .fullscreen {
+    width: 100% !important;
+    height: 100% !important;
+    top: 0px !important;
+    left: 0px !important;
+    bottom: initial;
+    z-index: 10 !important;
+  }
 }
+
