@@ -37,10 +37,13 @@ let pc = function () {
       }
     }
   }
+
+  /*
   for (let i = 0; i < player.config.channelNum; i++) {
     let videoName = `video${i === 0 ? '' : i}`
     player[videoName].addEventListener('click', function (e) { player.onElementClick(e, player[videoName]) }, false)
   }
+*/
 
   player.onElementDblclick = function (e, element) {
     e.preventDefault()
