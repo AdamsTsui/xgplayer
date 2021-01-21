@@ -12,18 +12,25 @@ let s_time = function () {
   })
 
   let onTimeChange = function () {
-    if (!player['video'].seeking && (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash)) {
-      supposedCurrentTime = player.currentTime
+    if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
+      let currTime = player.currentTime
+      if (supposedCurrentTime && (currTime - supposedCurrentTime > 1)) {
+        player.currentTime = supposedCurrentTime
+        return
+      }
+      supposedCurrentTime = currTime
       container.innerHTML = `<span class="xgplayer-time-current">${util.format(player.currentTime || 0)}</span>` + `<span>${util.format(player.duration)}</span>`
     }
   }
 
+  /*
   let onSeeking = function () {
     var delta = player.currentTime - supposedCurrentTime
     if (delta > 0.01) {
       player.currentTime = supposedCurrentTime
     }
   }
+  */
 
   let onEnded = function () {
     supposedCurrentTime = 0
@@ -31,13 +38,13 @@ let s_time = function () {
 
   player.on('ended', onEnded)
   player.on('durationchange', onTimeChange)
-  player.on('seeking', onSeeking)
+  // player.on('seeking', onSeeking)
   player.on('timeupdate', onTimeChange)
 
   function onDestroy () {
     player.off('ended', onEnded)
     player.off('durationchange', onTimeChange)
-    player.off('seeking', onSeeking)
+    // player.off('seeking', onSeeking)
     player.off('timeupdate', onTimeChange)
     player.off('destroy', onDestroy)
   }

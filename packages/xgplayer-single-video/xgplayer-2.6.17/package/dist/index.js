@@ -8579,18 +8579,25 @@ var s_time = function s_time() {
   });
 
   var onTimeChange = function onTimeChange() {
-    if (!player['video'].seeking && (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash)) {
-      supposedCurrentTime = player.currentTime;
+    if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
+      var currTime = player.currentTime;
+      if (supposedCurrentTime && currTime - supposedCurrentTime > 1) {
+        player.currentTime = supposedCurrentTime;
+        return;
+      }
+      supposedCurrentTime = currTime;
       container.innerHTML = '<span class="xgplayer-time-current">' + util.format(player.currentTime || 0) + '</span>' + ('<span>' + util.format(player.duration) + '</span>');
     }
   };
 
-  var onSeeking = function onSeeking() {
-    var delta = player.currentTime - supposedCurrentTime;
+  /*
+  let onSeeking = function () {
+    var delta = player.currentTime - supposedCurrentTime
     if (delta > 0.01) {
-      player.currentTime = supposedCurrentTime;
+      player.currentTime = supposedCurrentTime
     }
-  };
+  }
+  */
 
   var onEnded = function onEnded() {
     supposedCurrentTime = 0;
@@ -8598,13 +8605,13 @@ var s_time = function s_time() {
 
   player.on('ended', onEnded);
   player.on('durationchange', onTimeChange);
-  player.on('seeking', onSeeking);
+  // player.on('seeking', onSeeking)
   player.on('timeupdate', onTimeChange);
 
   function onDestroy() {
     player.off('ended', onEnded);
     player.off('durationchange', onTimeChange);
-    player.off('seeking', onSeeking);
+    // player.off('seeking', onSeeking)
     player.off('timeupdate', onTimeChange);
     player.off('destroy', onDestroy);
   }
