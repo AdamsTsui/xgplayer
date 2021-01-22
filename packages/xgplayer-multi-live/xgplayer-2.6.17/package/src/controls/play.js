@@ -10,7 +10,9 @@ let play = function () {
     if (player.paused) {
       let playPromise = player.play()
       if (playPromise !== undefined && playPromise) {
-        playPromise.catch(err => {})
+        if (typeof playPromise.catch === 'function') {
+          playPromise.catch(err => {})
+        }
       }
     } else {
       player.pause()

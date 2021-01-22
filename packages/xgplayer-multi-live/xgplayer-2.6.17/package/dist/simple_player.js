@@ -320,7 +320,7 @@ var Player = function (_Proxy) {
     }
     if (_this.config.videoInit) {
       if (_util2.default.hasClass(_this.root, 'xgplayer-nostart')) {
-        _this.start();
+        // this.start()
       }
     }
     if (player.config.rotate) {
@@ -343,15 +343,28 @@ var Player = function (_Proxy) {
 
       var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.config.url;
 
+      // console.log('start func...')
       var root = this.root;
       var player = this;
       if (!url || url === '') {
         this.emit('urlNull');
       }
       this.logParams.playSrc = url;
-      this.canPlayFunc = function () {
+      this.canPlayFunc = function (e) {
+        var videoId = e.target.id;
+        if (videoId === 'video') {
+          this.canPlayStatus[0] = true;
+        } else if (videoId === 'video1') {
+          this.canPlayStatus[1] = true;
+        } else if (videoId === 'video2') {
+          this.canPlayStatus[2] = true;
+        } else if (videoId === 'video3') {
+          this.canPlayStatus[3] = true;
+        }
+
         var status = true;
         for (var i = 0; i < player.config.channelNum; i++) {
+          // console.log('player.canPlayStatus[i]:::' + player.canPlayStatus[i])
           status = status && player.canPlayStatus[i];
         }
         if (!status) {
@@ -366,24 +379,26 @@ var Player = function (_Proxy) {
         if (playPromise !== undefined && playPromise) {
           playPromise.then(function () {
             player.emit('autoplay started');
+            console.log('开始自动播放了。。。。。。。。。。。。。');
             player.play();
           }).catch(function () {
             player.emit('autoplay was prevented');
             Player.util.addClass(player.root, 'xgplayer-is-autoplay');
           });
         }
-        player.off('canplay', player.canPlayFunc);
+        player.emit('flvPlayStarted');
+        player.off('flvCanplay', player.canPlayFunc);
       };
-      if (_util2.default.typeOf(url) === 'Array') {
-        for (var i = 0; i < this.config.channelNum; i++) {
-          var videoName = 'video' + (i === 0 ? '' : i);
+      /*if (util.typeOf(url) === 'Array') {
+        for (let i = 0; i < this.config.channelNum; i++) {
+          let videoName = `video${i === 0 ? '' : i}`
           if (url[i].indexOf('blob:') > -1 && url[i] === this[videoName].src) {
             // 在Chromium环境下用mse url给video二次赋值会导致错误
           } else {
-            this[videoName].src = url[i];
+            this[videoName].src = url[i]
           }
         }
-      }
+      }*/
       this.logParams.pt = new Date().getTime();
       this.logParams.vt = this.logParams.pt;
       this.loadeddataFunc = function () {
@@ -395,10 +410,10 @@ var Player = function (_Proxy) {
       };
       this.once('loadeddata', this.loadeddataFunc);
       if (this.config.autoplay) {
-        this.on('canplay', this.canPlayFunc);
+        this.on('flvCanplay', this.canPlayFunc);
       }
-      for (var _i2 = 0; _i2 < this.config.channelNum; _i2++) {
-        root.insertBefore(this['video' + (_i2 === 0 ? '' : _i2)], root.firstChild);
+      for (var i = 0; i < this.config.channelNum; i++) {
+        root.insertBefore(this['video' + (i === 0 ? '' : i)], root.firstChild);
       }
       setTimeout(function () {
         _this2.emit('complete');
@@ -2628,7 +2643,7 @@ var Proxy = function () {
     this.ev.forEach(function (item) {
       self.evItem = Object.keys(item)[0];
       var name = Object.keys(item)[0];
-      self.video.addEventListener(Object.keys(item)[0], function () {
+      self['video'].addEventListener(Object.keys(item)[0], function () {
         // fix when video destroy called and video reload
         if (!self.logParams) {
           return;
@@ -2664,7 +2679,7 @@ var Proxy = function () {
         }
 
         if (name === 'canplay') {
-          self.canPlayStatus[0] = true;
+          // self.canPlayStatus[0] = true
         }
         if (name === 'error') {
           // process the error
@@ -2697,36 +2712,36 @@ var Proxy = function () {
       }, false);
 
       if (options.channelNum > 1) {
-        self.video1.addEventListener(Object.keys(item)[0], function () {
+        self['video1'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name);
           } else if (name === 'canplay') {
-            self.canPlayStatus[1] = true;
+            // self.canPlayStatus[1] = true
             self.emit(name, self);
           }
         }, false);
       }
 
       if (options.channelNum > 2) {
-        self.video2.addEventListener(Object.keys(item)[0], function () {
+        self['video2'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name);
           } else if (name === 'canplay') {
-            self.canPlayStatus[2] = true;
+            // self.canPlayStatus[2] = true
             self.emit(name, self);
           }
         }, false);
       }
 
       if (options.channelNum > 3) {
-        self.video3.addEventListener(Object.keys(item)[0], function () {
+        self['video3'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name);
           } else if (name === 'canplay') {
-            self.canPlayStatus[3] = true;
+            // self.canPlayStatus[3] = true
             self.emit(name, self);
           }
         }, false);
@@ -5770,7 +5785,9 @@ var play = function play() {
     if (player.paused) {
       var playPromise = player.play();
       if (playPromise !== undefined && playPromise) {
-        playPromise.catch(function (err) {});
+        if (typeof playPromise.catch === 'function') {
+          playPromise.catch(function (err) {});
+        }
       }
     } else {
       player.pause();
@@ -6730,6 +6747,9 @@ var danmu = function danmu() {
         danmujs.start();
       };
 
+      // player.onElementClick && container.addEventListener('click', function (e) { player.onElementClick(e, container) }, false)
+      // player.onElementDblclick && container.addEventListener('dblclick', function (e) { player.onElementDblclick(e, container) }, false)
+
       var onPause = function onPause() {
         if (util.hasClass(player.danmuBtn, 'danmu-switch-active')) {
           danmujs.pause();
@@ -6776,14 +6796,6 @@ var danmu = function danmu() {
           }
         });
       });
-
-      player.onElementClick && container.addEventListener('click', function (e) {
-        player.onElementClick(e, container);
-      }, false);
-      player.onElementDblclick && container.addEventListener('dblclick', function (e) {
-        player.onElementDblclick(e, container);
-      }, false);
-
       player.on('pause', onPause);
 
       player.on('play', onPlay);
@@ -7655,7 +7667,8 @@ var s_start = function s_start() {
     util.addClass(player.root, 'xgplayer-nostart');
   });
 
-  player.once('canplay', function () {
+  player.on('flvPlayStarted', function () {
+    console.log('flvPlayStarted:::::::::');
     util.removeClass(player.root, 'xgplayer-is-enter');
   });
 
@@ -8781,7 +8794,7 @@ var s_time = function s_time() {
     for (var i = 1; i < this.config.channelNum; i++) {
       if (Math.abs(player.currentTime - this['video' + (i === 0 ? '' : i)].currentTime) > 0.5) {
         // console.log('video' + i + '与主流时间开始同步')
-        this['video' + (i === 0 ? '' : i)].currentTime = player.currentTime;
+        // this[`video${i === 0 ? '' : i}`].currentTime = player.currentTime
       }
     }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
@@ -10580,6 +10593,7 @@ var s_error = function s_error() {
   var root = player.root;
   var util = _player2.default.util;
   var winInteval = undefined;
+  var retryCounter = 0;
 
   var error = util.createDom('xg-error', '<span class="xgplayer-error-text">请<span class="xgplayer-error-refresh">刷新</span>试试</span>', {}, 'xgplayer-error');
   player.once('ready', function () {
@@ -10614,11 +10628,17 @@ var s_error = function s_error() {
     }
 
     if (!winInteval) {
-      winInteval = window.setInterval(replayVideo, 6000);
+      winInteval = window.setInterval(replayVideo, 1000 * 60);
     }
   }
 
   function replayVideo() {
+    if (retryCounter >= 5) {
+      if (winInteval) {
+        window.clearInterval(winInteval);
+      }
+      return;
+    }
     player.autoplay = true;
     player.once('playing', function () {
       if (winInteval) {
@@ -10629,6 +10649,7 @@ var s_error = function s_error() {
       util.removeClass(player.root, 'xgplayer-is-enter');
     });
     player.src = player.config.url;
+    retryCounter++;
   }
 
   player.on('error', onError);
@@ -10700,7 +10721,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'multi-live-v1.0.1';
+var VERSION = 'multi-live-v1.0.2';
 
 var s_version = function s_version() {
   var player = this,

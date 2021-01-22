@@ -68,6 +68,9 @@ class FlvJsPlayer extends Player {
         player.mediainfo = data;
         player.emit("MEDIA_INFO",data);
       })
+      flv.on('flvCanplay', e => {
+        this.emit('flvCanplay', e)
+      })
     }
     player.once('destroy', () => {
       for (let i = 0; i < this.flvOpts.channelNum; i++) {

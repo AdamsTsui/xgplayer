@@ -172,7 +172,7 @@ class Player extends Proxy {
     }
     if (this.config.videoInit) {
       if (util.hasClass(this.root, 'xgplayer-nostart')) {
-        this.start()
+        // this.start()
       }
     }
     if (player.config.rotate) {
@@ -188,15 +188,28 @@ class Player extends Proxy {
   }
 
   start (url = this.config.url) {
+    // console.log('start func...')
     let root = this.root
     let player = this
     if (!url || url === '') {
       this.emit('urlNull')
     }
     this.logParams.playSrc = url
-    this.canPlayFunc = function () {
+    this.canPlayFunc = function (e) {
+      let videoId = e.target.id
+      if (videoId === 'video') {
+        this.canPlayStatus[0] = true
+      } else if (videoId === 'video1') {
+        this.canPlayStatus[1] = true
+      } else if (videoId === 'video2') {
+        this.canPlayStatus[2] = true
+      } else if (videoId === 'video3') {
+        this.canPlayStatus[3] = true
+      }
+
       let status = true
       for(let i = 0; i < player.config.channelNum; i++) {
+        // console.log('player.canPlayStatus[i]:::' + player.canPlayStatus[i])
         status = status && player.canPlayStatus[i]
       }
       if(!status) {
@@ -211,15 +224,17 @@ class Player extends Proxy {
       if (playPromise !== undefined && playPromise) {
         playPromise.then(function () {
           player.emit('autoplay started')
+          console.log('开始自动播放了。。。。。。。。。。。。。')
           player.play()
         }).catch(function () {
           player.emit('autoplay was prevented')
           Player.util.addClass(player.root, 'xgplayer-is-autoplay')
         })
       }
-      player.off('canplay', player.canPlayFunc)
+      player.emit('flvPlayStarted')
+      player.off('flvCanplay', player.canPlayFunc)
     }
-    if (util.typeOf(url) === 'Array') {
+    /*if (util.typeOf(url) === 'Array') {
       for (let i = 0; i < this.config.channelNum; i++) {
         let videoName = `video${i === 0 ? '' : i}`
         if (url[i].indexOf('blob:') > -1 && url[i] === this[videoName].src) {
@@ -228,7 +243,7 @@ class Player extends Proxy {
           this[videoName].src = url[i]
         }
       }
-    }
+    }*/
     this.logParams.pt = new Date().getTime()
     this.logParams.vt = this.logParams.pt
     this.loadeddataFunc = function () {
@@ -240,7 +255,7 @@ class Player extends Proxy {
     }
     this.once('loadeddata', this.loadeddataFunc)
     if (this.config.autoplay) {
-      this.on('canplay', this.canPlayFunc)
+      this.on('flvCanplay', this.canPlayFunc)
     }
     for (let i = 0; i < this.config.channelNum; i++) {
       root.insertBefore(this[`video${i === 0 ? '' : i}`], root.firstChild)

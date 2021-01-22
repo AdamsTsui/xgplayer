@@ -41,7 +41,8 @@ let s_start = function () {
     util.addClass(player.root, 'xgplayer-nostart')
   })
 
-  player.once('canplay', () => {
+  player.on('flvPlayStarted', () => {
+    console.log('flvPlayStarted:::::::::')
     util.removeClass(player.root, 'xgplayer-is-enter')
   })
 

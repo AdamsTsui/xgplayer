@@ -5,6 +5,7 @@ let s_error = function () {
   let root = player.root
   let util = Player.util
   let winInteval = undefined
+  let retryCounter = 0;
 
   let error = util.createDom('xg-error', '<span class="xgplayer-error-text">请<span class="xgplayer-error-refresh">刷新</span>试试</span>', {}, 'xgplayer-error')
   player.once('ready', () => {
@@ -39,12 +40,18 @@ let s_error = function () {
     }
 
     if(!winInteval) {
-      winInteval = window.setInterval(replayVideo, 6000)
+      winInteval = window.setInterval(replayVideo, 1000 * 60)
     }
 
   }
 
   function replayVideo() {
+    if (retryCounter >= 5) {
+      if (winInteval) {
+        window.clearInterval(winInteval)
+      }
+      return
+    }
     player.autoplay = true
     player.once('playing', () => {
       if(winInteval) {
@@ -55,6 +62,7 @@ let s_error = function () {
       util.removeClass(player.root, 'xgplayer-is-enter')
     })
     player.src = player.config.url
+    retryCounter++;
   }
 
   player.on('error', onError)

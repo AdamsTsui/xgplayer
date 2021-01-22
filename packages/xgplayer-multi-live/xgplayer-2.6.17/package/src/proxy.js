@@ -121,7 +121,7 @@ class Proxy {
     this.ev.forEach(item => {
       self.evItem = Object.keys(item)[0]
       let name = Object.keys(item)[0]
-      self.video.addEventListener(Object.keys(item)[0], function () {
+      self['video'].addEventListener(Object.keys(item)[0], function () {
         // fix when video destroy called and video reload
         if (!self.logParams) {
           return
@@ -157,7 +157,7 @@ class Proxy {
         }
 
         if (name === 'canplay') {
-          self.canPlayStatus[0] = true
+          // self.canPlayStatus[0] = true
         }
         if (name === 'error') {
           // process the error
@@ -190,36 +190,36 @@ class Proxy {
       }, false)
 
       if (options.channelNum > 1) {
-        self.video1.addEventListener(Object.keys(item)[0], function () {
+        self['video1'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name)
           } else if (name === 'canplay') {
-            self.canPlayStatus[1] = true
+            // self.canPlayStatus[1] = true
             self.emit(name, self)
           }
         }, false)
       }
 
       if (options.channelNum > 2) {
-        self.video2.addEventListener(Object.keys(item)[0], function () {
+        self['video2'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name)
           } else if (name === 'canplay') {
-            self.canPlayStatus[2] = true
+            // self.canPlayStatus[2] = true
             self.emit(name, self)
           }
         }, false)
       }
 
       if (options.channelNum > 3) {
-        self.video3.addEventListener(Object.keys(item)[0], function () {
+        self['video3'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name)
           } else if (name === 'canplay') {
-            self.canPlayStatus[3] = true
+            // self.canPlayStatus[3] = true
             self.emit(name, self)
           }
         }, false)
