@@ -5,6 +5,7 @@ let pc = function () {
   let util = Player.util; let controls = player.controls; let root = player.root
   let clk = 0; let _click_
 
+  /*
   player.onElementClick = function (e, element) {
     e.preventDefault()
     if(!this.config.closeVideoStopPropagation) {
@@ -37,6 +38,7 @@ let pc = function () {
       }
     }
   }
+  */
 
   /*
   for (let i = 0; i < player.config.channelNum; i++) {

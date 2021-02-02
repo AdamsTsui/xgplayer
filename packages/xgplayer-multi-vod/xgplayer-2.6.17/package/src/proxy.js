@@ -553,6 +553,9 @@ class Proxy {
       })
     }
   }
+  playerResize () {
+    this.emit('playerResize')
+  }
 }
 
 export default Proxy

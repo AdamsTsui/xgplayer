@@ -2823,6 +2823,11 @@ var Proxy = function () {
       this.emit('showFuliu', type);
     }
   }, {
+    key: 'playerResize',
+    value: function playerResize() {
+      this.emit('playerResize');
+    }
+  }, {
     key: 'hasStart',
     get: function get() {
       return this._hasStart;
@@ -5845,38 +5850,40 @@ var pc = function pc() {
   var util = _player2.default.util;var controls = player.controls;var root = player.root;
   var clk = 0;var _click_ = void 0;
 
+  /*
   player.onElementClick = function (e, element) {
-    e.preventDefault();
-    if (!this.config.closeVideoStopPropagation) {
-      e.stopPropagation();
+    e.preventDefault()
+    if(!this.config.closeVideoStopPropagation) {
+      e.stopPropagation()
     }
-    var player = this;
+    let player = this
     if (!player.config.closeVideoClick) {
-      clk++;
+      clk++
       if (_click_) {
-        clearTimeout(_click_);
+        clearTimeout(_click_)
       }
       if (clk === 1) {
         _click_ = setTimeout(function () {
           if (util.hasClass(player.root, 'xgplayer-nostart')) {
-            return false;
+            return false
           } else if (!player.ended) {
             if (player.paused) {
-              var playPromise = player.play();
+              let playPromise = player.play()
               if (playPromise !== undefined && playPromise) {
-                playPromise.catch(function (err) {});
+                playPromise.catch(err => {})
               }
             } else {
-              player.pause();
+              player.pause()
             }
           }
-          clk = 0;
-        }, 200);
+          clk = 0
+        }, 200)
       } else {
-        clk = 0;
+        clk = 0
       }
     }
-  };
+  }
+  */
 
   /*
   for (let i = 0; i < player.config.channelNum; i++) {
@@ -5971,34 +5978,36 @@ var mobile = function mobile() {
   var player = this;
   var util = _player2.default.util;var controls = player.controls;var root = player.root;
 
+  /*
   player.onElementTouchend = function (e, element) {
-    e.preventDefault();
-    e.stopPropagation();
-    var player = this;
+    e.preventDefault()
+    e.stopPropagation()
+    let player = this
     if (util.hasClass(root, 'xgplayer-inactive')) {
-      player.emit('focus');
+      player.emit('focus')
     } else {
-      player.emit('blur');
+      player.emit('blur')
     }
     if (!player.config.closeVideoTouch && !player.isTouchMove) {
       if (util.hasClass(player.root, 'xgplayer-nostart')) {
-        return false;
+        return false
       } else if (!player.ended) {
         if (player.paused) {
-          var playPromise = player.play();
+          let playPromise = player.play()
           if (playPromise !== undefined && playPromise) {
-            playPromise.catch(function (err) {});
+            playPromise.catch(err => {})
           }
         } else {
-          player.pause();
+          player.pause()
         }
       }
     }
-  };
+  }
+  */
 
   function onReady(e) {
     player.video.addEventListener('touchend', function (e) {
-      player.onElementTouchend(e, player.video);
+      // player.onElementTouchend(e, player.video)
     });
     player.video.addEventListener('touchstart', function () {
       player.isTouchMove = false;
@@ -8314,6 +8323,7 @@ var s_displayMode = function s_displayMode() {
     player.off('destroy', destroyFunc);
     player.off('requestFullscreen', modeChange);
     player.off('exitFullscreen', modeChange);
+    player.off('playerResize', modeChange);
     window.removeEventListener('resize', modeChange, false);
     player.off('showFuliu', showFuliu);
   }
@@ -8321,6 +8331,7 @@ var s_displayMode = function s_displayMode() {
   player.on('canplay', canplayModeFunc);
   player.on('requestFullscreen', modeChange);
   player.on('exitFullscreen', modeChange);
+  player.on('playerResize', modeChange);
   window.addEventListener('resize', modeChange, false);
   player.on('showFuliu', showFuliu);
   player.once('destroy', destroyFunc);

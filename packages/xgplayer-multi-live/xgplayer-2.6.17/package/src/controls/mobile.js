@@ -4,6 +4,7 @@ let mobile = function () {
   let player = this
   let util = Player.util; let controls = player.controls; let root = player.root
 
+  /*
   player.onElementTouchend = function (e, element) {
     e.preventDefault()
     e.stopPropagation()
@@ -28,10 +29,11 @@ let mobile = function () {
       }
     }
   }
+  */
 
   function onReady (e) {
     player.video.addEventListener('touchend', function (e) {
-      player.onElementTouchend(e, player.video)
+      // player.onElementTouchend(e, player.video)
     })
     player.video.addEventListener('touchstart', () => {
       player.isTouchMove = false

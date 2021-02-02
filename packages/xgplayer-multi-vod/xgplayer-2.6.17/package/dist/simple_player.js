@@ -2888,6 +2888,11 @@ var Proxy = function () {
       }
     }
   }, {
+    key: 'playerResize',
+    value: function playerResize() {
+      this.emit('playerResize');
+    }
+  }, {
     key: 'hasStart',
     get: function get() {
       return this._hasStart;
@@ -8538,6 +8543,7 @@ var s_displayMode = function s_displayMode() {
     player.off('displayModeChange', canplayModeFunc);
     player.off('requestFullscreen', modeChange);
     player.off('exitFullscreen', modeChange);
+    player.off('playerResize', modeChange);
     player.off('ShowOrHideFuliu', canplayModeFunc);
     player.off('blur', onBlur);
     window.removeEventListener('resize', modeChange, false);
@@ -8549,6 +8555,7 @@ var s_displayMode = function s_displayMode() {
   player.on('displayModeChange', canplayModeFunc);
   player.on('requestFullscreen', modeChange);
   player.on('exitFullscreen', modeChange);
+  player.on('playerResize', modeChange);
   player.on('ShowOrHideFuliu', canplayModeFunc);
   window.addEventListener('resize', modeChange, false);
   player.once('destroy', destroyFunc);

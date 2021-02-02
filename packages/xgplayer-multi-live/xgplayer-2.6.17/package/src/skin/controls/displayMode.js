@@ -132,7 +132,7 @@ let s_displayMode = function () {
     let winHeight = player.root.clientHeight
     return {
       'modePosSize1': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8}],
-      'modePosSize2': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2  + 'px', 'height': winHeight + 'px', 'zIndex': 8},
+      'modePosSize2': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 8},
                        {'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9}],
       'modePosSize3': [{'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8},
                        {'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}],
@@ -211,6 +211,7 @@ let s_displayMode = function () {
     player.off('destroy', destroyFunc)
     player.off('requestFullscreen', modeChange)
     player.off('exitFullscreen', modeChange)
+    player.off('playerResize', modeChange)
     window.removeEventListener('resize', modeChange, false)
     player.off('showFuliu', showFuliu)
   }
@@ -218,6 +219,7 @@ let s_displayMode = function () {
   player.on('canplay', canplayModeFunc)
   player.on('requestFullscreen', modeChange)
   player.on('exitFullscreen', modeChange)
+  player.on('playerResize', modeChange)
   window.addEventListener('resize', modeChange, false)
   player.on('showFuliu', showFuliu)
   player.once('destroy', destroyFunc)

@@ -524,6 +524,9 @@ class Proxy {
   showFuliu (type) {
     this.emit('showFuliu', type)
   }
+  playerResize () {
+    this.emit('playerResize')
+  }
 }
 
 export default Proxy
