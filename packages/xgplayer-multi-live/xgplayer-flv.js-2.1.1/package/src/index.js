@@ -43,7 +43,7 @@ class FlvJsPlayer extends Player {
       }
     })
     player.on('showFuliu', function (type) {
-      console.log('showFuliu flv:::' + type)
+      // console.log('showFuliu flv:::' + type)
       if (type === 1) {
         this.switchURL(this.config.url.join(','))
       }
@@ -73,6 +73,9 @@ class FlvJsPlayer extends Player {
       flv.on(Flv.Events.MEDIA_INFO, (data)=>{
         player.mediainfo = data;
         player.emit("MEDIA_INFO",data);
+      })
+      flv.on('flvCanplay', e => {
+        this.emit('flvCanplay', e)
       })
     }
     player.once('destroy', () => {

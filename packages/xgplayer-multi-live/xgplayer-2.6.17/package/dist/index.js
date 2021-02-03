@@ -320,7 +320,7 @@ var Player = function (_Proxy) {
     }
     if (_this.config.videoInit) {
       if (_util2.default.hasClass(_this.root, 'xgplayer-nostart')) {
-        _this.start();
+        // this.start()
       }
     }
     if (player.config.rotate) {
@@ -349,10 +349,21 @@ var Player = function (_Proxy) {
         this.emit('urlNull');
       }
       this.logParams.playSrc = url;
-      this.canPlayFunc = function () {
+      this.canPlayFunc = function (e) {
+        var videoId = e.target.id;
+        if (videoId === 'video') {
+          this.canPlayStatus[0] = true;
+        } else if (videoId === 'video1') {
+          this.canPlayStatus[1] = true;
+        } else if (videoId === 'video2') {
+          this.canPlayStatus[2] = true;
+        } else if (videoId === 'video3') {
+          this.canPlayStatus[3] = true;
+        }
+
         var status = true;
         for (var i = 0; i < player.config.channelNum; i++) {
-          status = status && player.canPlayStatus[i];
+          status = status || player.canPlayStatus[i];
         }
         if (!status) {
           return;
@@ -360,30 +371,27 @@ var Player = function (_Proxy) {
         for (var _i = 0; _i < player.config.channelNum; _i++) {
           player.canPlayStatus[_i] = false;
         }
-        var index = player.soundChannelId - 1;
-        var videoName = 'video' + (index === 0 ? '' : index);
-        var playPromise = player[videoName].play();
-        if (playPromise !== undefined && playPromise) {
-          playPromise.then(function () {
-            player.emit('autoplay started');
-            player.play();
-          }).catch(function () {
-            player.emit('autoplay was prevented');
-            Player.util.addClass(player.root, 'xgplayer-is-autoplay');
-          });
-        }
-        player.off('canplay', player.canPlayFunc);
-      };
-      if (_util2.default.typeOf(url) === 'Array') {
-        for (var i = 0; i < this.config.channelNum; i++) {
-          var videoName = 'video' + (i === 0 ? '' : i);
-          if (url[i].indexOf('blob:') > -1 && url[i] === this[videoName].src) {
-            // 在Chromium环境下用mse url给video二次赋值会导致错误
-          } else {
-            this[videoName].src = url[i];
+        new Promise(function (resolve, reject) {
+          setTimeout(function () {
+            resolve();
+          }, 2000);
+        }).then(function () {
+          var index = player.soundChannelId - 1;
+          var videoName = 'video' + (index === 0 ? '' : index);
+          var playPromise = player[videoName].play();
+          if (playPromise !== undefined && playPromise) {
+            playPromise.then(function () {
+              player.emit('autoplay started');
+              player.play();
+            }).catch(function () {
+              player.emit('autoplay was prevented');
+              Player.util.addClass(player.root, 'xgplayer-is-autoplay');
+            });
           }
-        }
-      }
+          player.emit('flvPlayStarted');
+          player.off('flvCanplay', player.canPlayFunc);
+        });
+      };
       this.logParams.pt = new Date().getTime();
       this.logParams.vt = this.logParams.pt;
       this.loadeddataFunc = function () {
@@ -395,10 +403,10 @@ var Player = function (_Proxy) {
       };
       this.once('loadeddata', this.loadeddataFunc);
       if (this.config.autoplay) {
-        this.on('canplay', this.canPlayFunc);
+        this.on('flvCanplay', this.canPlayFunc);
       }
-      for (var _i2 = 0; _i2 < this.config.channelNum; _i2++) {
-        root.insertBefore(this['video' + (_i2 === 0 ? '' : _i2)], root.firstChild);
+      for (var i = 0; i < this.config.channelNum; i++) {
+        root.insertBefore(this['video' + (i === 0 ? '' : i)], root.firstChild);
       }
       setTimeout(function () {
         _this2.emit('complete');
@@ -2609,12 +2617,14 @@ var Proxy = function () {
     }
 
     if (options.autoplay) {
-      var _index = this.soundChannelId - 1;
-      var _videoName = 'video' + (_index === 0 ? '' : _index);
-      this[_videoName].autoplay = true;
+      /*
+      let index = this.soundChannelId - 1
+      let videoName = `video${(index === 0) ? '' : index}`
+      this[videoName].autoplay = true
       if (options.autoplayMuted) {
-        this[_videoName].muted = true;
+        this[videoName].muted = true
       }
+      */
     }
     this.ev = ['play', 'playing', 'pause', 'ended', 'error', 'seeking', 'seeked', 'timeupdate', 'waiting', 'canplay', 'canplaythrough', 'durationchange', 'volumechange', 'loadeddata'].map(function (item) {
       return _defineProperty({}, item, 'on' + item.charAt(0).toUpperCase() + item.slice(1));
@@ -2628,7 +2638,7 @@ var Proxy = function () {
     this.ev.forEach(function (item) {
       self.evItem = Object.keys(item)[0];
       var name = Object.keys(item)[0];
-      self.video.addEventListener(Object.keys(item)[0], function () {
+      self['video'].addEventListener(Object.keys(item)[0], function () {
         // fix when video destroy called and video reload
         if (!self.logParams) {
           return;
@@ -2664,7 +2674,7 @@ var Proxy = function () {
         }
 
         if (name === 'canplay') {
-          self.canPlayStatus[0] = true;
+          // self.canPlayStatus[0] = true
         }
         if (name === 'error') {
           // process the error
@@ -2697,36 +2707,33 @@ var Proxy = function () {
       }, false);
 
       if (options.channelNum > 1) {
-        self.video1.addEventListener(Object.keys(item)[0], function () {
+        self['video1'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name);
-          } else if (name === 'canplay') {
-            self.canPlayStatus[1] = true;
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
             self.emit(name, self);
           }
         }, false);
       }
 
       if (options.channelNum > 2) {
-        self.video2.addEventListener(Object.keys(item)[0], function () {
+        self['video2'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name);
-          } else if (name === 'canplay') {
-            self.canPlayStatus[2] = true;
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
             self.emit(name, self);
           }
         }, false);
       }
 
       if (options.channelNum > 3) {
-        self.video3.addEventListener(Object.keys(item)[0], function () {
+        self['video3'].addEventListener(Object.keys(item)[0], function () {
           if (name === 'error') {
             // process the error
             self._onError(name);
-          } else if (name === 'canplay') {
-            self.canPlayStatus[3] = true;
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
             self.emit(name, self);
           }
         }, false);
@@ -5780,7 +5787,7 @@ var play = function play() {
     if (player.paused) {
       var playPromise = player.play();
       if (playPromise !== undefined && playPromise) {
-        playPromise.catch(function (err) {});
+        playPromise.catch && playPromise.catch(function (err) {});
       }
     } else {
       player.pause();
@@ -7602,7 +7609,7 @@ var s_start = function s_start() {
     util.addClass(player.root, 'xgplayer-nostart');
   });
 
-  player.once('canplay', function () {
+  player.on('flvPlayStarted', function () {
     util.removeClass(player.root, 'xgplayer-is-enter');
   });
 
@@ -8257,9 +8264,9 @@ var s_displayMode = function s_displayMode() {
     var winHeight = player.root.clientHeight;
     return {
       'modePosSize1': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
-      'modePosSize2': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9 }],
-      'modePosSize3': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }],
-      'modePosSize4': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }],
+      'modePosSize2': [{ 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9 }, { 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
+      'modePosSize3': [{ 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }, { 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
+      'modePosSize4': [{ 'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': '0px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
       'modePosSize5': [{ 'left': winWidth / 3 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }],
       'modePosSize6': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }],
       'modePosSize7': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight * 2 / 3 + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }],
@@ -8728,12 +8735,12 @@ var s_time = function s_time() {
     // }
 
     // console.log(player.video.currentTime + ':::::::::::::::' + player.video1.currentTime + ':::::::::' + player.video2.currentTime)
-    for (var i = 1; i < this.config.channelNum; i++) {
-      if (Math.abs(player.currentTime - this['video' + (i === 0 ? '' : i)].currentTime) > 0.5) {
-        // console.log('video' + i + '与主流时间开始同步')
-        this['video' + (i === 0 ? '' : i)].currentTime = player.currentTime;
-      }
-    }
+    // for (let i = 1; i < this.config.channelNum; i++) {
+    //   if (Math.abs(player.currentTime - this[`video${i === 0 ? '' : i}`].currentTime) > 0.5) {
+    //     // console.log('video' + i + '与主流时间开始同步')
+    //     this[`video${i === 0 ? '' : i}`].currentTime = player.currentTime
+    //   }
+    // }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = '<span class="xgplayer-time-current">' + util.format(player.currentTime || 0) + '</span>' + ('<span>' + util.format(player.duration) + '</span>');
     }
@@ -10529,7 +10536,7 @@ var s_error = function s_error() {
   var player = this;
   var root = player.root;
   var util = _player2.default.util;
-  var winInteval = undefined;
+  // let winInteval = undefined
 
   var error = util.createDom('xg-error', '<span class="xgplayer-error-text">请<span class="xgplayer-error-refresh">刷新</span>试试</span>', {}, 'xgplayer-error');
   player.once('ready', function () {
@@ -10540,6 +10547,7 @@ var s_error = function s_error() {
   var refresh = null;
 
   function onError() {
+    return false;
     // player.controls.style.display = 'none'
     // if (player.error) {
     //   text.innerHTML = player.error
@@ -10551,36 +10559,36 @@ var s_error = function s_error() {
     }
     // }
     // util.addClass(player.root, 'xgplayer-is-error')
-    util.addClass(player.root, 'xgplayer-is-enter');
+    // util.addClass(player.root, 'xgplayer-is-enter')
     refresh = error.querySelector('.xgplayer-error-refresh');
     if (refresh) {
       ['touchend', 'click'].forEach(function (item) {
         refresh.addEventListener(item, function (e) {
           e.preventDefault();
           e.stopPropagation();
-          replayVideo();
+          // replayVideo()
         });
       });
     }
-
-    if (!winInteval) {
-      winInteval = window.setInterval(replayVideo, 6000);
+    /*
+    if(!winInteval) {
+      winInteval = window.setInterval(replayVideo, 6000)
     }
+    */
   }
-
+  /*
   function replayVideo() {
-    player.autoplay = true;
-    player.once('playing', function () {
-      if (winInteval) {
-        window.clearInterval(winInteval);
-        winInteval = undefined;
+    player.autoplay = true
+    player.once('playing', () => {
+      if(winInteval) {
+        window.clearInterval(winInteval)
+        winInteval = undefined
       }
-      // util.removeClass(player.root, 'xgplayer-is-error')
-      util.removeClass(player.root, 'xgplayer-is-enter');
-    });
-    player.src = player.config.url;
+      util.removeClass(player.root, 'xgplayer-is-enter')
+    })
+    player.src = player.config.url
   }
-
+  */
   player.on('error', onError);
   function onDestroy() {
     player.off('error', onError);
@@ -10650,7 +10658,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'rex-ch50-live-v1.0.1';
+var VERSION = 'rex-ch50-live-v1.0.2';
 
 var s_version = function s_version() {
   var player = this,

@@ -1334,7 +1334,6 @@ util.isWeiXin = function () {
 util.transMp4ToSegment = function (stream) {
   var STEP = 30 * 60;
   var MAX = 35 * 60;
-  if (!stream || !(util.typeOf(stream) === 'object')) return;
   var channels = stream.channel;
   if (channels && channels.length > 0) {
     for (var i = 0; i < channels.length; i++) {
@@ -3150,6 +3149,7 @@ var Proxy = function () {
         vt: new Date().getTime(),
         vd: 0
       };
+      _util2.default.transMp4ToSegment(url);
       for (var i = 0; i < this.channelNum; i++) {
         this['video' + (i === 0 ? '' : i)].pause();
       }
@@ -5930,7 +5930,7 @@ var play = function play() {
     if (player.paused) {
       var playPromise = player.play();
       if (playPromise !== undefined && playPromise) {
-        playPromise.catch(function (err) {});
+        playPromise.catch && playPromise.catch(function (err) {});
       }
     } else {
       player.pause();
@@ -8480,9 +8480,9 @@ var s_displayMode = function s_displayMode() {
     var winHeight = player.root.clientHeight;
     return {
       'modePosSize1': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
-      'modePosSize2': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9 }],
-      'modePosSize3': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }],
-      'modePosSize4': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }],
+      'modePosSize2': [{ 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 9 }, { 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
+      'modePosSize3': [{ 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }, { 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
+      'modePosSize4': [{ 'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': '0px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight + 'px', 'zIndex': 8 }],
       'modePosSize5': [{ 'left': winWidth / 3 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }],
       'modePosSize6': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth * 2 / 3 + 'px', 'height': winHeight + 'px', 'zIndex': 8 }, { 'left': winWidth * 2 / 3 + 'px', 'top': 'initial', 'bottom': winHeight / 2 + 'px', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': 'auto', 'zIndex': 9 }],
       'modePosSize7': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight * 2 / 3 + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }],
@@ -11052,7 +11052,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'rex-ch50-vod-v1.0.2';
+var VERSION = 'rex-ch50-vod-v1.0.3';
 
 var s_version = function s_version() {
   var player = this,

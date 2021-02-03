@@ -436,6 +436,7 @@ class Proxy {
       vt: new Date().getTime(),
       vd: 0
     }
+    util.transMp4ToSegment(url)
     for (let i = 0; i < this.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].pause()
     }

@@ -596,6 +596,7 @@ class FlvPlayer {
     _onvCanPlay(e) {
         this._receivedCanPlay = true;
         this._mediaElement.removeEventListener('canplay', this.e.onvCanPlay);
+        this._emitter.emit('flvCanplay', e);
     }
 
     _onvStalled(e) {

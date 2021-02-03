@@ -172,7 +172,7 @@ class Player extends Proxy {
     }
     if (this.config.videoInit) {
       if (util.hasClass(this.root, 'xgplayer-nostart')) {
-        this.start()
+        // this.start()
       }
     }
     if (player.config.rotate) {
@@ -194,40 +194,48 @@ class Player extends Proxy {
       this.emit('urlNull')
     }
     this.logParams.playSrc = url
-    this.canPlayFunc = function () {
-      let status = true
-      for(let i = 0; i < player.config.channelNum; i++) {
-        status = status && player.canPlayStatus[i]
+    this.canPlayFunc = function (e) {
+      let videoId = e.target.id
+      if (videoId === 'video') {
+        this.canPlayStatus[0] = true
+      } else if (videoId === 'video1') {
+        this.canPlayStatus[1] = true
+      } else if (videoId === 'video2') {
+        this.canPlayStatus[2] = true
+      } else if (videoId === 'video3') {
+        this.canPlayStatus[3] = true
       }
-      if(!status) {
+
+      let status = true
+      for (let i = 0; i < player.config.channelNum; i++) {
+        status = status || player.canPlayStatus[i]
+      }
+      if (!status) {
         return
       }
-      for(let i = 0; i < player.config.channelNum; i++) {
+      for (let i = 0; i < player.config.channelNum; i++) {
         player.canPlayStatus[i] = false
       }
-      let index = player.soundChannelId - 1
-      let videoName = `video${(index === 0) ? '' : index}`
-      let playPromise = player[videoName].play()
-      if (playPromise !== undefined && playPromise) {
-        playPromise.then(function () {
-          player.emit('autoplay started')
-          player.play()
-        }).catch(function () {
-          player.emit('autoplay was prevented')
-          Player.util.addClass(player.root, 'xgplayer-is-autoplay')
-        })
-      }
-      player.off('canplay', player.canPlayFunc)
-    }
-    if (util.typeOf(url) === 'Array') {
-      for (let i = 0; i < this.config.channelNum; i++) {
-        let videoName = `video${i === 0 ? '' : i}`
-        if (url[i].indexOf('blob:') > -1 && url[i] === this[videoName].src) {
-          // 在Chromium环境下用mse url给video二次赋值会导致错误
-        } else {
-          this[videoName].src = url[i]
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve()
+        }, 2000)
+      }).then(() => {
+        let index = player.soundChannelId - 1
+        let videoName = `video${(index === 0) ? '' : index}`
+        let playPromise = player[videoName].play()
+        if (playPromise !== undefined && playPromise) {
+          playPromise.then(function () {
+            player.emit('autoplay started')
+            player.play()
+          }).catch(function () {
+            player.emit('autoplay was prevented')
+            Player.util.addClass(player.root, 'xgplayer-is-autoplay')
+          })
         }
-      }
+        player.emit('flvPlayStarted')
+        player.off('flvCanplay', player.canPlayFunc)
+      })
     }
     this.logParams.pt = new Date().getTime()
     this.logParams.vt = this.logParams.pt
@@ -240,7 +248,7 @@ class Player extends Proxy {
     }
     this.once('loadeddata', this.loadeddataFunc)
     if (this.config.autoplay) {
-      this.on('canplay', this.canPlayFunc)
+      this.on('flvCanplay', this.canPlayFunc)
     }
     for (let i = 0; i < this.config.channelNum; i++) {
       root.insertBefore(this[`video${i === 0 ? '' : i}`], root.firstChild)

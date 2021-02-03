@@ -235,7 +235,6 @@ util.isWeiXin = function () {
 util.transMp4ToSegment = function (stream) {
   const STEP = 30 * 60
   const MAX = 35 * 60
-  if (!stream || !(util.typeOf(stream) === 'object')) return
   let channels = stream.channel
   if (channels && channels.length > 0) {
     for (let i = 0; i < channels.length; i++) {
