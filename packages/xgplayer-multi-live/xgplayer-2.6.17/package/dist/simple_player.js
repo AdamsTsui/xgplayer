@@ -369,24 +369,29 @@ var Player = function (_Proxy) {
           return;
         }
         for (var _i = 0; _i < player.config.channelNum; _i++) {
-          player.canPlayStatus[_i] = false;
+          // player.canPlayStatus[i] = false
         }
         new Promise(function (resolve, reject) {
           setTimeout(function () {
             resolve();
           }, 2000);
         }).then(function () {
-          var index = player.soundChannelId - 1;
-          var videoName = 'video' + (index === 0 ? '' : index);
-          var playPromise = player[videoName].play();
-          if (playPromise !== undefined && playPromise) {
-            playPromise.then(function () {
-              player.emit('autoplay started');
-              player.play();
-            }).catch(function () {
-              player.emit('autoplay was prevented');
-              Player.util.addClass(player.root, 'xgplayer-is-autoplay');
-            });
+          if (player.canPlayStatus[0]) {
+            var index = player.soundChannelId - 1;
+            var videoName = 'video' + (index === 0 ? '' : index);
+            var playPromise = player[videoName].play();
+            if (playPromise !== undefined && playPromise) {
+              playPromise.then(function () {
+                player.emit('autoplay started');
+                player.play();
+              }).catch(function () {
+                player.emit('autoplay was prevented');
+                Player.util.addClass(player.root, 'xgplayer-is-autoplay');
+              });
+            }
+          } else {
+            player.emit('autoplay started');
+            player.play();
           }
           player.emit('flvPlayStarted');
           player.off('flvCanplay', player.canPlayFunc);
@@ -871,7 +876,7 @@ var Player = function (_Proxy) {
   }, {
     key: 'onPlay',
     value: function onPlay() {
-      _util2.default.addClass(this.root, 'xgplayer-isloading');
+      // util.addClass(this.root, 'xgplayer-isloading')
       _util2.default.addClass(this.root, 'xgplayer-playing');
       _util2.default.removeClass(this.root, 'xgplayer-pause');
     }
@@ -930,7 +935,7 @@ var Player = function (_Proxy) {
       }
       var time = self.currentTime;
       self.waitTimer = setTimeout(function () {
-        _util2.default.addClass(self.root, 'xgplayer-isloading');
+        // util.addClass(self.root, 'xgplayer-isloading')
         self.checkTimer = setInterval(function () {
           if (self.currentTime !== time) {
             _util2.default.removeClass(this.root, 'xgplayer-isloading');

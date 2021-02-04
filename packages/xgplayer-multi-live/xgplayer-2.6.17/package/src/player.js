@@ -214,24 +214,29 @@ class Player extends Proxy {
         return
       }
       for (let i = 0; i < player.config.channelNum; i++) {
-        player.canPlayStatus[i] = false
+        // player.canPlayStatus[i] = false
       }
       new Promise((resolve, reject) => {
         setTimeout(() => {
           resolve()
         }, 2000)
       }).then(() => {
-        let index = player.soundChannelId - 1
-        let videoName = `video${(index === 0) ? '' : index}`
-        let playPromise = player[videoName].play()
-        if (playPromise !== undefined && playPromise) {
-          playPromise.then(function () {
-            player.emit('autoplay started')
-            player.play()
-          }).catch(function () {
-            player.emit('autoplay was prevented')
-            Player.util.addClass(player.root, 'xgplayer-is-autoplay')
-          })
+        if (player.canPlayStatus[0]) {
+          let index = player.soundChannelId - 1
+          let videoName = `video${(index === 0) ? '' : index}`
+          let playPromise = player[videoName].play()
+          if (playPromise !== undefined && playPromise) {
+            playPromise.then(function () {
+              player.emit('autoplay started')
+              player.play()
+            }).catch(function () {
+              player.emit('autoplay was prevented')
+              Player.util.addClass(player.root, 'xgplayer-is-autoplay')
+            })
+          }
+        } else {
+          player.emit('autoplay started')
+          player.play()
         }
         player.emit('flvPlayStarted')
         player.off('flvCanplay', player.canPlayFunc)
@@ -674,7 +679,7 @@ class Player extends Proxy {
   }
 
   onPlay () {
-    util.addClass(this.root, 'xgplayer-isloading')
+    // util.addClass(this.root, 'xgplayer-isloading')
     util.addClass(this.root, 'xgplayer-playing')
     util.removeClass(this.root, 'xgplayer-pause')
   }
@@ -727,7 +732,7 @@ class Player extends Proxy {
     }
     let time = self.currentTime
     self.waitTimer = setTimeout(function () {
-      util.addClass(self.root, 'xgplayer-isloading')
+      // util.addClass(self.root, 'xgplayer-isloading')
       self.checkTimer = setInterval(function () {
         if (self.currentTime !== time) {
           util.removeClass(this.root, 'xgplayer-isloading')

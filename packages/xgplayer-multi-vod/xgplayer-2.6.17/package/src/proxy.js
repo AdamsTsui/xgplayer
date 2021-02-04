@@ -41,7 +41,7 @@ class Proxy {
     }
     if (options.url) {
       this.channelNum = options.url.channel.length
-      util.transMp4ToSegment(options.url)
+      // util.transMp4ToSegment(options.url)
       // console.log('options.url:::' + JSON.stringify(options.url))
     }
 
@@ -436,7 +436,7 @@ class Proxy {
       vt: new Date().getTime(),
       vd: 0
     }
-    util.transMp4ToSegment(url)
+    // util.transMp4ToSegment(url)
     for (let i = 0; i < this.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].pause()
     }

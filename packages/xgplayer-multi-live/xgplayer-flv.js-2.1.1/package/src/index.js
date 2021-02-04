@@ -63,6 +63,8 @@ class FlvJsPlayer extends Player {
 
       flv.on(Flv.Events.ERROR, (e) => {
         player.emit('error', new Player.Errors('other', player.config.url))
+        // 没有流，置黑屏
+        flv._mediaElement.src = flv._mediaElement.src;
       })
       flv.on(Flv.Events.LOADED_SEI, (timestamp, data) => {
         player.emit('loaded_sei', timestamp, data);

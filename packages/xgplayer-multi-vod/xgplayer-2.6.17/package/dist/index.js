@@ -2623,7 +2623,7 @@ var Proxy = function () {
     }
     if (options.url) {
       this.channelNum = options.url.channel.length;
-      _util2.default.transMp4ToSegment(options.url);
+      // util.transMp4ToSegment(options.url)
       // console.log('options.url:::' + JSON.stringify(options.url))
     }
 
@@ -3148,9 +3148,8 @@ var Proxy = function () {
         pt: new Date().getTime(),
         vt: new Date().getTime(),
         vd: 0
-      };
-      _util2.default.transMp4ToSegment(url);
-      for (var i = 0; i < this.channelNum; i++) {
+        // util.transMp4ToSegment(url)
+      };for (var i = 0; i < this.channelNum; i++) {
         this['video' + (i === 0 ? '' : i)].pause();
       }
       var urlArr = url.channel;
