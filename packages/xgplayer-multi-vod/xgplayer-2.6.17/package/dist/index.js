@@ -113,7 +113,7 @@ var _proxy = __webpack_require__(10);
 
 var _proxy2 = _interopRequireDefault(_proxy);
 
-var _util = __webpack_require__(2);
+var _util = __webpack_require__(1);
 
 var _util2 = _interopRequireDefault(_util);
 
@@ -376,6 +376,10 @@ var Player = function (_Proxy) {
             // }
           } else if (channel.type === 'jpg') {
             this[videoName].poster = channel.files[0].imageUrl;
+          }
+
+          if (player.is323Meeting && i === 0) {
+            break;
           }
         }
       }
@@ -1074,19 +1078,6 @@ module.exports = exports['default'];
 "use strict";
 
 
-var _undefined = __webpack_require__(23)(); // Support ES3 engines
-
-module.exports = function (val) {
-  return val !== _undefined && val !== null;
-};
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -1339,7 +1330,6 @@ util.isWeiXin = function () {
 util.transMp4ToSegment = function (stream) {
   var STEP = 30 * 60;
   var MAX = 35 * 60;
-  if (!stream || !(util.typeOf(stream) === 'object')) return;
   var channels = stream.channel;
   if (channels && channels.length > 0) {
     for (var i = 0; i < channels.length; i++) {
@@ -1392,6 +1382,19 @@ util.transMp4ToSegment = function (stream) {
 };
 exports.default = util;
 module.exports = exports['default'];
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _undefined = __webpack_require__(23)(); // Support ES3 engines
+
+module.exports = function (val) {
+  return val !== _undefined && val !== null;
+};
 
 /***/ }),
 /* 3 */
@@ -2575,7 +2578,7 @@ var _eventEmitter = __webpack_require__(11);
 
 var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
 
-var _util = __webpack_require__(2);
+var _util = __webpack_require__(1);
 
 var _util2 = _interopRequireDefault(_util);
 
@@ -2591,6 +2594,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Proxy = function () {
   function Proxy(options) {
+    var _this = this;
+
     _classCallCheck(this, Proxy);
 
     this.logParams = {
@@ -2599,6 +2604,10 @@ var Proxy = function () {
       played: []
     };
     this._hasStart = false;
+    this.currFileNumArr = [0, 0, 0, 0];
+    this.is323Meeting = false;
+    this.isFuliuPlaying = false;
+    this.channelNum = 0;
     this.videoConfig = {
       controls: !!options.isShowControl,
       // autoplay: options.autoplay,
@@ -2626,8 +2635,6 @@ var Proxy = function () {
     }
     if (options.url) {
       this.channelNum = options.url.channel.length;
-      _util2.default.transMp4ToSegment(options.url);
-      // console.log('options.url:::' + JSON.stringify(options.url))
     }
     this.soundChannelId = options.soundChannelId;
     if (!this.soundChannelId || this.channelNum === 1) {
@@ -2642,68 +2649,35 @@ var Proxy = function () {
         break;
       }
     }
-
     var totalDuration = 0;
-    var mainFiles = options.url.channel[0].files;
-    for (var _i = 0; _i < mainFiles.length; _i++) {
-      totalDuration += parseFloat(mainFiles[_i].totaltime);
+    var channels = options.url.channel;
+    for (var _i = 0; _i < channels.length; _i++) {
+      var files = channels[_i].files;
+      for (var j = 0; j < files.length; j++) {
+        var file = files[j];
+        if (_i === 0) {
+          totalDuration += parseFloat(file.totaltime);
+        }
+        if (file['endtime'] && file['endtime'] * 1 > 0) {
+          this.is323Meeting = true;
+          break;
+        }
+      }
+    }
+    // console.log('this.is323Meeting:::::::::' + this.is323Meeting)
+    if (!this.is323Meeting) {
+      _util2.default.transMp4ToSegment(options.url);
     }
     this.totalDuration = totalDuration;
-    this.currFileNum = 0;
-    var textTrackDom = '';
-    this.textTrackShowDefault = true;
-    if (options.textTrack && Array.isArray(options.textTrack) && (navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('Firefox') > -1)) {
-      if (options.textTrack.length > 0 && !options.textTrack.some(function (track) {
-        return track.default;
-      })) {
-        options.textTrack[0].default = true;
-        this.textTrackShowDefault = false;
-      }
-      options.textTrack.some(function (track) {
-        if (track.src && track.label && track.default) {
-          textTrackDom += '<track src="' + track.src + '" ';
-          if (track.kind) {
-            textTrackDom += 'kind="' + track.kind + '" ';
-          }
-          textTrackDom += 'label="' + track.label + '" ';
-          if (track.srclang) {
-            textTrackDom += 'srclang="' + track.srclang + '" ';
-          }
-          textTrackDom += (track.default ? 'default' : '') + '>';
-          return true;
-        }
-      });
-      this.videoConfig.crossorigin = 'anonymous';
-    }
-    if (options.textTrackStyle) {
-      var style = document.createElement('style');
-      this.textTrackStyle = style;
-      document.head.appendChild(style);
-      var styleStr = '';
-      for (var index in options.textTrackStyle) {
-        styleStr += index + ': ' + options.textTrackStyle[index] + ';';
-      }
-      var wrap = options.id ? '#' + options.id : options.el.id ? '#' + options.el.id : '.' + options.el.className;
-      if (style.sheet.insertRule) {
-        style.sheet.insertRule(wrap + ' video::cue { ' + styleStr + ' }', 0);
-      } else if (style.sheet.addRule) {
-        style.sheet.addRule(wrap + ' video::cue', styleStr);
-      }
-    }
     for (var _i2 = 0; _i2 < 4; _i2++) {
       var videoName = 'video' + (_i2 === 0 ? '' : _i2);
       this.videoConfig['id'] = videoName;
-      this[videoName] = _util2.default.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName);
-    }
-
-    if (!this.textTrackShowDefault && textTrackDom) {
-      var trackDoms = this.video.getElementsByTagName('Track');
-      trackDoms[0].track.mode = 'hidden';
+      this[videoName] = _util2.default.createDom(this.videoConfig.mediaType, '', this.videoConfig, videoName);
     }
 
     if (options.autoplay) {
-      var _index = this.soundChannelId - 1;
-      var _videoName = 'video' + (_index === 0 ? '' : _index);
+      var index = this.soundChannelId - 1;
+      var _videoName = 'video' + (index === 0 ? '' : index);
       this[_videoName].autoplay = true;
       if (options.autoplayMuted) {
         this[_videoName].muted = true;
@@ -2721,7 +2695,7 @@ var Proxy = function () {
     this.ev.forEach(function (item) {
       self.evItem = Object.keys(item)[0];
       var name = Object.keys(item)[0];
-      self.video.addEventListener(Object.keys(item)[0], function () {
+      self['video'].addEventListener(Object.keys(item)[0], function () {
         // fix when video destroy called and video reload
         if (!self.logParams) {
           return;
@@ -2784,6 +2758,42 @@ var Proxy = function () {
           }
         }
       }, false);
+
+      if (_this.channelNum > 1) {
+        self['video1'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[1] = true
+            self.emit(name, self);
+          }
+        }, false);
+      }
+
+      if (_this.channelNum > 2) {
+        self['video2'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[2] = true
+            self.emit(name, self);
+          }
+        }, false);
+      }
+
+      if (_this.channelNum > 3) {
+        self['video3'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[3] = true
+            self.emit(name, self);
+          }
+        }, false);
+      }
     });
   }
   /**
@@ -2855,6 +2865,75 @@ var Proxy = function () {
       }
     }
   }, {
+    key: 'getFuliuCountTime',
+    value: function getFuliuCountTime(listNum) {
+      var sumTime = 0;
+      var channel = this.config.url.channel[1];
+      if (channel) {
+        var files = channel.files;
+        if (listNum > files.length - 1) {
+          listNum = files.length - 1;
+        }
+        for (var i = 0; i <= listNum; i++) {
+          var file = files[i];
+          sumTime += file['totaltime'] * 1 + file['starttime'] * 1;
+        }
+      }
+      return sumTime;
+    }
+  }, {
+    key: 'getFuliuVideoListNum',
+    value: function getFuliuVideoListNum(time) {
+      var channel = this.config.url.channel[1];
+      if (channel) {
+        var sumTime = 0;
+        var files = channel.files;
+        for (var i = 0; i < files.length; i++) {
+          var file = files[i];
+          var startTime = sumTime;
+          sumTime += file['totaltime'] * 1 + file['starttime'] * 1;
+          if (time >= startTime && time < sumTime) {
+            return i;
+          }
+        }
+      }
+      return 0;
+    }
+  }, {
+    key: 'isFuliuAvailable',
+    value: function isFuliuAvailable(time) {
+      var listNum = this.getFuliuVideoListNum(time);
+      var file = this.config.url.channel[1].files[listNum];
+      var countTime = this.getFuliuCountTime(listNum - 1);
+      var timeStart = countTime + file['starttime'];
+      var timeEnd = countTime + file['starttime'] * 1 + file['endtime'] * 1;
+      return time >= timeStart && time <= timeEnd;
+    }
+  }, {
+    key: 'playFuliu',
+    value: function playFuliu(time) {
+      var self = this;
+      var listNum = this.getFuliuVideoListNum(time);
+      var file = this.config.url.channel[1].files[listNum];
+      var seekTime = time - file['starttime'] * 1;
+      this['video1'].src = file.url;
+      if (seekTime > 0) {
+        self.isSrcChanging = true;
+        this.once('canplay', function () {
+          var playPromise = this['video1'].play();
+          if (playPromise) {
+            self['video1'].currentTime = seekTime;
+            self.isSrcChanging = false;
+          }
+        });
+      }
+    }
+  }, {
+    key: 'playerResize',
+    value: function playerResize() {
+      this.emit('playerResize');
+    }
+  }, {
     key: 'hasStart',
     get: function get() {
       return this._hasStart;
@@ -2899,56 +2978,58 @@ var Proxy = function () {
     get: function get() {
       var tmpTime = 0;
       var mainFiles = this.config.url.channel[0].files;
-      // console.log('this.currFileNum:' + this.currFileNum)
-      for (var i = 0; i < this.currFileNum; i++) {
+      for (var i = 0; i < this.currFileNumArr[0]; i++) {
         tmpTime += parseFloat(mainFiles[i].totaltime);
       }
-      // console.log('currTime:::' + (tmpTime + this.video.currentTime))
-      return tmpTime + this.video.currentTime;
+      return tmpTime + this['video'].currentTime;
     },
     set: function set(time) {
-      if (typeof isFinite === 'function' && !isFinite(time)) return;
-      var toFileNum = 0;
-      var toCurrTime = 0;
-      var tmpTime = 0;
-      var mainFiles = this.config.url.channel[0].files;
-      for (var i = 0; i < mainFiles.length; i++) {
-        tmpTime += parseFloat(mainFiles[i].totaltime);
-        if (tmpTime > time) {
-          toFileNum = i;
-          toCurrTime = time - (tmpTime - parseFloat(mainFiles[i].totaltime));
+      var _this2 = this;
+
+      var channels = this.config.url.channel;
+      for (var k = 0; k < channels.length; k++) {
+        var toFileNum = 0;
+        var toCurrTime = 0;
+        var tmpTime = 0;
+        var mainFiles = channels[k].files;
+        if (this.is323Meeting && k === 1) {
           break;
         }
-      }
-      // console.log('time::' + time)
-      // console.log('currFileNum::' + this.currFileNum)
-      // console.log('toFileNum::' + toFileNum)
-      // console.log('toCurrTime::' + toCurrTime)
-      if (toFileNum === this.currFileNum) {
-        // console.log('分片内。。。')
-        for (var _i4 = 0; _i4 < this.channelNum; _i4++) {
-          this['video' + (_i4 === 0 ? '' : _i4)].currentTime = toCurrTime;
-        }
-        this.emit('currentTimeChange');
-      } else {
-        // console.log('跨分片。。。')
-        var self = this;
-        this.currFileNum = toFileNum;
-        this.isSrcChanging = true;
-        this.src = this.config.url;
-        this.once('canplay', function () {
-          var playPromise = self.play();
-          if (playPromise !== undefined && playPromise) {
-            // console.log('跨分片后，继续播放。。。')
-            self.currentTime = time;
-            this.isSrcChanging = false;
-            if (_util2.default.typeOf(playPromise) === 'function') {
-              playPromise.catch(function (err) {
-                console.error(err);
-              });
-            }
+        for (var i = 0; i < mainFiles.length; i++) {
+          tmpTime += parseFloat(mainFiles[i].totaltime);
+          if (tmpTime > time) {
+            toFileNum = i;
+            toCurrTime = time - (tmpTime - parseFloat(mainFiles[i].totaltime));
+            break;
           }
-        });
+        }
+        if (toFileNum === this.currFileNumArr[k]) {
+          // console.log('分片内。。。')
+          this['video' + (k === 0 ? '' : k)].currentTime = toCurrTime;
+          this.emit('currentTimeChange');
+        } else {
+          (function () {
+            // console.log('跨分片。。。')
+            var self = _this2;
+            _this2.currFileNumArr[k] = toFileNum;
+            _this2.isSrcChanging = true;
+            // this.src = this.config.url
+            _this2['video' + (k === 0 ? '' : k)].src = _this2.config.url.channel[k].files[_this2.currFileNumArr[k]].url;
+            _this2.once('canplay', function () {
+              var playPromise = self.play();
+              if (playPromise !== undefined && playPromise) {
+                // console.log('跨分片后，继续播放。。。')
+                self.currentTime = time;
+                this.isSrcChanging = false;
+                if (_util2.default.typeOf(playPromise) === 'function') {
+                  playPromise.catch(function (err) {
+                    console.error(err);
+                  });
+                }
+              }
+            });
+          })();
+        }
       }
     }
   }, {
@@ -3098,7 +3179,6 @@ var Proxy = function () {
       return this.config.url;
     },
     set: function set(url) {
-      // console.log('this.currFileNum::::' + this.currFileNum)
       var self = this;
       if (!_util2.default.hasClass(this.root, 'xgplayer-ended')) {
         this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)));
@@ -3115,8 +3195,8 @@ var Proxy = function () {
         this['video' + (i === 0 ? '' : i)].pause();
       }
       var urlArr = url.channel;
-      for (var _i5 = 0; _i5 < this.channelNum; _i5++) {
-        this['video' + (_i5 === 0 ? '' : _i5)].src = urlArr[_i5].files[this.currFileNum].url;
+      for (var _i4 = 0; _i4 < this.channelNum; _i4++) {
+        this['video' + (_i4 === 0 ? '' : _i4)].src = urlArr[_i4].files[this.currFileNumArr[_i4]].url;
       }
       this.emit('srcChange');
       this.logParams.playSrc = url;
@@ -3565,7 +3645,7 @@ module.exports = function () {
 "use strict";
 
 
-var isValue = __webpack_require__(1);
+var isValue = __webpack_require__(2);
 
 var keys = Object.keys;
 
@@ -3591,7 +3671,7 @@ module.exports = function () {};
 "use strict";
 
 
-var isValue = __webpack_require__(1);
+var isValue = __webpack_require__(2);
 
 module.exports = function (value) {
 	if (!isValue(value)) throw new TypeError("Cannot use null or undefined");
@@ -3605,7 +3685,7 @@ module.exports = function (value) {
 "use strict";
 
 
-var isValue = __webpack_require__(1);
+var isValue = __webpack_require__(2);
 
 var forEach = Array.prototype.forEach,
     create = Object.create;
@@ -5759,7 +5839,7 @@ var _player = __webpack_require__(0);
 
 var _player2 = _interopRequireDefault(_player);
 
-var _util = __webpack_require__(2);
+var _util = __webpack_require__(1);
 
 var _util2 = _interopRequireDefault(_util);
 
@@ -8123,6 +8203,10 @@ var _player = __webpack_require__(0);
 
 var _player2 = _interopRequireDefault(_player);
 
+var _util = __webpack_require__(1);
+
+var _util2 = _interopRequireDefault(_util);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var s_definition = function s_definition() {
@@ -8256,10 +8340,12 @@ var s_definition = function s_definition() {
             paused = player.paused;
             if (!player.ended) {
               var newUrl = JSON.parse(tmpSrc);
-              player.currFileNum = 0; // 从第一个分片开始播放，然后通过player.curTime再跳转
+              player.currFileNumArr = [0, 0, 0, 0]; // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl;
               player.channelNum = player.config.url.channel.length;
-              util.transMp4ToSegment(player.config.url);
+              if (!player.is323Meeting) {
+                util.transMp4ToSegment(player.config.url);
+              }
 
               var totalDuration = 0;
               var mainFiles = player.config.url.channel[0].files;
@@ -8268,7 +8354,7 @@ var s_definition = function s_definition() {
               }
               player.totalDuration = totalDuration;
 
-              player.src = newUrl;
+              player.src = player.config.url;
               player.emit('displayModeChange');
               player.once('canplay', onCanplayChangeDefinition);
             }
@@ -8334,6 +8420,9 @@ var s_displayMode = function s_displayMode() {
 
   function canplayModeFunc() {
     // console.info('播放器初始化完毕，可以初始化布局')
+    if (player.is323Meeting && !player.isFuliuPlaying) {
+      player.channelNum = 1;
+    }
     player.volume = player.volume;
     for (var i = 0; i < 4; i++) {
       var _video = player['video' + (i === 0 ? '' : i)];
@@ -8359,9 +8448,9 @@ var s_displayMode = function s_displayMode() {
         break;
       case 2:
         player.currMode = 3;
-        tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-1" d="' + iconPath[1] + '" class="curr" />\n      </svg></li>');
+        tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-1" d="' + iconPath[1] + '" />\n      </svg></li>');
         tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-2" d="' + iconPath[2] + '" />\n      </svg></li>');
-        tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-3" d="' + iconPath[3] + '" />\n      </svg></li>');
+        tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-3" d="' + iconPath[3] + '" class="curr" />\n      </svg></li>');
         break;
       case 3:
         player.currMode = 4;
@@ -8377,6 +8466,10 @@ var s_displayMode = function s_displayMode() {
     tmp.push('</ul>');
     tmp.push('<p class=\'name\'>\u5E03\u5C40</p>');
     container.innerHTML = tmp.join('');
+    var exitsEle = util.findDom(root, '.xgplayer-displaymode');
+    if (exitsEle) {
+      root.removeChild(exitsEle);
+    }
     root.appendChild(container);
     if (player.channelNum > 1) {
       util.addClass(player.root, 'xgplayer-is-displaymode');
@@ -8529,6 +8622,7 @@ var s_displayMode = function s_displayMode() {
     player.off('displayModeChange', canplayModeFunc);
     player.off('requestFullscreen', modeChange);
     player.off('exitFullscreen', modeChange);
+    player.off('ShowOrHideFuliu', canplayModeFunc);
     player.off('blur', onBlur);
     window.removeEventListener('resize', modeChange, false);
     player.off('destroy', destroyFunc);
@@ -8539,6 +8633,7 @@ var s_displayMode = function s_displayMode() {
   player.on('displayModeChange', canplayModeFunc);
   player.on('requestFullscreen', modeChange);
   player.on('exitFullscreen', modeChange);
+  player.on('ShowOrHideFuliu', canplayModeFunc);
   window.addEventListener('resize', modeChange, false);
   player.once('destroy', destroyFunc);
 };
@@ -8945,23 +9040,42 @@ var s_time = function s_time() {
     }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = '<span class="xgplayer-time-current">' + util.format(player.currentTime || 0) + '</span>' + ('<span>' + util.format(player.duration) + '</span>');
-      // 三路视频同步
-      var currTime = player['video'].currentTime;
-      for (var i = 1; i < player.channelNum; i++) {
-        var _video = player['video' + i];
-        var channel = player.config.url.channel[i];
-        if (channel.type === 'mp4') {
-          if (Math.abs(currTime - _video.currentTime) > 1) {
-            _video.currentTime = currTime;
+      if (player.is323Meeting) {
+        if (player.isFuliuAvailable(player.currentTime)) {
+          if (!player.isFuliuPlaying) {
+            // console.log('开始辅流............')
+            player.channelNum = 2;
+            player.isFuliuPlaying = true;
+            player.emit('ShowOrHideFuliu');
+            player.playFuliu(player.currentTime);
           }
-        } else if (channel.type === 'jpg') {
-          var currentAllTime = player.currentTime;
-          var files = channel.files;
-          for (var j = files.length - 1; j >= 0; j--) {
-            var file = files[j];
-            if (currentAllTime > file.starttime) {
-              _video.poster = file.imageUrl;
-              break;
+        } else {
+          if (player.isFuliuPlaying) {
+            // console.log('暂停辅流............')
+            player.channelNum = 1;
+            player.isFuliuPlaying = false;
+            player.emit('ShowOrHideFuliu');
+          }
+        }
+      } else {
+        // 三路视频同步
+        var currTime = player['video'].currentTime;
+        for (var i = 1; i < player.channelNum; i++) {
+          var _video = player['video' + i];
+          var channel = player.config.url.channel[i];
+          if (channel.type === 'mp4') {
+            if (Math.abs(currTime - _video.currentTime) > 1) {
+              _video.currentTime = currTime;
+            }
+          } else if (channel.type === 'jpg') {
+            var currentAllTime = player.currentTime;
+            var files = channel.files;
+            for (var j = files.length - 1; j >= 0; j--) {
+              var file = files[j];
+              if (currentAllTime > file.starttime) {
+                _video.poster = file.imageUrl;
+                break;
+              }
             }
           }
         }
@@ -11023,7 +11137,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'multi-vod-v1.0.2';
+var VERSION = 'multi-vod-v1.0.3';
 
 var s_version = function s_version() {
   var player = this,

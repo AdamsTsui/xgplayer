@@ -42,7 +42,7 @@ let s_start = function () {
   })
 
   player.on('flvPlayStarted', () => {
-    console.log('flvPlayStarted:::::::::')
+    // console.log('flvPlayStarted:::::::::')
     util.removeClass(player.root, 'xgplayer-is-enter')
   })
 

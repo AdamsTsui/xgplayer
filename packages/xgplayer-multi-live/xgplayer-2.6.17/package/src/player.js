@@ -209,41 +209,40 @@ class Player extends Proxy {
 
       let status = true
       for(let i = 0; i < player.config.channelNum; i++) {
-        // console.log('player.canPlayStatus[i]:::' + player.canPlayStatus[i])
-        status = status && player.canPlayStatus[i]
+        status = status || player.canPlayStatus[i]
       }
       if(!status) {
         return
       }
       for(let i = 0; i < player.config.channelNum; i++) {
-        player.canPlayStatus[i] = false
+        // player.canPlayStatus[i] = false
       }
-      let index = player.soundChannelId - 1
-      let videoName = `video${(index === 0) ? '' : index}`
-      let playPromise = player[videoName].play()
-      if (playPromise !== undefined && playPromise) {
-        playPromise.then(function () {
-          player.emit('autoplay started')
-          console.log('开始自动播放了。。。。。。。。。。。。。')
-          player.play()
-        }).catch(function () {
-          player.emit('autoplay was prevented')
-          Player.util.addClass(player.root, 'xgplayer-is-autoplay')
-        })
-      }
-      player.emit('flvPlayStarted')
-      player.off('flvCanplay', player.canPlayFunc)
-    }
-    /*if (util.typeOf(url) === 'Array') {
-      for (let i = 0; i < this.config.channelNum; i++) {
-        let videoName = `video${i === 0 ? '' : i}`
-        if (url[i].indexOf('blob:') > -1 && url[i] === this[videoName].src) {
-          // 在Chromium环境下用mse url给video二次赋值会导致错误
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve()
+        }, 2000)
+      }).then(() => {
+        if (player.canPlayStatus[0]) {
+          let index = player.soundChannelId - 1
+          let videoName = `video${(index === 0) ? '' : index}`
+          let playPromise = player[videoName].play()
+          if (playPromise !== undefined && playPromise) {
+            playPromise.then(function () {
+              player.emit('autoplay started')
+              player.play()
+            }).catch(function () {
+              player.emit('autoplay was prevented')
+              Player.util.addClass(player.root, 'xgplayer-is-autoplay')
+            })
+          }
         } else {
-          this[videoName].src = url[i]
+          player.emit('autoplay started')
+          player.play()
         }
-      }
-    }*/
+        player.emit('flvPlayStarted')
+        player.off('flvCanplay', player.canPlayFunc)
+      })
+    }
     this.logParams.pt = new Date().getTime()
     this.logParams.vt = this.logParams.pt
     this.loadeddataFunc = function () {
@@ -681,7 +680,7 @@ class Player extends Proxy {
   }
 
   onPlay () {
-    util.addClass(this.root, 'xgplayer-isloading')
+    // util.addClass(this.root, 'xgplayer-isloading')
     util.addClass(this.root, 'xgplayer-playing')
     util.removeClass(this.root, 'xgplayer-pause')
   }
@@ -734,7 +733,7 @@ class Player extends Proxy {
     }
     let time = self.currentTime
     self.waitTimer = setTimeout(function () {
-      util.addClass(self.root, 'xgplayer-isloading')
+      // util.addClass(self.root, 'xgplayer-isloading')
       self.checkTimer = setInterval(function () {
         if (self.currentTime !== time) {
           util.removeClass(this.root, 'xgplayer-isloading')

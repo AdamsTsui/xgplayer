@@ -96,7 +96,7 @@ class Proxy {
       let trackDoms = this.video.getElementsByTagName('Track')
       trackDoms[0].track.mode = 'hidden'
     }
-
+    /*
     if (options.autoplay) {
       let index = this.soundChannelId - 1
       let videoName = `video${(index === 0) ? '' : index}`
@@ -105,6 +105,7 @@ class Proxy {
         this[videoName].muted = true
       }
     }
+    */
     this.ev = ['play', 'playing', 'pause', 'ended', 'error', 'seeking', 'seeked',
       'timeupdate', 'waiting', 'canplay', 'canplaythrough', 'durationchange', 'volumechange', 'loadeddata'
     ].map((item) => {
@@ -194,7 +195,7 @@ class Proxy {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if (name === 'canplay') {
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
             // self.canPlayStatus[1] = true
             self.emit(name, self)
           }
@@ -206,7 +207,7 @@ class Proxy {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if (name === 'canplay') {
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
             // self.canPlayStatus[2] = true
             self.emit(name, self)
           }
@@ -218,7 +219,7 @@ class Proxy {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if (name === 'canplay') {
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
             // self.canPlayStatus[3] = true
             self.emit(name, self)
           }
@@ -520,6 +521,12 @@ class Proxy {
   }
   get pip () {
     return util.hasClass(this.root, 'xgplayer-pip-active')
+  }
+  showFuliu (type) {
+    this.emit('showFuliu', type)
+  }
+  playerResize () {
+    this.emit('playerResize')
   }
 }
 

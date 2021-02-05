@@ -5,6 +5,9 @@ let s_displayMode = function () {
 
   function canplayModeFunc () {
     // console.info('播放器初始化完毕，可以初始化布局')
+    if (player.is323Meeting && !player.isFuliuPlaying) {
+      player.channelNum = 1
+    }
     player.volume = player.volume
     for (let i = 0; i < 4; i++) {
       let _video = player[`video${(i === 0 ? '' : i)}`]
@@ -40,13 +43,13 @@ let s_displayMode = function () {
       case 2:
         player.currMode = 3
         tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
-        <path name="path-1" d="${iconPath[1]}" class="curr" />
+        <path name="path-1" d="${iconPath[1]}" />
       </svg></li>`)
         tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-2" d="${iconPath[2]}" />
       </svg></li>`)
         tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
-        <path name="path-3" d="${iconPath[3]}" />
+        <path name="path-3" d="${iconPath[3]}" class="curr" />
       </svg></li>`)
         break
       case 3:
@@ -71,6 +74,10 @@ let s_displayMode = function () {
     tmp.push(`</ul>`)
     tmp.push(`<p class='name'>布局</p>`)
     container.innerHTML = tmp.join('')
+    let exitsEle = util.findDom(root, '.xgplayer-displaymode')
+    if (exitsEle) {
+      root.removeChild(exitsEle)
+    }
     root.appendChild(container)
     if (player.channelNum > 1) {
       util.addClass(player.root, 'xgplayer-is-displaymode')
@@ -236,6 +243,7 @@ let s_displayMode = function () {
     player.off('displayModeChange', canplayModeFunc)
     player.off('requestFullscreen', modeChange)
     player.off('exitFullscreen', modeChange)
+    player.off('ShowOrHideFuliu', canplayModeFunc)
     player.off('blur', onBlur)
     window.removeEventListener('resize', modeChange, false)
     player.off('destroy', destroyFunc)
@@ -246,6 +254,7 @@ let s_displayMode = function () {
   player.on('displayModeChange', canplayModeFunc)
   player.on('requestFullscreen', modeChange)
   player.on('exitFullscreen', modeChange)
+  player.on('ShowOrHideFuliu', canplayModeFunc)
   window.addEventListener('resize', modeChange, false)
   player.once('destroy', destroyFunc)
 }

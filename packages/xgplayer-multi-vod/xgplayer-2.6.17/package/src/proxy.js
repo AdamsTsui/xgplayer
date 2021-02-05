@@ -10,6 +10,10 @@ class Proxy {
       played: []
     }
     this._hasStart = false
+    this.currFileNumArr = [0, 0, 0, 0]
+    this.is323Meeting = false
+    this.isFuliuPlaying = false
+    this.channelNum = 0
     this.videoConfig = {
       controls: !!options.isShowControl,
       // autoplay: options.autoplay,
@@ -37,8 +41,6 @@ class Proxy {
     }
     if (options.url) {
       this.channelNum = options.url.channel.length
-      util.transMp4ToSegment(options.url)
-      // console.log('options.url:::' + JSON.stringify(options.url))
     }
     this.soundChannelId = options.soundChannelId
     if (!this.soundChannelId || this.channelNum === 1) {
@@ -53,61 +55,30 @@ class Proxy {
         break
       }
     }
-
     let totalDuration = 0
-    let mainFiles = options.url.channel[0].files
-    for (let i = 0; i < mainFiles.length; i++) {
-      totalDuration += parseFloat(mainFiles[i].totaltime)
+    let channels = options.url.channel
+    for (let i = 0; i < channels.length; i++) {
+      let files = channels[i].files
+      for (let j = 0; j < files.length; j++) {
+        let file = files[j]
+        if (i === 0) {
+          totalDuration += parseFloat(file.totaltime)
+        }
+        if (file['endtime'] && file['endtime'] * 1 > 0) {
+          this.is323Meeting = true
+          break
+        }
+      }
+    }
+    // console.log('this.is323Meeting:::::::::' + this.is323Meeting)
+    if (!this.is323Meeting) {
+      util.transMp4ToSegment(options.url)
     }
     this.totalDuration = totalDuration
-    this.currFileNum = 0
-    let textTrackDom = ''
-    this.textTrackShowDefault = true
-    if (options.textTrack && Array.isArray(options.textTrack) && (navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('Firefox') > -1)) {
-      if(options.textTrack.length > 0 && !options.textTrack.some(track => { return track.default })) {
-        options.textTrack[0].default = true
-        this.textTrackShowDefault = false
-      }
-      options.textTrack.some(track => {
-        if (track.src && track.label && track.default) {
-          textTrackDom += `<track src="${track.src}" `
-          if (track.kind) {
-            textTrackDom += `kind="${track.kind}" `
-          }
-          textTrackDom += `label="${track.label}" `
-          if (track.srclang) {
-            textTrackDom += `srclang="${track.srclang}" `
-          }
-          textTrackDom += `${track.default ? 'default' : ''}>`
-          return true
-        }
-      })
-      this.videoConfig.crossorigin = 'anonymous'
-    }
-    if (options.textTrackStyle) {
-      let style = document.createElement('style')
-      this.textTrackStyle = style
-      document.head.appendChild(style)
-      let styleStr = ''
-      for (let index in options.textTrackStyle) {
-        styleStr += `${index}: ${options.textTrackStyle[index]};`
-      }
-      let wrap = options.id ? `#${options.id}` : (options.el.id ? `#${options.el.id}` : `.${options.el.className}`)
-      if (style.sheet.insertRule) {
-        style.sheet.insertRule(`${wrap} video::cue { ${styleStr} }`, 0)
-      } else if (style.sheet.addRule) {
-        style.sheet.addRule(`${wrap} video::cue`, styleStr)
-      }
-    }
     for (let i = 0; i < 4; i++) {
       let videoName = `video${(i === 0) ? '' : i}`
       this.videoConfig['id'] = videoName
-      this[videoName] = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName)
-    }
-
-    if (!this.textTrackShowDefault && textTrackDom) {
-      let trackDoms = this.video.getElementsByTagName('Track')
-      trackDoms[0].track.mode = 'hidden'
+      this[videoName] = util.createDom(this.videoConfig.mediaType, '', this.videoConfig, videoName)
     }
 
     if (options.autoplay) {
@@ -134,7 +105,7 @@ class Proxy {
     this.ev.forEach(item => {
       self.evItem = Object.keys(item)[0]
       let name = Object.keys(item)[0]
-      self.video.addEventListener(Object.keys(item)[0], function () {
+      self['video'].addEventListener(Object.keys(item)[0], function () {
         // fix when video destroy called and video reload
         if (!self.logParams) {
           return
@@ -197,6 +168,43 @@ class Proxy {
           }
         }
       }, false)
+
+      if (this.channelNum > 1) {
+        self['video1'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[1] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
+
+      if (this.channelNum > 2) {
+        self['video2'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[2] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
+
+      if (this.channelNum > 3) {
+        self['video3'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[3] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
+
     })
   }
   /**
@@ -288,54 +296,52 @@ class Proxy {
   get currentTime () {
     let tmpTime = 0
     let mainFiles = this.config.url.channel[0].files
-    // console.log('this.currFileNum:' + this.currFileNum)
-    for (let i = 0; i < this.currFileNum; i++) {
+    for (let i = 0; i < this.currFileNumArr[0]; i++) {
       tmpTime += parseFloat(mainFiles[i].totaltime)
     }
-    // console.log('currTime:::' + (tmpTime + this.video.currentTime))
-    return (tmpTime + this.video.currentTime)
+    return (tmpTime + this['video'].currentTime)
   }
   set currentTime (time) {
-    if (typeof isFinite === 'function' && !isFinite(time)) return
-    let toFileNum = 0
-    let toCurrTime = 0
-    let tmpTime = 0
-    let mainFiles = this.config.url.channel[0].files
-    for (let i = 0; i < mainFiles.length; i++) {
-      tmpTime += parseFloat(mainFiles[i].totaltime)
-      if (tmpTime > time) {
-        toFileNum = i
-        toCurrTime = time - (tmpTime - parseFloat(mainFiles[i].totaltime))
+    let channels = this.config.url.channel
+    for (let k = 0; k < channels.length; k++) {
+      let toFileNum = 0
+      let toCurrTime = 0
+      let tmpTime = 0
+      let mainFiles = channels[k].files
+      if (this.is323Meeting && k === 1) {
         break
       }
-    }
-    // console.log('time::' + time)
-    // console.log('currFileNum::' + this.currFileNum)
-    // console.log('toFileNum::' + toFileNum)
-    // console.log('toCurrTime::' + toCurrTime)
-    if (toFileNum === this.currFileNum) {
-      // console.log('分片内。。。')
-      for (let i = 0; i < this.channelNum; i++) {
-        this[`video${i === 0 ? '' : i}`].currentTime = toCurrTime
-      }
-      this.emit('currentTimeChange')
-    } else {
-      // console.log('跨分片。。。')
-      let self = this
-      this.currFileNum = toFileNum
-      this.isSrcChanging = true
-      this.src = this.config.url
-      this.once('canplay', function () {
-        let playPromise = self.play()
-        if (playPromise !== undefined && playPromise) {
-          // console.log('跨分片后，继续播放。。。')
-          self.currentTime = time
-          this.isSrcChanging = false
-          if (util.typeOf(playPromise) === 'function') {
-            playPromise.catch(err => { console.error(err) })
-          }
+      for (let i = 0; i < mainFiles.length; i++) {
+        tmpTime += parseFloat(mainFiles[i].totaltime)
+        if (tmpTime > time) {
+          toFileNum = i
+          toCurrTime = time - (tmpTime - parseFloat(mainFiles[i].totaltime))
+          break
         }
-      })
+      }
+      if (toFileNum === this.currFileNumArr[k]) {
+        // console.log('分片内。。。')
+        this[`video${k === 0 ? '' : k}`].currentTime = toCurrTime
+        this.emit('currentTimeChange')
+      } else {
+        // console.log('跨分片。。。')
+        let self = this
+        this.currFileNumArr[k] = toFileNum
+        this.isSrcChanging = true
+        // this.src = this.config.url
+        this[`video${k === 0 ? '' : k}`].src = this.config.url.channel[k].files[this.currFileNumArr[k]].url
+        this.once('canplay', function () {
+          let playPromise = self.play()
+          if (playPromise !== undefined && playPromise) {
+            // console.log('跨分片后，继续播放。。。')
+            self.currentTime = time
+            this.isSrcChanging = false
+            if (util.typeOf(playPromise) === 'function') {
+              playPromise.catch(err => { console.error(err) })
+            }
+          }
+        })
+      }
     }
   }
   get defaultMuted () {
@@ -455,7 +461,6 @@ class Proxy {
     return this.config.url
   }
   set src (url) {
-    // console.log('this.currFileNum::::' + this.currFileNum)
     let self = this
     if (!util.hasClass(this.root, 'xgplayer-ended')) {
       this.emit('urlchange', JSON.parse(JSON.stringify(self.logParams)))
@@ -473,7 +478,7 @@ class Proxy {
     }
     let urlArr = url.channel
     for (let i = 0; i < this.channelNum; i++) {
-      this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[this.currFileNum].url
+      this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[this.currFileNumArr[i]].url
     }
     this.emit('srcChange')
     this.logParams.playSrc = url
@@ -522,6 +527,66 @@ class Proxy {
   }
   get pip () {
     return util.hasClass(this.root, 'xgplayer-pip-active')
+  }
+  getFuliuCountTime (listNum) {
+    let sumTime = 0
+    let channel = this.config.url.channel[1]
+    if (channel) {
+      let files = channel.files
+      if (listNum > files.length - 1) {
+        listNum = files.length - 1
+      }
+      for (let i = 0; i <= listNum; i++) {
+        let file = files[i]
+        sumTime += file['totaltime'] * 1 + file['starttime'] * 1
+      }
+    }
+    return sumTime
+  }
+
+  getFuliuVideoListNum (time) {
+    let channel = this.config.url.channel[1]
+    if (channel) {
+      let sumTime = 0
+      let files = channel.files
+      for (let i = 0; i < files.length; i++) {
+        let file = files[i]
+        let startTime = sumTime
+        sumTime += file['totaltime'] * 1 + file['starttime'] * 1
+        if (time >= startTime && time < sumTime) {
+          return i
+        }
+      }
+    }
+    return 0
+  }
+  isFuliuAvailable (time) {
+    let listNum = this.getFuliuVideoListNum(time)
+    let file = this.config.url.channel[1].files[listNum]
+    let countTime = this.getFuliuCountTime(listNum - 1)
+    let timeStart = countTime + file['starttime']
+    let timeEnd = countTime + file['starttime'] * 1 + file['endtime'] * 1
+    return time >= timeStart && time <= timeEnd
+  }
+  playFuliu (time) {
+    let self = this
+    let listNum = this.getFuliuVideoListNum(time)
+    let file = this.config.url.channel[1].files[listNum]
+    let seekTime = time - file['starttime'] * 1
+    this['video1'].src = file.url
+    if (seekTime > 0) {
+      self.isSrcChanging = true
+      this.once('canplay', function () {
+        let playPromise = this['video1'].play()
+        if (playPromise) {
+          self['video1'].currentTime = seekTime
+          self.isSrcChanging = false
+        }
+      })
+    }
+  }
+  playerResize () {
+    this.emit('playerResize')
   }
 }
 

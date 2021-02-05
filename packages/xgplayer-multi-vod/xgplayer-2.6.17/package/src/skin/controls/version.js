@@ -1,6 +1,6 @@
 import Player from '../../player'
 
-const VERSION = 'multi-vod-v1.0.2'
+const VERSION = 'multi-vod-v1.0.3'
 
 let s_version = function () {
   let player = this, util = Player.util, root = player.root

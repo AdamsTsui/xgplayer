@@ -11,7 +11,7 @@ let play = function () {
       let playPromise = player.play()
       if (playPromise !== undefined && playPromise) {
         if (typeof playPromise.catch === 'function') {
-          playPromise.catch(err => {})
+          playPromise.catch && playPromise.catch(err => {})
         }
       }
     } else {

@@ -4,8 +4,8 @@ let s_error = function () {
   let player = this
   let root = player.root
   let util = Player.util
-  let winInteval = undefined
-  let retryCounter = 0;
+  // let winInteval = undefined
+  // let retryCounter = 0;
 
   let error = util.createDom('xg-error', '<span class="xgplayer-error-text">请<span class="xgplayer-error-refresh">刷新</span>试试</span>', {}, 'xgplayer-error')
   player.once('ready', () => {
@@ -16,6 +16,7 @@ let s_error = function () {
   let refresh = null
 
   function onError () {
+    return false
     // player.controls.style.display = 'none'
     // if (player.error) {
     //   text.innerHTML = player.error
@@ -27,24 +28,24 @@ let s_error = function () {
     }
     // }
     // util.addClass(player.root, 'xgplayer-is-error')
-    util.addClass(player.root, 'xgplayer-is-enter')
+    // util.addClass(player.root, 'xgplayer-is-enter')
     refresh = error.querySelector('.xgplayer-error-refresh')
     if (refresh) {
       ['touchend', 'click'].forEach(item => {
         refresh.addEventListener(item, function (e) {
           e.preventDefault()
           e.stopPropagation()
-          replayVideo()
+          // replayVideo()
         })
       })
     }
-
+    /*
     if(!winInteval) {
       winInteval = window.setInterval(replayVideo, 1000 * 60)
     }
-
+    */
   }
-
+/*
   function replayVideo() {
     if (retryCounter >= 5) {
       if (winInteval) {
@@ -64,7 +65,7 @@ let s_error = function () {
     player.src = player.config.url
     retryCounter++;
   }
-
+  */
   player.on('error', onError)
   function onDestroy () {
     player.off('error', onError)

@@ -1,4 +1,5 @@
 import Player from '../../player'
+import util from "../../utils/util";
 
 let s_definition = function () {
   let player = this
@@ -125,10 +126,12 @@ let s_definition = function () {
             paused = player.paused
             if (!player.ended) {
               let newUrl = JSON.parse(tmpSrc)
-              player.currFileNum = 0 // 从第一个分片开始播放，然后通过player.curTime再跳转
+              player.currFileNumArr = [0, 0, 0, 0] // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl
               player.channelNum = player.config.url.channel.length
-              util.transMp4ToSegment(player.config.url)
+              if (!player.is323Meeting) {
+                util.transMp4ToSegment(player.config.url)
+              }
 
               let totalDuration = 0
               let mainFiles = player.config.url.channel[0].files
@@ -137,7 +140,7 @@ let s_definition = function () {
               }
               player.totalDuration = totalDuration
 
-              player.src = newUrl
+              player.src = player.config.url
               player.emit('displayModeChange')
               player.once('canplay', onCanplayChangeDefinition)
             }

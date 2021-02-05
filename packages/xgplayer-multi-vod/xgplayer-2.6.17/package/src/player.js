@@ -222,6 +222,10 @@ class Player extends Proxy {
         } else if (channel.type === 'jpg') {
           this[videoName].poster = channel.files[0].imageUrl
         }
+
+        if (player.is323Meeting && i === 0) {
+          break
+        }
       }
     }
     this.logParams.pt = new Date().getTime()
