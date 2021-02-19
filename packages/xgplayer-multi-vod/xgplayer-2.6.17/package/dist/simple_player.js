@@ -2651,6 +2651,7 @@ var Proxy = function () {
     }
     var totalDuration = 0;
     var channels = options.url.channel;
+    // console.log('options.url:::::::::' + JSON.stringify(options.url))
     for (var _i = 0; _i < channels.length; _i++) {
       var files = channels[_i].files;
       for (var j = 0; j < files.length; j++) {
@@ -8448,9 +8449,12 @@ var s_displayMode = function s_displayMode() {
         break;
       case 2:
         player.currMode = 3;
-        tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-1" d="' + iconPath[1] + '" />\n      </svg></li>');
+        if (player.is323Meeting) {
+          player.currMode = 1;
+        }
+        tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-1" d="' + iconPath[1] + '" class="' + (player.currMode === 1 ? 'curr' : '') + '" />\n      </svg></li>');
         tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-2" d="' + iconPath[2] + '" />\n      </svg></li>');
-        tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-3" d="' + iconPath[3] + '" class="curr" />\n      </svg></li>');
+        tmp.push('<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">\n        <path name="path-3" d="' + iconPath[3] + '"  class="' + (player.currMode === 3 ? 'curr' : '') + '" />\n      </svg></li>');
         break;
       case 3:
         player.currMode = 4;

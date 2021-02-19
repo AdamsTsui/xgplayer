@@ -57,6 +57,7 @@ class Proxy {
     }
     let totalDuration = 0
     let channels = options.url.channel
+    // console.log('options.url:::::::::' + JSON.stringify(options.url))
     for (let i = 0; i < channels.length; i++) {
       let files = channels[i].files
       for (let j = 0; j < files.length; j++) {

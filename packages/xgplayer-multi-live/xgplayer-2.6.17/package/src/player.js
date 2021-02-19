@@ -214,9 +214,6 @@ class Player extends Proxy {
       if(!status) {
         return
       }
-      for(let i = 0; i < player.config.channelNum; i++) {
-        // player.canPlayStatus[i] = false
-      }
       new Promise((resolve, reject) => {
         setTimeout(() => {
           resolve()
@@ -241,6 +238,10 @@ class Player extends Proxy {
         }
         player.emit('flvPlayStarted')
         player.off('flvCanplay', player.canPlayFunc)
+
+        for(let i = 0; i < player.config.channelNum; i++) {
+          player.canPlayStatus[i] = false
+        }
       })
     }
     this.logParams.pt = new Date().getTime()
@@ -256,7 +257,7 @@ class Player extends Proxy {
     if (this.config.autoplay) {
       this.on('flvCanplay', this.canPlayFunc)
     }
-    for (let i = 0; i < this.config.channelNum; i++) {
+    for (let i = 0; i < 4; i++) {
       root.insertBefore(this[`video${i === 0 ? '' : i}`], root.firstChild)
     }
     setTimeout(() => {

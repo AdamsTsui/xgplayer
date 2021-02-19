@@ -369,9 +369,6 @@ var Player = function (_Proxy) {
         if (!status) {
           return;
         }
-        for (var _i = 0; _i < player.config.channelNum; _i++) {
-          // player.canPlayStatus[i] = false
-        }
         new Promise(function (resolve, reject) {
           setTimeout(function () {
             resolve();
@@ -396,6 +393,10 @@ var Player = function (_Proxy) {
           }
           player.emit('flvPlayStarted');
           player.off('flvCanplay', player.canPlayFunc);
+
+          for (var _i = 0; _i < player.config.channelNum; _i++) {
+            player.canPlayStatus[_i] = false;
+          }
         });
       };
       this.logParams.pt = new Date().getTime();
@@ -411,7 +412,7 @@ var Player = function (_Proxy) {
       if (this.config.autoplay) {
         this.on('flvCanplay', this.canPlayFunc);
       }
-      for (var i = 0; i < this.config.channelNum; i++) {
+      for (var i = 0; i < 4; i++) {
         root.insertBefore(this['video' + (i === 0 ? '' : i)], root.firstChild);
       }
       setTimeout(function () {
@@ -2611,7 +2612,7 @@ var Proxy = function () {
         style.sheet.addRule(wrap + ' video::cue', styleStr);
       }
     }
-    for (var _i = 0; _i < options.channelNum; _i++) {
+    for (var _i = 0; _i < 4; _i++) {
       var videoName = 'video' + (_i === 0 ? '' : _i);
       this.videoConfig['id'] = videoName;
       this[videoName] = _util2.default.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName);
@@ -8152,9 +8153,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var s_displayMode = function s_displayMode() {
   var player = this,
       util = _player2.default.util,
-      sniffer = _player2.default.sniffer;
+      sniffer = _player2.default.sniffer,
+      draggbleVideoId = void 0;
   var iconPath = ['M2 2 L34 2 L34 20 L2 20 Z', 'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20', 'M2 2 L18 2 L18 20 L2 20 Z M18 11 L34 11 L34 20 L18 20', 'M2 2 L34 2 L34 20 L2 20 Z M34 11 L18 11 L18 20', 'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M2 11 L18 11', 'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M18 11 L34 11', 'M2 2 L34 2 L34 20 L2 20 Z M2 11 L34 11 M12.67 11 L12.67 20 M23.34 11 L23.34 20 M34 11 L34 20', 'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M2 11 L34 11'];
   function initUI() {
+    for (var i = 0; i < 4; i++) {
+      var _video = player['video' + (i === 0 ? '' : i)];
+      if (i < player.config.channelNum) {
+        _video.style.display = 'block';
+      } else {
+        _video.style.display = 'none';
+      }
+    }
     var ul = util.createDom('xg-displaymode', '', { tabindex: 3 }, 'xgplayer-displaymode'),
         root = player.controls;
     if (sniffer.device === 'mobile') {
@@ -8269,45 +8279,49 @@ var s_displayMode = function s_displayMode() {
       'modePosSize7': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth + 'px', 'height': winHeight * 2 / 3 + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }, { 'left': winWidth * 2 / 3 + 'px', 'top': winHeight * 2 / 3 + 'px', 'bottom': 'initial', 'width': winWidth / 3 + 'px', 'height': winHeight / 3 + 'px', 'zIndex': 9 }],
       'modePosSize8': [{ 'left': '0px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 8 }, { 'left': '0px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }, { 'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }, { 'left': winWidth / 2 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9 }] };
   }
+  function onDragover(e) {
+    e.preventDefault();
+  }
+  function onDragstart(e) {
+    draggbleVideoId = e.target.id;
+  }
+  function onDrop(e) {
+    var _src = player[draggbleVideoId];
+    var _dst = e.currentTarget || e.target;
+    if (_src && _dst) {
+      _src.style.transitionDuration = '1s';
+      _dst.style.transitionDuration = '1s';
+      var tmpZindex = _src.style.zIndex;
+      var tmpTop = _src.style.top;
+      var tmpLeft = _src.style.left;
+      var tmpWidth = _src.style.width;
+      var tmpHeight = _src.style.height;
+      var tmpBottom = _src.style.bottom;
 
+      _src.style.zIndex = _dst.style.zIndex;
+      _src.style.top = _dst.style.top;
+      _src.style.left = _dst.style.left;
+      _src.style.width = _dst.style.width;
+      _src.style.height = _dst.style.height;
+      _src.style.bottom = _dst.style.bottom;
+
+      _dst.style.zIndex = tmpZindex;
+      _dst.style.top = tmpTop;
+      _dst.style.left = tmpLeft;
+      _dst.style.width = tmpWidth;
+      _dst.style.height = tmpHeight;
+      _dst.style.bottom = tmpBottom;
+    }
+  }
   function initDragFunc() {
-    var draggbleVideoId = void 0;
     for (var i = 0; i < player.config.channelNum; i++) {
-      player['video' + (i === 0 ? '' : i)].addEventListener('dragover', function (e) {
-        e.preventDefault();
-      });
-
-      player['video' + (i === 0 ? '' : i)].addEventListener('dragstart', function (e) {
-        draggbleVideoId = e.target.id;
-      });
-
-      player['video' + (i === 0 ? '' : i)].addEventListener('drop', function (e) {
-        var _src = player[draggbleVideoId];
-        var _dst = e.currentTarget || e.target;
-        var tmpZindex = _src.style.zIndex;
-        var tmpTop = _src.style.top;
-        var tmpLeft = _src.style.left;
-        var tmpWidth = _src.style.width;
-        var tmpHeight = _src.style.height;
-        var tmpBottom = _src.style.bottom;
-
-        _src.style.transitionDuration = '1s';
-        _dst.style.transitionDuration = '1s';
-
-        _src.style.zIndex = _dst.style.zIndex;
-        _src.style.top = _dst.style.top;
-        _src.style.left = _dst.style.left;
-        _src.style.width = _dst.style.width;
-        _src.style.height = _dst.style.height;
-        _src.style.bottom = _dst.style.bottom;
-
-        _dst.style.zIndex = tmpZindex;
-        _dst.style.top = tmpTop;
-        _dst.style.left = tmpLeft;
-        _dst.style.width = tmpWidth;
-        _dst.style.height = tmpHeight;
-        _dst.style.bottom = tmpBottom;
-      });
+      var ele = player['video' + (i === 0 ? '' : i)];
+      ele.removeEventListener('dragover', onDragover);
+      ele.removeEventListener('dragstart', onDragstart);
+      ele.removeEventListener('drop', onDrop);
+      ele.addEventListener('dragover', onDragover);
+      ele.addEventListener('dragstart', onDragstart);
+      ele.addEventListener('drop', onDrop);
     }
   }
 
@@ -10664,7 +10678,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'multi-live-v1.0.3';
+var VERSION = 'multi-live-v1.0.4';
 
 var s_version = function s_version() {
   var player = this,

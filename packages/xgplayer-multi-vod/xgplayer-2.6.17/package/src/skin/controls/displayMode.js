@@ -42,14 +42,17 @@ let s_displayMode = function () {
         break
       case 2:
         player.currMode = 3
+        if (player.is323Meeting ) {
+          player.currMode = 1
+        }
         tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
-        <path name="path-1" d="${iconPath[1]}" />
+        <path name="path-1" d="${iconPath[1]}" class="${player.currMode === 1 ? 'curr': ''}" />
       </svg></li>`)
         tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
         <path name="path-2" d="${iconPath[2]}" />
       </svg></li>`)
         tmp.push(`<li><svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">
-        <path name="path-3" d="${iconPath[3]}" class="curr" />
+        <path name="path-3" d="${iconPath[3]}"  class="${player.currMode === 3 ? 'curr': ''}" />
       </svg></li>`)
         break
       case 3:

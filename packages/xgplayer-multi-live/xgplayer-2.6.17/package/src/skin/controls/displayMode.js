@@ -1,7 +1,7 @@
 import Player from '../../player'
 
 let s_displayMode = function () {
-  let player = this, util = Player.util, sniffer = Player.sniffer
+  let player = this, util = Player.util, sniffer = Player.sniffer, draggbleVideoId
   let iconPath = ['M2 2 L34 2 L34 20 L2 20 Z',
     'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20',
     'M2 2 L18 2 L18 20 L2 20 Z M18 11 L34 11 L34 20 L18 20',
@@ -11,6 +11,14 @@ let s_displayMode = function () {
     'M2 2 L34 2 L34 20 L2 20 Z M2 11 L34 11 M12.67 11 L12.67 20 M23.34 11 L23.34 20 M34 11 L34 20',
     'M2 2 L34 2 L34 20 L2 20 Z M18 2 L18 20 M2 11 L34 11']
   function initUI () {
+    for (let i = 0; i < 4; i++) {
+      let _video = player[`video${(i === 0 ? '' : i)}`]
+      if (i < player.config.channelNum) {
+        _video.style.display = 'block'
+      } else {
+        _video.style.display = 'none'
+      }
+    }
     let ul = util.createDom('xg-displaymode', '', {tabindex: 3}, 'xgplayer-displaymode'), root = player.controls
     if (sniffer.device === 'mobile') {
       player.config.displayModeActive = 'click'
@@ -153,45 +161,49 @@ let s_displayMode = function () {
         {'left': winWidth / 2 + 'px', 'top': '0px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9},
         {'left': winWidth / 2 + 'px', 'top': winHeight / 2 + 'px', 'bottom': 'initial', 'width': winWidth / 2 + 'px', 'height': winHeight / 2 + 'px', 'zIndex': 9}]}
   }
+  function onDragover (e) {
+    e.preventDefault()
+  }
+  function onDragstart (e) {
+    draggbleVideoId = e.target.id
+  }
+  function onDrop (e) {
+    let _src = player[draggbleVideoId]
+    let _dst = e.currentTarget || e.target
+    if (_src && _dst) {
+      _src.style.transitionDuration = '1s'
+      _dst.style.transitionDuration = '1s'
+      let tmpZindex = _src.style.zIndex
+      let tmpTop = _src.style.top
+      let tmpLeft = _src.style.left
+      let tmpWidth = _src.style.width
+      let tmpHeight = _src.style.height
+      let tmpBottom = _src.style.bottom
 
+      _src.style.zIndex = _dst.style.zIndex
+      _src.style.top = _dst.style.top
+      _src.style.left = _dst.style.left
+      _src.style.width = _dst.style.width
+      _src.style.height = _dst.style.height
+      _src.style.bottom = _dst.style.bottom
+
+      _dst.style.zIndex = tmpZindex
+      _dst.style.top = tmpTop
+      _dst.style.left = tmpLeft
+      _dst.style.width = tmpWidth
+      _dst.style.height = tmpHeight
+      _dst.style.bottom = tmpBottom
+    }
+  }
   function initDragFunc () {
-    let draggbleVideoId
     for (let i = 0; i < player.config.channelNum; i++) {
-      player[`video${i === 0 ? '' : i}`].addEventListener('dragover', (e) => {
-        e.preventDefault()
-      })
-
-      player[`video${i === 0 ? '' : i}`].addEventListener('dragstart', (e) => {
-        draggbleVideoId = e.target.id
-      })
-
-      player[`video${i === 0 ? '' : i}`].addEventListener('drop', (e) => {
-        let _src = player[draggbleVideoId]
-        let _dst = e.currentTarget || e.target
-        let tmpZindex = _src.style.zIndex
-        let tmpTop = _src.style.top
-        let tmpLeft = _src.style.left
-        let tmpWidth = _src.style.width
-        let tmpHeight = _src.style.height
-        let tmpBottom = _src.style.bottom
-
-        _src.style.transitionDuration = '1s'
-        _dst.style.transitionDuration = '1s'
-
-        _src.style.zIndex = _dst.style.zIndex
-        _src.style.top = _dst.style.top
-        _src.style.left = _dst.style.left
-        _src.style.width = _dst.style.width
-        _src.style.height = _dst.style.height
-        _src.style.bottom = _dst.style.bottom
-
-        _dst.style.zIndex = tmpZindex
-        _dst.style.top = tmpTop
-        _dst.style.left = tmpLeft
-        _dst.style.width = tmpWidth
-        _dst.style.height = tmpHeight
-        _dst.style.bottom = tmpBottom
-      })
+      let ele = player[`video${i === 0 ? '' : i}`]
+      ele.removeEventListener('dragover', onDragover)
+      ele.removeEventListener('dragstart', onDragstart)
+      ele.removeEventListener('drop', onDrop)
+      ele.addEventListener('dragover', onDragover)
+      ele.addEventListener('dragstart', onDragstart)
+      ele.addEventListener('drop', onDrop)
     }
   }
 
