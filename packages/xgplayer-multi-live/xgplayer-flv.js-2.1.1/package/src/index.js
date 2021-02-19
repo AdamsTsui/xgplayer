@@ -123,11 +123,32 @@ class FlvJsPlayer extends Player {
       // mediaDataSource.isLive = true
       mediaDataSource.url = urlArr[i]
       // mediaDataSource.withCredentials = false
+      let flv = Flv.createPlayer(mediaDataSource, this.optionalConfig)
 
-      player[`__flv__${i === 0 ? '' : i}`] = Flv.createPlayer(mediaDataSource, this.optionalConfig)
+      flv.attachMediaElement(player[`video${i === 0 ? '' : i}`])
+      flv.load()
 
-      player[`__flv__${i === 0 ? '' : i}`].attachMediaElement(player[`video${i === 0 ? '' : i}`])
-      player[`__flv__${i === 0 ? '' : i}`].load()
+      flv.on(Flv.Events.ERROR, (e) => {
+        player.emit('error', new Player.Errors('other', player.config.url))
+        // 没有流，置黑屏
+        flv._mediaElement.src = flv._mediaElement.src;
+      })
+      flv.on(Flv.Events.LOADED_SEI, (timestamp, data) => {
+        player.emit('loaded_sei', timestamp, data);
+      })
+      flv.on(Flv.Events.STATISTICS_INFO, (data) => {
+        player.emit("statistics_info",data);
+      })
+      flv.on(Flv.Events.MEDIA_INFO, (data)=>{
+        player.mediainfo = data;
+        player.emit("MEDIA_INFO",data);
+      })
+      flv.on('flvCanplay', e => {
+        // console.log('hahah:::::::::::flvCanplay')
+        this.emit('flvCanplay', e)
+      })
+
+      player[`__flv__${i === 0 ? '' : i}`] = flv
     }
   }
 
@@ -144,12 +165,14 @@ class FlvJsPlayer extends Player {
       Player.util.removeClass(player.root, 'xgplayer-is-enter')
       player.video.muted = false
     })
+    /*
     player.on('canplay', function () {
       if (!player.config.isLive) {
         player.currentTime = curTime
       }
       player.play()
     })
+    */
   }
 }
 FlvJsPlayer.isSupported = Flv.isSupported

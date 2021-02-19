@@ -84,7 +84,6 @@ class Proxy {
       let index = this.soundChannelId - 1
       let videoName = `video${(index === 0) ? '' : index}`
       this[videoName].autoplay = true
-      this['video1'].auto = true
       if (options.autoplayMuted) {
         this[videoName].muted = true
       }
@@ -168,6 +167,42 @@ class Proxy {
           }
         }
       }, false)
+
+      if (this.channelNum > 1) {
+        self['video1'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[1] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
+
+      if (this.channelNum > 2) {
+        self['video2'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[2] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
+
+      if (this.channelNum > 3) {
+        self['video3'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name)
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[3] = true
+            self.emit(name, self)
+          }
+        }, false)
+      }
     })
   }
   /**
@@ -542,14 +577,11 @@ class Proxy {
     if (seekTime > 0) {
       self.isSrcChanging = true
       this.once('canplay', function () {
-        let playPromise = self.play()
-        if (playPromise !== undefined && playPromise) {
+        let playPromise = self['video1'].play()
+        if (playPromise) {
           // console.log('辅流播放，seek。。。')
           self['video1'].currentTime = seekTime
           self.isSrcChanging = false
-          if (util.typeOf(playPromise) === 'function') {
-            playPromise.catch(err => { console.error(err) })
-          }
         }
       })
     }

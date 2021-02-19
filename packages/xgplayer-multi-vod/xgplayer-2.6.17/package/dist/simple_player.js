@@ -2584,6 +2584,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Proxy = function () {
   function Proxy(options) {
+    var _this = this;
+
     _classCallCheck(this, Proxy);
 
     this.logParams = {
@@ -2666,7 +2668,6 @@ var Proxy = function () {
       var index = this.soundChannelId - 1;
       var _videoName = 'video' + (index === 0 ? '' : index);
       this[_videoName].autoplay = true;
-      this['video1'].auto = true;
       if (options.autoplayMuted) {
         this[_videoName].muted = true;
       }
@@ -2746,6 +2747,42 @@ var Proxy = function () {
           }
         }
       }, false);
+
+      if (_this.channelNum > 1) {
+        self['video1'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[1] = true
+            self.emit(name, self);
+          }
+        }, false);
+      }
+
+      if (_this.channelNum > 2) {
+        self['video2'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[2] = true
+            self.emit(name, self);
+          }
+        }, false);
+      }
+
+      if (_this.channelNum > 3) {
+        self['video3'].addEventListener(Object.keys(item)[0], function () {
+          if (name === 'error') {
+            // process the error
+            self._onError(name);
+          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+            // self.canPlayStatus[3] = true
+            self.emit(name, self);
+          }
+        }, false);
+      }
     });
   }
   /**
@@ -2872,16 +2909,11 @@ var Proxy = function () {
       if (seekTime > 0) {
         self.isSrcChanging = true;
         this.once('canplay', function () {
-          var playPromise = self.play();
-          if (playPromise !== undefined && playPromise) {
+          var playPromise = self['video1'].play();
+          if (playPromise) {
             // console.log('辅流播放，seek。。。')
             self['video1'].currentTime = seekTime;
             self.isSrcChanging = false;
-            if (_util2.default.typeOf(playPromise) === 'function') {
-              playPromise.catch(function (err) {
-                console.error(err);
-              });
-            }
           }
         });
       }
@@ -2942,7 +2974,7 @@ var Proxy = function () {
       return tmpTime + this['video'].currentTime;
     },
     set: function set(time) {
-      var _this = this;
+      var _this2 = this;
 
       var channels = this.config.url.channel;
       for (var k = 0; k < channels.length; k++) {
@@ -2968,12 +3000,12 @@ var Proxy = function () {
         } else {
           (function () {
             // console.log('跨分片。。。')
-            var self = _this;
-            _this.currFileNumArr[k] = toFileNum;
-            _this.isSrcChanging = true;
+            var self = _this2;
+            _this2.currFileNumArr[k] = toFileNum;
+            _this2.isSrcChanging = true;
             // this.src = this.config.url
-            _this['video' + (k === 0 ? '' : k)].src = _this.config.url.channel[k].files[_this.currFileNumArr[k]].url;
-            _this.once('canplay', function () {
+            _this2['video' + (k === 0 ? '' : k)].src = _this2.config.url.channel[k].files[_this2.currFileNumArr[k]].url;
+            _this2.once('canplay', function () {
               var playPromise = self.play();
               if (playPromise !== undefined && playPromise) {
                 // console.log('跨分片后，继续播放。。。')
@@ -8282,7 +8314,7 @@ var s_definition = function s_definition() {
             paused = player.paused;
             if (!player.ended) {
               var newUrl = JSON.parse(tmpSrc);
-              player.currFileNum = 0; // 从第一个分片开始播放，然后通过player.curTime再跳转
+              player.currFileNumArr = [0, 0, 0, 0]; // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl;
               player.channelNum = player.config.url.channel.length;
 
@@ -8293,7 +8325,7 @@ var s_definition = function s_definition() {
               }
               player.totalDuration = totalDuration;
 
-              player.src = newUrl;
+              player.src = player.config.url;
               player.emit('displayModeChange');
               player.once('canplay', onCanplayChangeDefinition);
             }

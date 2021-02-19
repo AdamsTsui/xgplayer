@@ -86,7 +86,7 @@ class Proxy {
         style.sheet.addRule(`${wrap} video::cue`, styleStr)
       }
     }
-    for (let i = 0; i < options.channelNum; i++) {
+    for (let i = 0; i < 4; i++) {
       let videoName = `video${(i === 0) ? '' : i}`
       this.videoConfig['id'] = videoName
       this[videoName] = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName)
