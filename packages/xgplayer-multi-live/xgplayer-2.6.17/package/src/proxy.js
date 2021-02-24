@@ -89,6 +89,11 @@ class Proxy {
     for (let i = 0; i < 4; i++) {
       let videoName = `video${(i === 0) ? '' : i}`
       this.videoConfig['id'] = videoName
+      if (i === (this.soundChannelId - 1)) {
+        this.videoConfig['muted'] = false
+      } else {
+        this.videoConfig['muted'] = true
+      }
       this[videoName] = util.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName)
     }
 

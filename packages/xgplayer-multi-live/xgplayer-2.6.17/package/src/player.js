@@ -14,6 +14,7 @@ class Player extends Proxy {
   constructor (options) {
     super(options)
     this.config = util.deepCopy({
+      isH323: false,
       width: 600,
       height: 337.5,
       ignores: [],
@@ -208,20 +209,25 @@ class Player extends Proxy {
 
       let status = true
       for (let i = 0; i < player.config.channelNum; i++) {
-        status = status || player.canPlayStatus[i]
+        if (player.config.isH323) {
+          status = status && player.canPlayStatus[i]
+        } else {
+          status = status || player.canPlayStatus[i]
+        }
       }
       if (!status) {
         return
       }
       new Promise((resolve, reject) => {
-        for (let i = 0; i < player.config.channelNum; i++) {
-          player.canPlayStatus[i] = false
-        }
-        setTimeout(() => {
+        if (player.config.isH323) {
           resolve()
-        }, 2000)
+        } else {
+          setTimeout(() => {
+            resolve()
+          }, 2000)
+        }
       }).then(() => {
-        if (this.canPlayStatus[0]) {
+        if ((player.config.isH323 && status) || (!player.config.isH323 && player.canPlayStatus[0])) {
           let index = player.soundChannelId - 1
           let videoName = `video${(index === 0) ? '' : index}`
           let playPromise = player[videoName].play()
@@ -238,8 +244,14 @@ class Player extends Proxy {
           player.emit('autoplay started')
           player.play()
         }
+        player.volume = player.volume
         player.emit('flvPlayStarted')
-        // player.off('flvCanplay', player.canPlayFunc)
+        if (!player.config.isH323) {
+          player.off('flvCanplay', player.canPlayFunc)
+        }
+        for (let i = 0; i < player.config.channelNum; i++) {
+          player.canPlayStatus[i] = false
+        }
       })
     }
     this.logParams.pt = new Date().getTime()

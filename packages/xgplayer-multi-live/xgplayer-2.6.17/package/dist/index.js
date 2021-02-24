@@ -158,6 +158,7 @@ var Player = function (_Proxy) {
     var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, options));
 
     _this.config = _util2.default.deepCopy({
+      isH323: false,
       width: 600,
       height: 337.5,
       ignores: [],
@@ -339,7 +340,7 @@ var Player = function (_Proxy) {
   _createClass(Player, [{
     key: 'start',
     value: function start() {
-      var _this3 = this;
+      var _this2 = this;
 
       var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.config.url;
 
@@ -350,8 +351,6 @@ var Player = function (_Proxy) {
       }
       this.logParams.playSrc = url;
       this.canPlayFunc = function (e) {
-        var _this2 = this;
-
         var videoId = e.target.id;
         if (videoId === 'video') {
           this.canPlayStatus[0] = true;
@@ -365,20 +364,25 @@ var Player = function (_Proxy) {
 
         var status = true;
         for (var i = 0; i < player.config.channelNum; i++) {
-          status = status || player.canPlayStatus[i];
+          if (player.config.isH323) {
+            status = status && player.canPlayStatus[i];
+          } else {
+            status = status || player.canPlayStatus[i];
+          }
         }
         if (!status) {
           return;
         }
         new Promise(function (resolve, reject) {
-          for (var _i = 0; _i < player.config.channelNum; _i++) {
-            player.canPlayStatus[_i] = false;
-          }
-          setTimeout(function () {
+          if (player.config.isH323) {
             resolve();
-          }, 2000);
+          } else {
+            setTimeout(function () {
+              resolve();
+            }, 2000);
+          }
         }).then(function () {
-          if (_this2.canPlayStatus[0]) {
+          if (player.config.isH323 && status || !player.config.isH323 && player.canPlayStatus[0]) {
             var index = player.soundChannelId - 1;
             var videoName = 'video' + (index === 0 ? '' : index);
             var playPromise = player[videoName].play();
@@ -395,8 +399,14 @@ var Player = function (_Proxy) {
             player.emit('autoplay started');
             player.play();
           }
+          player.volume = player.volume;
           player.emit('flvPlayStarted');
-          // player.off('flvCanplay', player.canPlayFunc)
+          if (!player.config.isH323) {
+            player.off('flvCanplay', player.canPlayFunc);
+          }
+          for (var _i = 0; _i < player.config.channelNum; _i++) {
+            player.canPlayStatus[_i] = false;
+          }
         });
       };
       this.logParams.pt = new Date().getTime();
@@ -416,7 +426,7 @@ var Player = function (_Proxy) {
         root.insertBefore(this['video' + (i === 0 ? '' : i)], root.firstChild);
       }
       setTimeout(function () {
-        _this3.emit('complete');
+        _this2.emit('complete');
       }, 1);
     }
   }, {
@@ -435,7 +445,7 @@ var Player = function (_Proxy) {
   }, {
     key: 'destroy',
     value: function destroy() {
-      var _this4 = this;
+      var _this3 = this;
 
       var isDelDom = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
@@ -453,9 +463,9 @@ var Player = function (_Proxy) {
       }
       this.ev.forEach(function (item) {
         var evName = Object.keys(item)[0];
-        var evFunc = _this4[item[evName]];
+        var evFunc = _this3[item[evName]];
         if (evFunc) {
-          _this4.off(evName, evFunc);
+          _this3.off(evName, evFunc);
         }
       });
       if (this.loadeddataFunc) {
@@ -474,12 +484,12 @@ var Player = function (_Proxy) {
         this.off('loadeddata', this.getVideoSize);
       };
       ['focus', 'blur'].forEach(function (item) {
-        _this4.off(item, _this4['on' + item.charAt(0).toUpperCase() + item.slice(1)]);
+        _this3.off(item, _this3['on' + item.charAt(0).toUpperCase() + item.slice(1)]);
       });
       if (!this.config.keyShortcut || this.config.keyShortcut === 'on') {
         ['video', 'controls'].forEach(function (item) {
-          if (_this4[item]) {
-            _this4[item].removeEventListener('keydown', function (e) {
+          if (_this3[item]) {
+            _this3[item].removeEventListener('keydown', function (e) {
               player.onKeydown(e, player);
             });
           }
@@ -645,7 +655,7 @@ var Player = function (_Proxy) {
   }, {
     key: 'pluginsCall',
     value: function pluginsCall() {
-      var _this5 = this;
+      var _this4 = this;
 
       var self = this;
       if (Player.plugins) {
@@ -664,7 +674,7 @@ var Player = function (_Proxy) {
                 }, 0);
               }
             } else {
-              descriptor.call(_this5, _this5);
+              descriptor.call(_this4, _this4);
             }
           }
         });
@@ -2615,6 +2625,11 @@ var Proxy = function () {
     for (var _i = 0; _i < 4; _i++) {
       var videoName = 'video' + (_i === 0 ? '' : _i);
       this.videoConfig['id'] = videoName;
+      if (_i === this.soundChannelId - 1) {
+        this.videoConfig['muted'] = false;
+      } else {
+        this.videoConfig['muted'] = true;
+      }
       this[videoName] = _util2.default.createDom(this.videoConfig.mediaType, textTrackDom, this.videoConfig, videoName);
     }
 
@@ -10679,7 +10694,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'rex-ch50-live-v1.0.3';
+var VERSION = 'rex-ch50-live-v1.0.5';
 
 var s_version = function s_version() {
   var player = this,
