@@ -14,6 +14,7 @@ class Player extends Proxy {
   constructor (options) {
     super(options)
     this.config = util.deepCopy({
+      isH323: false,
       width: 600,
       height: 337.5,
       ignores: [],
@@ -188,7 +189,6 @@ class Player extends Proxy {
   }
 
   start (url = this.config.url) {
-    // console.log('start func...')
     let root = this.root
     let player = this
     if (!url || url === '') {
@@ -207,19 +207,28 @@ class Player extends Proxy {
         this.canPlayStatus[3] = true
       }
 
+      console.log('::::::::::::player.config.channelNum:::' + player.config.channelNum)
       let status = true
-      for(let i = 0; i < player.config.channelNum; i++) {
-        status = status || player.canPlayStatus[i]
+      for (let i = 0; i < player.config.channelNum; i++) {
+        if (player.config.isH323) {
+          status = status && player.canPlayStatus[i]
+        } else {
+          status = status || player.canPlayStatus[i]
+        }
       }
-      if(!status) {
+      if (!status) {
         return
       }
       new Promise((resolve, reject) => {
-        setTimeout(() => {
+        if (player.config.isH323) {
           resolve()
-        }, 2000)
+        } else {
+          setTimeout(() => {
+            resolve()
+          }, 2000)
+        }
       }).then(() => {
-        if (player.canPlayStatus[0]) {
+        if ((player.config.isH323 && status) || (!player.config.isH323 && player.canPlayStatus[0])) {
           let index = player.soundChannelId - 1
           let videoName = `video${(index === 0) ? '' : index}`
           let playPromise = player[videoName].play()
@@ -236,10 +245,12 @@ class Player extends Proxy {
           player.emit('autoplay started')
           player.play()
         }
+        player.volume = player.volume
         player.emit('flvPlayStarted')
-        player.off('flvCanplay', player.canPlayFunc)
-
-        for(let i = 0; i < player.config.channelNum; i++) {
+        if (!player.config.isH323) {
+          player.off('flvCanplay', player.canPlayFunc)
+        }
+        for (let i = 0; i < player.config.channelNum; i++) {
           player.canPlayStatus[i] = false
         }
       })

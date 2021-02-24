@@ -158,6 +158,7 @@ var Player = function (_Proxy) {
     var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, options));
 
     _this.config = _util2.default.deepCopy({
+      isH323: false,
       width: 600,
       height: 337.5,
       ignores: [],
@@ -343,7 +344,6 @@ var Player = function (_Proxy) {
 
       var url = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.config.url;
 
-      // console.log('start func...')
       var root = this.root;
       var player = this;
       if (!url || url === '') {
@@ -362,19 +362,28 @@ var Player = function (_Proxy) {
           this.canPlayStatus[3] = true;
         }
 
+        console.log('::::::::::::player.config.channelNum:::' + player.config.channelNum);
         var status = true;
         for (var i = 0; i < player.config.channelNum; i++) {
-          status = status || player.canPlayStatus[i];
+          if (player.config.isH323) {
+            status = status && player.canPlayStatus[i];
+          } else {
+            status = status || player.canPlayStatus[i];
+          }
         }
         if (!status) {
           return;
         }
         new Promise(function (resolve, reject) {
-          setTimeout(function () {
+          if (player.config.isH323) {
             resolve();
-          }, 2000);
+          } else {
+            setTimeout(function () {
+              resolve();
+            }, 2000);
+          }
         }).then(function () {
-          if (player.canPlayStatus[0]) {
+          if (player.config.isH323 && status || !player.config.isH323 && player.canPlayStatus[0]) {
             var index = player.soundChannelId - 1;
             var videoName = 'video' + (index === 0 ? '' : index);
             var playPromise = player[videoName].play();
@@ -391,9 +400,11 @@ var Player = function (_Proxy) {
             player.emit('autoplay started');
             player.play();
           }
+          player.volume = player.volume;
           player.emit('flvPlayStarted');
-          player.off('flvCanplay', player.canPlayFunc);
-
+          if (!player.config.isH323) {
+            player.off('flvCanplay', player.canPlayFunc);
+          }
           for (var _i = 0; _i < player.config.channelNum; _i++) {
             player.canPlayStatus[_i] = false;
           }
@@ -2555,7 +2566,7 @@ var Proxy = function () {
         crossOrigin: 'Anonymous'
       }, this.videoConfig);
     }
-    // options.autoplay = false
+    options.autoplay = true;
     this.soundChannelId = options.soundChannelId;
     if (!this.soundChannelId) {
       this.soundChannelId = 1;
@@ -10678,7 +10689,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'multi-live-v1.0.4';
+var VERSION = 'multi-live-v1.0.5';
 
 var s_version = function s_version() {
   var player = this,

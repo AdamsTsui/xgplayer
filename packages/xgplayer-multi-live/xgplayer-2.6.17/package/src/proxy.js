@@ -31,7 +31,7 @@ class Proxy {
         crossOrigin: 'Anonymous'
       }, this.videoConfig)
     }
-    // options.autoplay = false
+    options.autoplay = true
     this.soundChannelId = options.soundChannelId
     if (!this.soundChannelId) {
       this.soundChannelId = 1
