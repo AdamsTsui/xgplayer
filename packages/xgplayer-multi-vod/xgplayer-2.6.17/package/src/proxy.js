@@ -573,7 +573,7 @@ class Proxy {
     let self = this
     let listNum = this.getFuliuVideoListNum(time)
     let file = this.config.url.channel[1].files[listNum]
-    let seekTime = time - file['starttime'] * 1
+    let seekTime = time - this.getFuliuCountTime(listNum - 1) - file['starttime'] * 1
     this['video1'].src = file.url
     if (seekTime > 0) {
       self.isSrcChanging = true
