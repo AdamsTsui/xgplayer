@@ -2904,7 +2904,7 @@ var Proxy = function () {
       var self = this;
       var listNum = this.getFuliuVideoListNum(time);
       var file = this.config.url.channel[1].files[listNum];
-      var seekTime = time - file['starttime'] * 1;
+      var seekTime = time - this.getFuliuCountTime(listNum - 1) - file['starttime'] * 1;
       this['video1'].src = file.url;
       if (seekTime > 0) {
         self.isSrcChanging = true;
@@ -11083,7 +11083,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'rex-ch50-vod-v1.0.3';
+var VERSION = 'rex-ch50-vod-v1.0.4';
 
 var s_version = function s_version() {
   var player = this,
