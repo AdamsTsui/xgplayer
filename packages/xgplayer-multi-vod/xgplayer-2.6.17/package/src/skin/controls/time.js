@@ -56,14 +56,16 @@ let s_time = function () {
             for (let j = (files.length - 1); j >= 0; j--) {
               let file = files[j]
               if (currentAllTime > file.starttime) {
-                // console.log(file.imageUrl)
-                if (!_video.paused) {
-                  _video.pause()
+                if (_video.poster !== file.imageUrl) {
+                  // console.log('_video.paused:::' + _video.paused + ':::_video.src:::' + _video.src + ':::file.imageUrl:::' + file.imageUrl + ':::file.starttime:::' + file.starttime)
+                  if (!_video.paused) {
+                    _video.pause()
+                  }
+                  if (_video.src) {
+                    _video.src = ''
+                  }
+                  _video.poster = file.imageUrl
                 }
-                if (_video.src) {
-                  _video.src = ''
-                }
-                _video.poster = file.imageUrl
                 break
               }
             }

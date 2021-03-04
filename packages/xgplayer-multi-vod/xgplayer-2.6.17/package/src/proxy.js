@@ -175,7 +175,7 @@ class Proxy {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+          } else if (['play', 'playing', 'seeked', 'canplay'].includes(name)) {
             // self.canPlayStatus[1] = true
             self.emit(name, self)
           }
@@ -187,7 +187,7 @@ class Proxy {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+          } else if (['play', 'playing', 'seeked', 'canplay'].includes(name)) {
             // self.canPlayStatus[2] = true
             self.emit(name, self)
           }
@@ -199,7 +199,7 @@ class Proxy {
           if (name === 'error') {
             // process the error
             self._onError(name)
-          } else if (['play', 'playing', 'seeked', 'timeupdate', 'canplay'].includes(name)) {
+          } else if (['play', 'playing', 'seeked', 'canplay'].includes(name)) {
             // self.canPlayStatus[3] = true
             self.emit(name, self)
           }
