@@ -207,7 +207,7 @@ class Player extends Proxy {
         this.canPlayStatus[3] = true
       }
 
-      console.log('::::::::::::player.config.channelNum:::' + player.config.channelNum)
+      // console.log('::::::::::::player.config.channelNum:::' + player.config.channelNum)
       let status = true
       for (let i = 0; i < player.config.channelNum; i++) {
         if (player.config.isH323) {

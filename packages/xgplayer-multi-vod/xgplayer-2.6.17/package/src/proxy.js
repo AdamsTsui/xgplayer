@@ -477,10 +477,17 @@ class Proxy {
     for (let i = 0; i < this.channelNum; i++) {
       this[`video${i === 0 ? '' : i}`].pause()
     }
+    this.imageChannelId = -1
     let urlArr = url.channel
     for (let i = 0; i < this.channelNum; i++) {
-      this[`video${i === 0 ? '' : i}`].src = urlArr[i].files[this.currFileNumArr[i]].url
+      let tmpChannel = urlArr[i]
+      if (tmpChannel.type === 'jpg') {
+        this.imageChannelId = i
+      } else {
+        this[`video${i === 0 ? '' : i}`].src = tmpChannel.files[this.currFileNumArr[i]].url
+      }
     }
+
     this.emit('srcChange')
     this.logParams.playSrc = url
     this.logParams.pt = new Date().getTime()

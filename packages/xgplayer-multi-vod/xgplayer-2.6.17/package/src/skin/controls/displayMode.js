@@ -134,14 +134,16 @@ let s_displayMode = function () {
   }
   function modeChange () {
     let posSize = scanlePosSizes()[`modePosSize${player.currMode + 1}`]
-    for (let i = 0; i < player.channelNum; i++) {
-      let _video = player[`video${(i === 0 ? '' : i)}`]
-      _video.style.top = posSize[i]['top']
-      _video.style.bottom = posSize[i]['bottom']
-      _video.style.left = posSize[i]['left']
-      _video.style.width = posSize[i]['width']
-      _video.style.height = posSize[i]['height']
-      _video.style.zIndex = posSize[i]['zIndex']
+    if (posSize) {
+      for (let i = 0; i < player.channelNum; i++) {
+        let _video = player[`video${(i === 0 ? '' : i)}`]
+        _video.style.top = posSize[i]['top']
+        _video.style.bottom = posSize[i]['bottom']
+        _video.style.left = posSize[i]['left']
+        _video.style.width = posSize[i]['width']
+        _video.style.height = posSize[i]['height']
+        _video.style.zIndex = posSize[i]['zIndex']
+      }
     }
   }
 
