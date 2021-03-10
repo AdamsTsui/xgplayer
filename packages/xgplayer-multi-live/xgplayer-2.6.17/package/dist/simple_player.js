@@ -362,13 +362,13 @@ var Player = function (_Proxy) {
           this.canPlayStatus[3] = true;
         }
 
-        console.log('::::::::::::player.config.channelNum:::' + player.config.channelNum);
+        // console.log('::::::::::::player.config.channelNum:::' + player.config.channelNum)
         var status = true;
         for (var i = 0; i < player.config.channelNum; i++) {
           if (player.config.isH323) {
             status = status && player.canPlayStatus[i];
           } else {
-            status = status || player.canPlayStatus[i];
+            // status = status || player.canPlayStatus[i]
           }
         }
         if (!status) {
@@ -402,11 +402,12 @@ var Player = function (_Proxy) {
           }
           player.volume = player.volume;
           player.emit('flvPlayStarted');
-          if (!player.config.isH323) {
-            player.off('flvCanplay', player.canPlayFunc);
-          }
-          for (var _i = 0; _i < player.config.channelNum; _i++) {
-            player.canPlayStatus[_i] = false;
+          if (player.config.isH323) {
+            for (var _i = 0; _i < player.config.channelNum; _i++) {
+              player.canPlayStatus[_i] = false;
+            }
+          } else {
+            // player.off('flvCanplay', player.canPlayFunc)
           }
         });
       };
@@ -8216,7 +8217,9 @@ var s_displayMode = function s_displayMode() {
 
     initDragFunc();
 
-    modeChange();
+    setTimeout(function () {
+      modeChange();
+    }, 500);
 
     var urlInRoot = root.querySelector('.xgplayer-displaymode');
     if (urlInRoot) {
@@ -10689,7 +10692,7 @@ var _player2 = _interopRequireDefault(_player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var VERSION = 'multi-live-v1.0.5';
+var VERSION = 'multi-live-v1.0.6';
 
 var s_version = function s_version() {
   var player = this,

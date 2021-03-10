@@ -74,7 +74,9 @@ let s_displayMode = function () {
 
     initDragFunc()
 
-    modeChange()
+    setTimeout(function () {
+      modeChange()
+    }, 500)
 
     let urlInRoot = root.querySelector('.xgplayer-displaymode')
     if (urlInRoot) {

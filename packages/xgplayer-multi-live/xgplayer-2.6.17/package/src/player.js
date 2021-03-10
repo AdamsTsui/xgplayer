@@ -213,7 +213,7 @@ class Player extends Proxy {
         if (player.config.isH323) {
           status = status && player.canPlayStatus[i]
         } else {
-          status = status || player.canPlayStatus[i]
+          // status = status || player.canPlayStatus[i]
         }
       }
       if (!status) {
@@ -247,11 +247,12 @@ class Player extends Proxy {
         }
         player.volume = player.volume
         player.emit('flvPlayStarted')
-        if (!player.config.isH323) {
-          player.off('flvCanplay', player.canPlayFunc)
-        }
-        for (let i = 0; i < player.config.channelNum; i++) {
-          player.canPlayStatus[i] = false
+        if (player.config.isH323) {
+          for (let i = 0; i < player.config.channelNum; i++) {
+            player.canPlayStatus[i] = false
+          }
+        } else {
+          // player.off('flvCanplay', player.canPlayFunc)
         }
       })
     }
