@@ -1,4 +1,5 @@
 import Player from '../../player'
+import util from "../../utils/util";
 
 const isRotateFullscreen = (player) => {
   return Player.util.hasClass(player.root, 'xgplayer-rotate-fullscreen')
@@ -121,12 +122,12 @@ let s_progress = function () {
     thumbnail.style.height = `${tnailHeight}px`
   };
   ['touchstart', 'mousedown'].forEach(item => {
-    if(player.config.disableProgress) return;
+    if(player.config.disableProgress) return
     container.addEventListener(item, function (e) {
       // e.preventDefault()
       e.stopPropagation()
       util.event(e)
-      if (e._target === point || (!player.config.allowSeekAfterEnded && player.ended)) {
+      if (e._target === point || (!player.config.allowSeekAfterEnded && player.ended) || player.isSrcChanging) {
         return true
       }
       container.focus()
@@ -154,7 +155,7 @@ let s_progress = function () {
         progress.style.width = `${w * 100 / containerWidth}%`
 
         if (player.videoConfig.mediaType === 'video' && !player.dash && !player.config.closeMoveSeek) {
-          player.currentTime = Number(now).toFixed(1)
+          // player.currentTime = Number(now).toFixed(1)
         } else {
           let time = util.findDom(player.controls, '.xgplayer-time')
           if (time) {
@@ -172,15 +173,32 @@ let s_progress = function () {
         window.removeEventListener('mouseup', up)
         window.removeEventListener('touchend', up)
         container.blur()
-        if (!player.isProgressMoving || player.videoConfig.mediaType === 'audio' || player.dash || player.config.closeMoveSeek) {
-          let w = (isRotate ? e.clientY : e.clientX) - left
-          if(w > containerWidth) {
-            w = containerWidth
-          }
-          let now = w / containerWidth * player.duration
-          progress.style.width = `${w * 100 / containerWidth}%`
-          player.currentTime = Number(now).toFixed(1)
+        // if (!player.isProgressMoving) {
+        let w = (isRotate ? e.clientY : e.clientX) - left
+        if (w > containerWidth) {
+          w = containerWidth
         }
+        let now = w / containerWidth * player.duration
+        progress.style.width = `${w * 100 / containerWidth}%`
+        // console.log('点击开始跳转。。。')
+        let nowTime = Number(now).toFixed(1)
+        if (player.is323Meeting) {
+          player.isFuliuPlaying = false
+          let isFuliuAvailable = player.isFuliuAvailable(nowTime)
+          if (isFuliuAvailable) {
+            player.isFuliuLoading = true
+            player.hideVideo()
+          } else {
+            player.channelNum = 1
+            player.emit('ShowOrHideFuliu')
+          }
+        } else {
+          player.commonLoading = true
+        }
+        player.pause()
+        util.addClass(player.root, 'xgplayer-isloading')
+        player.currentTime = nowTime
+        // }
         player.emit('focus')
         player.isProgressMoving = false
       }
@@ -249,7 +267,7 @@ let s_progress = function () {
 
   // let lastBtnLeft = false
   let onTimeupdate = function () {
-    if (player.isSrcChanging || !player.currentTime) {
+    if (player.isSrcChanging || !player.currentTime || player.isProgressMoving) {
       return true
     }
     if (!containerWidth && container) {

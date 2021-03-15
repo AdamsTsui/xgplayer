@@ -5,6 +5,9 @@ let s_displayMode = function () {
 
   function canplayModeFunc () {
     // console.info('播放器初始化完毕，可以初始化布局')
+    if (player.is323Meeting && player.isFuliuLoading) {
+      return
+    }
     if (player.is323Meeting && !player.isFuliuPlaying) {
       player.channelNum = 1
     }

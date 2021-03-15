@@ -9,15 +9,21 @@ let s_time = function () {
     player.controls.appendChild(container)
   })
   let onTimeChange = function () {
-    if (player.isSrcChanging || !player.currentTime) {
+    if (player.isSrcChanging || !player.currentTime || player.isProgressMoving) {
       return true
     }
     if (player.videoConfig.mediaType !== 'audio' || !player.isProgressMoving || !player.dash) {
       container.innerHTML = `<span class="xgplayer-time-current">${util.format(player.currentTime || 0)}</span>` + `<span>${util.format(player.duration)}</span>`
       if (player.is323Meeting) {
-        if (player.isFuliuAvailable(player.currentTime)) {
-          if (!player.isFuliuPlaying) {
+        let nowTime = Number(player.currentTime).toFixed(4)
+        let isFuliuAvailable = player.isFuliuAvailable(nowTime)
+        // console.log('开始。。。nowTime:::' + nowTime + '::::::::isFuliuAvailable:::' + isFuliuAvailable)
+        if (isFuliuAvailable) {
+          if (!player.isFuliuPlaying || player['video1'].paused) {
             // console.log('开始辅流............')
+            player.hideVideo()
+            player.isFuliuLoading = true
+            player.pause()
             player.channelNum = 2
             player.isFuliuPlaying = true
             player.emit('ShowOrHideFuliu')

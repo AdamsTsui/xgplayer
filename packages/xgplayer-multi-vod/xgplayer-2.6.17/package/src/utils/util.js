@@ -233,6 +233,7 @@ util.isWeiXin = function () {
 }
 
 util.transMp4ToSegment = function (stream) {
+  console.log('dfdfdf:::::::::::::::::::')
   const STEP = 30 * 60
   const MAX = 35 * 60
   let channels = stream.channel
@@ -243,37 +244,34 @@ util.transMp4ToSegment = function (stream) {
       let files = channel.files
       for (let j = 0; j < files.length; j++) {
         let file = files[j]
-        if (!file['endtime']) {
-          let totalTime = parseFloat(file['totaltime'])
-
-          if (totalTime > MAX) {
-            let start = 1
-            let end = STEP + 1
-            while (totalTime > STEP) {
-              tmpFiles.push({
-                'starttime': '0',
-                'totaltime': '' + STEP,
-                'url': file['url'] + '?start=' + start + '&end=' + end
-              })
-
-              start = end
-              end += STEP
-              totalTime -= STEP
-            }
-
-            end = end - STEP + totalTime
+        let totalTime = parseFloat(file['totaltime'])
+        if (totalTime > MAX) {
+          let start = 1
+          let end = STEP + 1
+          while (totalTime > STEP) {
             tmpFiles.push({
               'starttime': '0',
-              'totaltime': '' + totalTime,
+              'totaltime': '' + STEP,
               'url': file['url'] + '?start=' + start + '&end=' + end
             })
-          } else {
-            tmpFiles.push({
-              'starttime': '0',
-              'totaltime': '' + totalTime,
-              'url': file['url']
-            })
+
+            start = end
+            end += STEP
+            totalTime -= STEP
           }
+
+          end = end - STEP + totalTime
+          tmpFiles.push({
+            'starttime': '0',
+            'totaltime': '' + totalTime,
+            'url': file['url'] + '?start=' + start + '&end=' + end
+          })
+        } else {
+          tmpFiles.push({
+            'starttime': '0',
+            'totaltime': '' + totalTime,
+            'url': file['url']
+          })
         }
       }
       if (tmpFiles.length > 0) {

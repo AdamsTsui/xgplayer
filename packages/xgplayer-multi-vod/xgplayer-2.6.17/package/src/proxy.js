@@ -13,6 +13,7 @@ class Proxy {
     this.currFileNumArr = [0, 0, 0, 0]
     this.is323Meeting = false
     this.isFuliuPlaying = false
+    this.commonLoading = false
     this.channelNum = 0
     this.videoConfig = {
       controls: !!options.isShowControl,
@@ -332,6 +333,7 @@ class Proxy {
           let playPromise = self.play()
           if (playPromise !== undefined && playPromise) {
             // console.log('跨分片后，继续播放。。。')
+            util.addClass(this.root, 'xgplayer-isloading')
             self.currentTime = time
             this.isSrcChanging = false
             if (util.typeOf(playPromise) === 'function') {
@@ -564,9 +566,10 @@ class Proxy {
     let listNum = this.getFuliuVideoListNum(time)
     let file = this.config.url.channel[1].files[listNum]
     let countTime = this.getFuliuCountTime(listNum - 1)
-    let timeStart = countTime + file['starttime']
-    let timeEnd = countTime + file['starttime'] * 1 + file['endtime'] * 1
-    return time >= timeStart && time <= timeEnd
+    let timeStart = Number(countTime + file['starttime']).toFixed(4)
+    let timeEnd = Number(countTime + file['starttime'] * 1 + file['endtime'] * 1).toFixed(4)
+    // console.log('timeStart:::' + timeStart + '::::timeEnd:::' + timeEnd)
+    return (time - timeStart) >= Number.EPSILON && (timeEnd - time) >= Number.EPSILON
   }
   playFuliu (time) {
     let self = this
@@ -576,18 +579,36 @@ class Proxy {
     this['video1'].src = file.url
     if (seekTime > 0) {
       self.isSrcChanging = true
-      this.once('canplay', function () {
-        let playPromise = self['video1'].play()
-        if (playPromise) {
-          // console.log('辅流播放，seek。。。')
-          self['video1'].currentTime = seekTime
+      self.once('canplay', function () {
+        // console.log('辅流src加载完毕')
+        self.once('canplay', function () {
+          // console.log('辅流跳转完毕完毕')
+          self.play()
           self.isSrcChanging = false
-        }
+          self.isFuliuLoading = false
+          self.showVideo()
+          self.emit('displayModeChange')
+        })
+        self['video1'].currentTime = seekTime
       })
+    } else {
+      self.play()
     }
   }
   playerResize () {
     this.emit('playerResize')
+  }
+  showVideo () {
+    for (let i = 0; i < this.channelNum; i++) {
+      let videoName = `video${i === 0 ? '' : i}`
+      this[videoName].style.display = 'block'
+    }
+  }
+  hideVideo () {
+    for (let i = 0; i < this.channelNum; i++) {
+      let videoName = `video${i === 0 ? '' : i}`
+      this[videoName].style.display = 'none'
+    }
   }
 }
 

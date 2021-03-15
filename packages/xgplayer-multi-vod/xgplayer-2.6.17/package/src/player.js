@@ -197,6 +197,9 @@ class Player extends Proxy {
     this.canPlayFunc = function () {
       let index = player.soundChannelId - 1
       let videoName = `video${(index === 0) ? '' : index}`
+      if (player.is323Meeting && (player.isFuliuLoading || !player[videoName].paused)) return
+      if (this.commonLoading) this.commonLoading = false
+      // console.log('canPlayFunc:::::::')
       let playPromise = player[videoName].play()
       if (playPromise !== undefined && playPromise) {
         playPromise.then(function () {
@@ -662,7 +665,11 @@ class Player extends Proxy {
   }
 
   onPause () {
-    util.addClass(this.root, 'xgplayer-pause')
+    if ((this.is323Meeting && this.isFuliuLoading) || (!this.is323Meeting && this.commonLoading)) {
+      util.addClass(this.root, 'xgplayer-isloading')
+    } else {
+      util.addClass(this.root, 'xgplayer-pause')
+    }
     if (this.userTimer) {
       clearTimeout(this.userTimer)
     }
@@ -715,7 +722,10 @@ class Player extends Proxy {
     if (this.waitTimer) {
       clearTimeout(this.waitTimer)
     }
-    util.removeClass(this.root, 'xgplayer-isloading')
+    if ((this.is323Meeting && !this.isFuliuLoading) || (!this.is323Meeting && !this.commonLoading)) {
+      // console.log('onTimeupdate')
+      util.removeClass(this.root, 'xgplayer-isloading')
+    }
   }
 
   onSeeked () {
@@ -724,7 +734,10 @@ class Player extends Proxy {
     if (this.waitTimer) {
       clearTimeout(this.waitTimer)
     }
-    util.removeClass(this.root, 'xgplayer-isloading')
+    if ((this.is323Meeting && !this.isFuliuLoading) || (!this.is323Meeting && !this.commonLoading)) {
+      // console.log('onSeeked')
+      util.removeClass(this.root, 'xgplayer-isloading')
+    }
   }
 
   onWaiting () {
@@ -741,7 +754,10 @@ class Player extends Proxy {
       util.addClass(self.root, 'xgplayer-isloading')
       self.checkTimer = setInterval(function () {
         if (self.currentTime !== time) {
-          util.removeClass(this.root, 'xgplayer-isloading')
+          if ((this.is323Meeting && !this.isFuliuLoading) || (!this.is323Meeting && !this.commonLoading)) {
+            // console.log('onWaiting')
+            util.removeClass(this.root, 'xgplayer-isloading')
+          }
           clearInterval(self.checkTimer)
           self.checkTimer = null
         }
@@ -758,7 +774,11 @@ class Player extends Proxy {
     if (this.waitTimer) {
       clearTimeout(this.waitTimer)
     }
-    util.removeClass(this.root, 'xgplayer-isloading xgplayer-nostart xgplayer-pause xgplayer-ended xgplayer-is-error xgplayer-replay')
+    util.removeClass(this.root, 'xgplayer-nostart xgplayer-pause xgplayer-ended xgplayer-is-error xgplayer-replay')
+    if ((this.is323Meeting && !this.isFuliuLoading) || (!this.is323Meeting && !this.commonLoading)) {
+      // console.log('onPlaying')
+      util.removeClass(this.root, 'xgplayer-isloading')
+    }
     util.addClass(this.root, 'xgplayer-playing')
   }
 
