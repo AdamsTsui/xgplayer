@@ -195,11 +195,11 @@ class Player extends Proxy {
     }
     this.logParams.playSrc = url
     this.canPlayFunc = function () {
+      // console.log('canPlayFunc:::::::')
       let index = player.soundChannelId - 1
       let videoName = `video${(index === 0) ? '' : index}`
       if (player.is323Meeting && (player.isFuliuLoading || !player[videoName].paused)) return
-      if (this.commonLoading) this.commonLoading = false
-      // console.log('canPlayFunc:::::::')
+      if (!player.is323Meeting && player.commonLoading) return
       let playPromise = player[videoName].play()
       if (playPromise !== undefined && playPromise) {
         playPromise.then(function () {
@@ -214,12 +214,12 @@ class Player extends Proxy {
     }
     if (util.typeOf(url.channel) === 'Array') {
       for (let i = 0; i < this.channelNum; i++) {
+        if (player.is323Meeting && i === 1) {
+          break
+        }
         let videoName = `video${i === 0 ? '' : i}`
         let channel = this.config.url.channel[i]
         this[videoName].src = channel.files[0].url
-        if (player.is323Meeting && i === 0) {
-          break
-        }
       }
     }
     this.logParams.pt = new Date().getTime()

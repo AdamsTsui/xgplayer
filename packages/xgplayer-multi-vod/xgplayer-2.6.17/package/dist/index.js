@@ -350,11 +350,11 @@ var Player = function (_Proxy) {
       }
       this.logParams.playSrc = url;
       this.canPlayFunc = function () {
+        // console.log('canPlayFunc:::::::')
         var index = player.soundChannelId - 1;
         var videoName = 'video' + (index === 0 ? '' : index);
         if (player.is323Meeting && (player.isFuliuLoading || !player[videoName].paused)) return;
-        if (this.commonLoading) this.commonLoading = false;
-        // console.log('canPlayFunc:::::::')
+        if (!player.is323Meeting && player.commonLoading) return;
         var playPromise = player[videoName].play();
         if (playPromise !== undefined && playPromise) {
           playPromise.then(function () {
@@ -369,12 +369,12 @@ var Player = function (_Proxy) {
       };
       if (_util2.default.typeOf(url.channel) === 'Array') {
         for (var i = 0; i < this.channelNum; i++) {
+          if (player.is323Meeting && i === 1) {
+            break;
+          }
           var videoName = 'video' + (i === 0 ? '' : i);
           var channel = this.config.url.channel[i];
           this[videoName].src = channel.files[0].url;
-          if (player.is323Meeting && i === 0) {
-            break;
-          }
         }
       }
       this.logParams.pt = new Date().getTime();
@@ -2612,11 +2612,12 @@ var Proxy = function () {
       played: []
     };
     this._hasStart = false;
-    this.currFileNumArr = [0, 0, 0, 0];
+    this.currFileNum = 0;
     this.is323Meeting = false;
     this.isFuliuPlaying = false;
     this.commonLoading = false;
     this.channelNum = 0;
+    this.loadStatus = [false, false, false, false];
     this.videoConfig = {
       controls: !!options.isShowControl,
       // autoplay: options.autoplay,
@@ -3010,54 +3011,87 @@ var Proxy = function () {
     get: function get() {
       var tmpTime = 0;
       var mainFiles = this.config.url.channel[0].files;
-      for (var i = 0; i < this.currFileNumArr[0]; i++) {
+      for (var i = 0; i < this.currFileNum; i++) {
         tmpTime += parseFloat(mainFiles[i].totaltime);
       }
       return tmpTime + this['video'].currentTime;
     },
     set: function set(time) {
-      var channels = this.config.url.channel;
-      var toFileNum = 0;
-      var toCurrTime = 0;
-      var tmpTime = 0;
-      var mainFiles = channels[0].files;
+      var _this2 = this;
 
-      for (var i = 0; i < mainFiles.length; i++) {
-        tmpTime += parseFloat(mainFiles[i].totaltime);
-        if (tmpTime > time) {
-          toFileNum = i;
-          toCurrTime = time - (tmpTime - parseFloat(mainFiles[i].totaltime));
-          break;
+      var self = this;
+      var channels = this.config.url.channel;
+      if (channels.length > 0) {
+        var toFileNum = 0;
+        var toCurrTime = 0;
+        var tmpTime = 0;
+        var mainFiles = channels[0].files;
+        for (var i = 0; i < channels.length; i++) {
+          self.loadStatus[i] = false;
         }
-      }
-      if (toFileNum === this.currFileNumArr[0]) {
-        console.log('分片内。。。');
-        this['video' + (k === 0 ? '' : k)].currentTime = toCurrTime;
-        this.emit('currentTimeChange');
-        this.once('canplay', function () {
-          console.log('可以播放啦。。。' + k);
-        });
-      } else {
-        // console.log('跨分片。。。')
-        var self = this;
-        this.currFileNumArr[k] = toFileNum;
-        this.isSrcChanging = true;
-        // this.src = this.config.url
-        this['video' + (k === 0 ? '' : k)].src = this.config.url.channel[k].files[this.currFileNumArr[k]].url;
-        this.once('canplay', function () {
-          var playPromise = self.play();
-          if (playPromise !== undefined && playPromise) {
-            console.log('跨分片后，继续播放。。。');
-            _util2.default.addClass(this.root, 'xgplayer-isloading');
-            self.currentTime = time;
-            this.isSrcChanging = false;
-            if (_util2.default.typeOf(playPromise) === 'function') {
-              playPromise.catch(function (err) {
-                console.error(err);
-              });
-            }
+
+        for (var _i4 = 0; _i4 < mainFiles.length; _i4++) {
+          tmpTime += parseFloat(mainFiles[_i4].totaltime);
+          if (tmpTime - time > Number.EPSILON) {
+            toFileNum = _i4;
+            toCurrTime = time - (tmpTime - parseFloat(mainFiles[_i4].totaltime));
+            break;
           }
-        });
+        }
+        if (toFileNum === this.currFileNum) {
+          var _loop = function _loop(j) {
+            if (_this2.is323Meeting && j === 1) return 'break';
+            var videoName = 'video' + (j === 0 ? '' : j);
+            _this2[videoName].currentTime = toCurrTime;
+            _this2.once('canplay', function () {
+              // console.log('cplay.....' + j)
+              if (!self.is323Meeting) {
+                self.loadStatus[j] = true;
+                var status = true;
+                for (var k = 0; k < channels.length; k++) {
+                  status = status && self.loadStatus[k];
+                }
+                if (status) {
+                  if (self.commonLoading) self.commonLoading = false;
+                  self.play();
+                } else {
+                  self[videoName].pause();
+                }
+              }
+            });
+          };
+
+          // console.log('分片内。。。')
+          for (var j = 0; j < channels.length; j++) {
+            var _ret = _loop(j);
+
+            if (_ret === 'break') break;
+          }
+        } else {
+          // console.log('跨分片。。。')
+          this.currFileNum = toFileNum;
+          this.isSrcChanging = true;
+
+          var _loop2 = function _loop2(j) {
+            if (_this2.is323Meeting && j === 1) return 'break';
+            var videoName = 'video' + (j === 0 ? '' : j);
+            _this2[videoName].src = self.config.url.channel[j].files[_this2.currFileNum].url;
+            _this2.once('canplay', function () {
+              if (j === 0) {
+                self.play();
+                self.currentTime = time;
+                this.isSrcChanging = false;
+                _util2.default.addClass(this.root, 'xgplayer-isloading');
+              }
+            });
+          };
+
+          for (var j = 0; j < channels.length; j++) {
+            var _ret2 = _loop2(j);
+
+            if (_ret2 === 'break') break;
+          }
+        }
       }
     }
   }, {
@@ -3118,11 +3152,11 @@ var Proxy = function () {
     set: function set(isTrue) {
       var index = this.soundChannelId - 1;
       for (var i = 0; i < this.channelNum; i++) {
-        var videoName = 'video' + (i === 0 ? '' : i);
+        var _videoName2 = 'video' + (i === 0 ? '' : i);
         if (i === index) {
-          this[videoName].muted = isTrue;
+          this[_videoName2].muted = isTrue;
         } else {
-          this[videoName].muted = true;
+          this[_videoName2].muted = true;
         }
       }
     }
@@ -3223,8 +3257,9 @@ var Proxy = function () {
         this['video' + (i === 0 ? '' : i)].pause();
       }
       var urlArr = url.channel;
-      for (var _i4 = 0; _i4 < this.channelNum; _i4++) {
-        this['video' + (_i4 === 0 ? '' : _i4)].src = urlArr[_i4].files[this.currFileNumArr[_i4]].url;
+      for (var _i5 = 0; _i5 < this.channelNum; _i5++) {
+        if (this.is323Meeting && _i5 === 1) break;
+        this['video' + (_i5 === 0 ? '' : _i5)].src = urlArr[_i5].files[this.currFileNum].url;
       }
       this.emit('srcChange');
       this.logParams.playSrc = url;
@@ -3258,11 +3293,11 @@ var Proxy = function () {
     set: function set(vol) {
       var index = this.soundChannelId - 1;
       for (var i = 0; i < this.channelNum; i++) {
-        var videoName = 'video' + (i === 0 ? '' : i);
+        var _videoName3 = 'video' + (i === 0 ? '' : i);
         if (i === index) {
-          this[videoName].volume = vol;
+          this[_videoName3].volume = vol;
         } else {
-          this[videoName].volume = 0;
+          this[_videoName3].volume = 0;
         }
       }
     }
@@ -8219,6 +8254,10 @@ var _player = __webpack_require__(0);
 
 var _player2 = _interopRequireDefault(_player);
 
+var _util = __webpack_require__(1);
+
+var _util2 = _interopRequireDefault(_util);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var s_definition = function s_definition() {
@@ -8300,6 +8339,8 @@ var s_definition = function s_definition() {
 
   function onCanplayChangeDefinition() {
     player.currentTime = player.curTime;
+    util.addClass(this.root, 'xgplayer-isloading');
+    this.commonLoading = true;
     if (!paused) {
       var playPromise = player.play();
       if (playPromise !== undefined && playPromise) {
@@ -8352,7 +8393,7 @@ var s_definition = function s_definition() {
             paused = player.paused;
             if (!player.ended) {
               var newUrl = JSON.parse(tmpSrc);
-              player.currFileNumArr = [0, 0, 0, 0]; // 从第一个分片开始播放，然后通过player.curTime再跳转
+              player.currFileNumArr = 0; // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl;
               player.channelNum = player.config.url.channel.length;
 

@@ -1,4 +1,5 @@
 import Player from '../../player'
+import util from "../../utils/util";
 
 let s_definition = function () {
   let player = this
@@ -77,6 +78,8 @@ let s_definition = function () {
 
   function onCanplayChangeDefinition () {
     player.currentTime = player.curTime
+    util.addClass(this.root, 'xgplayer-isloading')
+    this.commonLoading = true
     if (!paused) {
       let playPromise = player.play()
       if (playPromise !== undefined && playPromise) {
@@ -125,7 +128,7 @@ let s_definition = function () {
             paused = player.paused
             if (!player.ended) {
               let newUrl = JSON.parse(tmpSrc)
-              player.currFileNumArr = [0, 0, 0, 0] // 从第一个分片开始播放，然后通过player.curTime再跳转
+              player.currFileNumArr = 0 // 从第一个分片开始播放，然后通过player.curTime再跳转
               player.config.url = newUrl
               player.channelNum = player.config.url.channel.length
 
